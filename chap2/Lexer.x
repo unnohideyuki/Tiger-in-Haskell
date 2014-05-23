@@ -17,7 +17,7 @@ tokens :-
 $white+                 ;
 "/*" ([$u # \*] | \* [$u # \/])* ("*")+ "/" ;
 
-where                   {(\p s -> Where p)}
+while                   {(\p s -> While p)}
 for                     {(\p s -> For p)}
 to                      {(\p s -> To p)}
 break                   {(\p s -> Break p)}
@@ -60,7 +60,7 @@ nil                     {(\p s -> Nil p)}
 ":="                    {(\p s -> Assign p)}
 
 \" \"                   {(\p s -> Strliteral p $ unquot s)}
-\" .* [^\\] \"          {(\p s -> Strliteral p $ unquot s)}
+\" ([^\"]|\\ \")* \"    {(\p s -> Strliteral p $ unquot s)}
 
 $digit+                 {(\p s -> Intliteral p (read s :: Integer))}
 
@@ -71,7 +71,7 @@ $digit+                 {(\p s -> Intliteral p (read s :: Integer))}
 {
 data Token =
      -- reserved words
-       Where AlexPosn
+       While AlexPosn
      | For AlexPosn
      | To AlexPosn
      | Break AlexPosn
@@ -125,7 +125,7 @@ prettyToken :: Token -> String
 prettyToken c = tk ++ " at " ++ prettyAlexPosn pos where
   (tk, pos) = case c of
      --
-     Where p -> ("where", p)
+     While p -> ("while", p)
      For p -> ("for", p)
      To p -> ("to", p)
      Break p -> ("break", p)
@@ -173,8 +173,4 @@ prettyToken c = tk ++ " at " ++ prettyAlexPosn pos where
      Eof p -> ("EOF", p)
 
 unquot (x:xs) = init xs
-
--- main = do
---   s <- getContents
---   print $ alexScanTokens s
 }
