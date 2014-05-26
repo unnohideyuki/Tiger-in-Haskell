@@ -146,7 +146,7 @@ rcd:            ID '=' exp rcd_tail     { rec_field $1 $3 : $4 }
  |              {- empty -}             { [] }
 
 rcd_tail:       ',' ID '=' exp rcd_tail { rec_field $2 $4 : $5 }
- |              {- empty -}    		{ [] }
+ |              {- empty -}             { [] }
 
 
 {
