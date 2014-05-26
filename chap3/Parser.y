@@ -3,11 +3,6 @@
 module Parser (parse) where
 import Lexer
 
-parseError :: [Token] -> a
-parseError [] = error "Parse Error at EOF"
-parseError (x:xs) = error ("Parse Error at token " ++ prettyToken x)
-
-
 }
 
 %name parse
@@ -150,8 +145,11 @@ rcd:            ID '=' exp rcd_tail     {}
  |              {- empty -}             {}
 
 rcd_tail:       ',' ID '=' exp rcd_tail {}
- |              {- empty -}
+ |              {- empty -}             {}
 
 
 {
+parseError :: [Token] -> a
+parseError [] = error "Parse Error at EOF"
+parseError (x:xs) = error ("Parse Error at token " ++ prettyToken x)
 }

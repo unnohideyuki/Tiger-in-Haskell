@@ -1,5 +1,8 @@
 import Parser (parse)
-import Lexer (alexScanTokens)
+import Lexer (alexScanTokens, prettyToken)
 
 main = do
-  getContents >>= print . parse . alexScanTokens
+  s <- getContents
+  let tokens = alexScanTokens s
+  print tokens
+  print $ parse tokens

@@ -4,42 +4,6 @@ module Parser (parse) where
 import Lexer
 import qualified Absyn as A
 
-parseError :: [Token] -> a
-parseError [] = error "Parse Error at EOF"
-parseError (x:xs) = error ("Parse Error at token " ++ prettyToken x)
-
-simplevar (Id (AlexPn _ l c) s) = A.SimpleVar s $ A.Pos l c
-fieldvar v (Id _ s) (AlexPn _ l c) = A.FieldVar v s $ A.Pos l c
-subscriptvar v e (AlexPn _ l c) = A.SubscriptVar v e $ A.Pos l c
-
-zero = A.IntExp 0 $ A.Pos 0 0
-one = A.IntExp 1 $ A.Pos 0 0
-
-intexp (Intliteral (AlexPn _ l c) i) = A.IntExp i $ A.Pos l c
-stringexp (Strliteral (AlexPn _ l c) s) = A.StringExp s $ A.Pos l c
-callexp (Id (AlexPn _ l c) f) args = A.CallExp f args $ A.Pos l c
-breakexp (AlexPn _ l c) = A.BreakExp $ A.Pos l c
-opexp oper lhs rhs (AlexPn _ l c) = A.OpExp oper lhs rhs $ A.Pos l c
-rec_field (Id (AlexPn _ l c) s) exp = (s, exp, A.Pos l c)
-recordexp (Id (AlexPn _ l c) s) rs = A.RecordExp rs s $ A.Pos l c
-assignexp var exp (AlexPn _ l c) = A.AssignExp var exp $ A.Pos l c
-ifexp test' then' else' (AlexPn _ l c) = A.IfExp test' then' (Just else') (A.Pos l c)
-ifexp' test' then' (AlexPn _ l c) = A.IfExp test' then' Nothing $ A.Pos l c
-whileexp t b (AlexPn _ l c) = A.WhileExp t b $ A.Pos l c
-forexp (Id _ s) lo hi body (AlexPn _ l c) = A.ForExp s True lo hi body $ A.Pos l c
-letexp decs body (AlexPn _ l c) = A.LetExp decs body $ A.Pos l c
-arrayexp (Id (AlexPn _ l c) s) sz exp = A.ArrayExp s sz exp $ A.Pos l c
-
-seqexp_concat exp (A.SeqExp es) = A.SeqExp (exp : es)
-
-namety (Id (AlexPn _ l c) s) = A.NameTy s $ A.Pos l c
-arrayty (Id (AlexPn _ l c) s) = A.ArrayTy s $ A.Pos l c
-field (Id (AlexPn _ l c) f) (Id _ t) = A.Field f True t $ A.Pos l c
-
-typedec (Id _ s) t (AlexPn _ l c) = A.TypeDec [(s, t, A.Pos l c)] -- should be merged later?
-
-
-
 }
 
 %name parse
@@ -57,7 +21,7 @@ end     { End _ }
 function { Function _ }
 var     { Var _ }
 type    { Type $$ }
-array   { Array _ }
+array   { Array $$ }
 if      { If $$ }
 then    { Then _ }
 else    { Else _ }
@@ -87,9 +51,9 @@ nil     { Nil _ }
 '&'     { And $$ }
 '|'     { Or $$ }
 ':='    { Assign $$ }
-STRING  { $$ }
-INT     { $$ }
-ID      { $$ }
+STRING  { Strliteral $$ }
+INT     { Intliteral $$ }
+ID      { Id $$}
 
 %right    of
 %nonassoc do
@@ -114,7 +78,7 @@ tydec:          type ID '=' ty { typedec $2 $4 $1 }
 
 ty:             ID                      { namety $1 }
  |              '{' tyfields '}'        { A.RecordTy $2 }
- |              array of ID             { arrayty $1 }
+ |              array of ID             { arrayty $1 $3 }
 
 tyfields:       ID ':' ID tyfs_tail     { field $1 $3 : $4 }
  |              {- empty -}             { [] }
@@ -186,5 +150,38 @@ rcd_tail:       ',' ID '=' exp rcd_tail { rec_field $2 $4 : $5 }
 
 
 {
+parseError :: [Token] -> a
+parseError [] = error "Parse Error at EOF"
+parseError (x:xs) = error ("Parse Error at token " ++ prettyToken x)
+
+simplevar ((AlexPn _ l c), s) = A.SimpleVar s $ A.Pos l c
+fieldvar v (_, s) (AlexPn _ l c) = A.FieldVar v s $ A.Pos l c
+subscriptvar v e (AlexPn _ l c) = A.SubscriptVar v e $ A.Pos l c
+
+zero = A.IntExp 0 $ A.Pos 0 0
+one = A.IntExp 1 $ A.Pos 0 0
+
+intexp ((AlexPn _ l c), i) = A.IntExp i $ A.Pos l c
+stringexp ((AlexPn _ l c), s) = A.StringExp s $ A.Pos l c
+callexp ((AlexPn _ l c), f) args = A.CallExp f args $ A.Pos l c
+breakexp (AlexPn _ l c) = A.BreakExp $ A.Pos l c
+opexp oper lhs rhs (AlexPn _ l c) = A.OpExp oper lhs rhs $ A.Pos l c
+rec_field ((AlexPn _ l c), s) exp = (s, exp, A.Pos l c)
+recordexp ((AlexPn _ l c), s) rs = A.RecordExp rs s $ A.Pos l c
+assignexp var exp (AlexPn _ l c) = A.AssignExp var exp $ A.Pos l c
+ifexp test' then' else' (AlexPn _ l c) = A.IfExp test' then' (Just else') (A.Pos l c)
+ifexp' test' then' (AlexPn _ l c) = A.IfExp test' then' Nothing $ A.Pos l c
+whileexp t b (AlexPn _ l c) = A.WhileExp t b $ A.Pos l c
+forexp (_, s) lo hi body (AlexPn _ l c) = A.ForExp s True lo hi body $ A.Pos l c
+letexp decs body (AlexPn _ l c) = A.LetExp decs body $ A.Pos l c
+arrayexp ((AlexPn _ l c), s) sz exp = A.ArrayExp s sz exp $ A.Pos l c
+
+seqexp_concat exp (A.SeqExp es) = A.SeqExp (exp : es)
+
+namety ((AlexPn _ l c), s) = A.NameTy s $ A.Pos l c
+arrayty (AlexPn _ l c) (_, s) = A.ArrayTy s $ A.Pos l c
+field ((AlexPn _ l c), f) (_, t) = A.Field f True t $ A.Pos l c
+
+typedec (_, s) t (AlexPn _ l c) = A.TypeDec [(s, t, A.Pos l c)] -- should be merged later?
 
 }

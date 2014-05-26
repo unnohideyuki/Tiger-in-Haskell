@@ -59,12 +59,12 @@ nil                     {(\p s -> Nil p)}
 "|"                     {(\p s -> Or p)}
 ":="                    {(\p s -> Assign p)}
 
-\" \"                   {(\p s -> Strliteral p $ unquot s)}
-\" ([^\"]|\\ \")* \"    {(\p s -> Strliteral p $ unquot s)}
+\" \"                   {(\p s -> Strliteral (p, unquot s))}
+\" ([^\"]|\\ \")* \"    {(\p s -> Strliteral (p, unquot s))}
 
-$digit+                 {(\p s -> Intliteral p (read s :: Integer))}
+$digit+                 {(\p s -> Intliteral (p, (read s :: Integer)))}
 
-@id                     {(\p s -> Id p s)}
+@id                     {(\p s -> Id (p, s))}
 
 -- todo: how to match EOF?
 
@@ -113,9 +113,9 @@ data Token =
      | Or AlexPosn
      | Assign AlexPosn
      --
-     | Strliteral AlexPosn String
-     | Intliteral AlexPosn Integer
-     | Id AlexPosn String
+     | Strliteral (AlexPosn, String)
+     | Intliteral (AlexPosn, Integer)
+     | Id (AlexPosn, String)
      | Eof AlexPosn
        deriving (Eq, Show)
 
@@ -167,9 +167,9 @@ prettyToken c = tk ++ " at " ++ prettyAlexPosn pos where
      Or p -> ("|", p)
      Assign p -> (":=", p)
      --
-     Strliteral p s -> (show s, p)
-     Intliteral p i -> (show i, p)
-     Id p s -> ("id:" ++ s, p)
+     Strliteral (p, s) -> (show s, p)
+     Intliteral (p, i) -> (show i, p)
+     Id (p, s) -> ("id:" ++ s, p)
      Eof p -> ("EOF", p)
 
 unquot (x:xs) = init xs
