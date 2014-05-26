@@ -53,7 +53,7 @@ nil     { Nil _ }
 ':='    { Assign $$ }
 STRING  { Strliteral $$ }
 INT     { Intliteral $$ }
-ID      { Id $$}
+ID      { Id $$ }
 
 %right    of
 %nonassoc do
@@ -69,9 +69,9 @@ ID      { Id $$}
 
 program:        exp     { $1 }
 
-decs:           tydec decs   { [] }
+decs:           tydec decs   { $1 : $2 }
  |              vardec decs  { [] }
- |              fundec decs  { [] }
+ |              fundec decs  { $1 : $2 }
  |              {- empty -}  { [] }
 
 tydec:          type ID '=' ty { typedec $2 $4 $1 }
@@ -86,11 +86,11 @@ tyfields:       ID ':' ID tyfs_tail     { field $1 $3 : $4 }
 tyfs_tail:      ',' ID ':' ID tyfs_tail { field $2 $4 : $5 }
  |              {- empty -}             { [] }
 
-vardec:         var ID ':=' exp         {}
- |              var ID ':' ID ':=' exp  {}
+vardec:         var ID ':=' exp         { vardec' $2 $4 }
+ |              var ID ':' ID ':=' exp  { vardec $2 $4 $6 }
 
-fundec:         function ID '(' tyfields ')' '=' exp            {}
- |              function ID '(' tyfields ')' ':' ID '=' exp     {}
+fundec:         function ID '(' tyfields ')' '=' exp            { funcdec' $2 $4 $7 }
+ |              function ID '(' tyfields ')' ':' ID '=' exp     { funcdec $2 $4 $7 $9 }
 
 lvalue:         ID                      { simplevar $1 }
  |              lval2                   { $1 }
@@ -150,6 +150,7 @@ rcd_tail:       ',' ID '=' exp rcd_tail { rec_field $2 $4 : $5 }
 
 
 {
+
 parseError :: [Token] -> a
 parseError [] = error "Parse Error at EOF"
 parseError (x:xs) = error ("Parse Error at token " ++ prettyToken x)
@@ -183,5 +184,9 @@ arrayty (AlexPn _ l c) (_, s) = A.ArrayTy s $ A.Pos l c
 field ((AlexPn _ l c), f) (_, t) = A.Field f True t $ A.Pos l c
 
 typedec (_, s) t (AlexPn _ l c) = A.TypeDec [(s, t, A.Pos l c)] -- should be merged later?
+funcdec ((AlexPn _ l c), s) params (_, ty) body = A.FunctionDec [A.FuncDec s params (Just ty) body $ A.Pos l c]
+funcdec' ((AlexPn _ l c), s) params body = A.FunctionDec [A.FuncDec s params Nothing body $ A.Pos l c]
+vardec ((AlexPn _ l c), s) (_, ty) init = A.VarDec s True (Just ty) init $ A.Pos l c
+vardec' ((AlexPn _ l c), s) init = A.VarDec s True Nothing init $ A.Pos l c
 
 }

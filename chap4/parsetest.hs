@@ -4,5 +4,5 @@ import Lexer (alexScanTokens, prettyToken)
 main = do
   s <- getContents
   let tokens = alexScanTokens s
-  print tokens
+  -- print tokens
   print $ parse tokens

@@ -30,7 +30,7 @@ data Exp = VarExp Var
 
 data Dec = FunctionDec [FuncDec]
          | VarDec { name' :: Symbol, escape' :: Bool, 
-                    typ' :: Maybe Symbol, init' :: Exp }
+                    typ' :: Maybe Symbol, init' :: Exp, pos' :: Pos }
          | TypeDec [(Symbol, Ty, Pos)]
            deriving(Show)
            
@@ -48,7 +48,7 @@ data Field = Field { field_name :: Symbol, field_esc :: Bool,
              deriving(Show)
 
 data FuncDec = FuncDec { name :: Symbol, params :: [Field],
-                         result :: Maybe Symbol, func_body :: Exp }
+                         result :: Maybe Symbol, func_body :: Exp, func_pos :: Pos }
                deriving(Show)
 
            
