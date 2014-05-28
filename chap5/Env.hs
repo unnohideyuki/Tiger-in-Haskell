@@ -12,8 +12,7 @@ data EnvEntry = VarEntry { ty :: Ty }
               | FunEntry { formals :: [Ty], result :: Ty }
                 deriving (Eq, Show)
                 
-fromList [] = S.empty
-fromList ((s, e):xs) = S.insert (fromList xs) s e
+fromList xs = foldl (\acc (id, v) -> S.insert acc id v) S.empty xs
 
 base_tenv :: S.Table T.Ty
 base_tenv = fromList [("int", T.INT), ("string", T.STRING)]

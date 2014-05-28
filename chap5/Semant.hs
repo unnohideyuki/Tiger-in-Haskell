@@ -323,23 +323,40 @@ transDec venv tenv =
                      A.pos' = pos} = 
       let                                     
         ExpTy { ty=ty } = transExp venv tenv init
+        ret name ty = 
+          (S.insert venv name E.VarEntry { E.ty = ty }, tenv)
       in
        case typ of
          Nothing -> if ty == T.NIL
                     then
                       error $ show pos ++ "nil can be used only in the long form."
                     else
-                      ExpTy { ty=ty }
+                      ret name ty
          Just sym -> 
            case S.lookup tenv sym of
              Nothing -> error $ show pos ++ "type not found: " ++ sym
              Just ty' -> if checkType ty ty' pos
                          then
-                           ExpTy { ty = actual_ty ty' pos }
+                           ret name ty
                          else
                            undefined
 
-    trdec (A.TypeDec tdecs) = undefined
+    trdec (A.TypeDec tdecs) = 
+      let
+        {- 1st pass -}
+        tenv' = undefined
+        
+        {- 2nd pass -}
+        tenv'' = undefined
+        
+        checktdecs = undefined
+        check_cyclic_dep = undefined
+      in
+        if checktdecs tdecs && check_cyclic_dep tdecs
+        then
+          (venv, tenv'')
+        else
+          undefined
   in
    trdec
 
