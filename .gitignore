@@ -1,7 +1,8 @@
 *.o
 *.hi
-*.hs
 *~
+Lexer.hs
+Parser.hs
 driver
 parsetest
 testcases/*
