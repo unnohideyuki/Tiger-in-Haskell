@@ -35,7 +35,7 @@ data Dec = FunctionDec [FuncDec]
            deriving(Show)
            
 data Ty = NameTy Symbol Pos
-        | RecordTy [Field]
+        | RecordTy [Field] Pos
         | ArrayTy Symbol Pos
           deriving(Show)
           
