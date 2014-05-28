@@ -264,4 +264,30 @@ transExp venv tenv =
   in
    trexp
 
+transTy tenv =
+  let
+    -- dirty hask: generate a unique number from the position.
+    pos2u (A.Pos l c) = fromIntegral $ l * 10000 + c
+    
+    transty (A.NameTy sym pos) =
+      case S.lookup tenv sym of
+        Just ty -> ty
+        _ -> error "must not reach here"
+        
+    transty (A.RecordTy fs pos) =
+      let
+        f A.Field { A.field_name = name } = 
+          case S.lookup tenv name of
+            Just ty -> (name, ty)
+            Nothing -> error $ show pos ++ "undefined type: " ++ name
+      in
+       T.RECORD (fmap f fs) (pos2u pos)
+       
+    transty (A.ArrayTy sym pos) =
+      case S.lookup tenv sym of
+        Just ty -> T.ARRAY ty $ pos2u pos
+        Nothing -> error $ show pos ++ "undefined type: " ++ sym
+  in
+   transty
+
 transdecs = undefined
