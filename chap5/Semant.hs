@@ -1,5 +1,7 @@
 module Semant where
 
+import qualified Data.List as List
+
 import qualified Absyn as A
 import qualified Env as E
 import qualified Symbol as S
@@ -308,6 +310,7 @@ transTy tenv =
             Just ty -> (name, ty)
             Nothing -> error $ show pos ++ "undefined type: " ++ name
       in
+       {- TODO: checkdup -}
        T.RECORD (fmap f fs) (pos2u pos)
        
     transty (A.ArrayTy sym pos) =
@@ -344,20 +347,120 @@ transDec venv tenv =
     trdec (A.TypeDec tdecs) = 
       let
         {- 1st pass -}
-        tenv' = undefined
+        tenv' = 
+          foldl 
+          (\acc (name, _, _) -> S.insert acc name (T.NAME name Nothing))
+          tenv
+          tdecs
         
         {- 2nd pass -}
-        tenv'' = undefined
+        tenv'' = 
+          foldl
+          (\acc (name, ty, _) -> 
+            case S.lookup acc name of
+              Just (T.NAME n _) -> 
+                S.insert acc n $ T.NAME n (Just $ transTy acc ty))
+          tenv'
+          tdecs
         
-        checktdecs = undefined
-        check_cyclic_dep = undefined
+        names = fmap (\(n,_,_) -> n) tdecs
+        poss = fmap (\(_,_,pos) -> pos) tdecs
+        
+        check_cyclic_dep [] = True
+        check_cyclic_dep ((name, ty, pos):xs) = 
+          let
+            chkcyc seen ty pos =
+              case ty of
+                Nothing -> error $ show pos ++ "type not found: " ++ show ty
+                Just ty' ->
+                  case ty' of
+                    T.NAME sym ty'' ->
+                      if (List.all (/= sym) seen) then
+                        chkcyc (sym:seen) ty'' pos
+                      else
+                        False
+                    _ -> True
+          in
+           case S.lookup tenv'' name of
+             Just (T.NAME _ ty) ->
+               if chkcyc [name] ty pos then
+                 check_cyclic_dep xs
+               else
+                 error $ show pos ++ "cyclic dependency: " ++ name
+          
       in
-        if checktdecs tdecs && check_cyclic_dep tdecs
+        if check_cyclic_dep tdecs && checkdup names poss
         then
           (venv, tenv'')
         else
           undefined
+          
+    trdec (A.FunctionDec fundecs) = 
+      let
+        {- 1st pass -}
+        transfun venv A.FuncDec { A.name = name, A.params = params, 
+                                  A.result = result, A.func_body = body, 
+                                  A.func_pos = pos } = 
+          let
+            rty = 
+              case result of
+                Nothing -> T.UNIT
+                Just typ -> 
+                  case S.lookup tenv typ of
+                    Nothing -> error $ show pos ++ "result type not found: " ++ show typ
+                    Just ty -> ty
+                    
+            ftys = 
+              fmap
+              (\A.Field { A.field_typ = typ, A.field_pos = pos } ->
+                case S.lookup tenv typ of
+                  Just t -> t
+                  Nothing -> error $ show pos ++ "type not found: " ++ typ)
+              params
+          in
+           if checkdup (fmap A.field_name params) (fmap A.field_pos params) then
+             S.insert venv name E.FunEntry { E.formals = ftys
+                                           , E.result = rty
+                                           }
+           else
+             undefined
+
+        venv' = foldl transfun venv fundecs
+        
+        {- 2nd pass -}
+        transbody acc A.FuncDec { A.name = name, A.params = params, 
+                                  A.result = result, A.func_body = body, 
+                                  A.func_pos = pos } = 
+          let
+            Just E.FunEntry { E.result = rty, E.formals = formals } = 
+              S.lookup venv' name
+            
+            transparam acc (A.Field { A.field_name = name }, ty) =
+              S.insert acc name $ E.VarEntry { E.ty=ty }
+
+            venv_loc = foldl transparam venv' $ zip params formals
+            
+            ExpTy { ty=bdty } = transExp venv_loc tenv body
+          in
+           checkType rty bdty pos && acc
+        
+        check_bodies = foldl transbody True fundecs
+      in
+       if checkdup (fmap A.name fundecs) (fmap A.func_pos fundecs)
+          && check_bodies 
+       then
+         (venv', tenv)
+       else
+         undefined
+       
   in
    trdec
 
 transdecs = undefined
+
+checkdup [] _ = True
+checkdup (name:ns) (pos:ps) = 
+  if List.all (/= name) ns then 
+    checkdup ns ps
+  else
+    error $ show pos ++ "duplicated defintion: " ++ name
