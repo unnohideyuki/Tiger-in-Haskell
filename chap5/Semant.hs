@@ -16,6 +16,7 @@ data ExpTy = ExpTy { ty :: T.Ty } -- Translate.Exp has not been prepared yet.
 data Optype = Arith | Comp | Eq
 
 actual_ty ty pos =
+  {- TODO: to detect cyclic dependency -}
   case ty of
     T.NAME s t -> case t of
       Just ty' -> actual_ty ty' pos
@@ -259,8 +260,35 @@ transExp venv tenv =
            else
              undefined
 
-    trvar = undefined
+    trvar (A.SimpleVar sym pos) = 
+      case S.lookup venv sym of
+        Just E.VarEntry { E.ty=ty } -> ExpTy { ty=ty }
+        Just _ -> error $ show pos ++ "not a variable: " ++ sym
+        _ -> error $ show pos ++ "undefined variable: " ++ sym
     
+    trvar (A.FieldVar var id pos) = 
+      let
+        ExpTy { ty=ty } = trvar var
+      in
+       case ty of
+         T.RECORD fs _ ->
+           case lookup id fs of
+             Nothing -> error $ show pos ++ "field not found: " ++ id
+             Just ty' -> ExpTy { ty = actual_ty ty' pos }
+         _ -> error $ show pos ++ "not a record: " ++ show ty
+         
+    trvar (A.SubscriptVar var exp pos) = 
+      let
+        ExpTy { ty=ty } = trvar var
+      in
+       case actual_ty ty pos of
+         T.ARRAY ty' _ -> 
+           let ExpTy { ty=ty'' } = trexp exp
+           in
+            case ty'' of
+              T.INT -> ExpTy { ty=ty' }
+              _ -> error $ show pos ++ "array subscript type:" ++ show ty''
+         _ -> error $ show pos ++ "not an array"
   in
    trexp
 
