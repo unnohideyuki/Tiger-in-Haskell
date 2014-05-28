@@ -1,0 +1,8 @@
+*.o
+*.hi
+*.hs
+*~
+driver
+parsetest
+testcases/*
+*/support_files/*
