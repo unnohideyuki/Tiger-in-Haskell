@@ -174,7 +174,21 @@ ifexp test' then' else' (AlexPn _ l c) = A.IfExp test' then' (Just else') (A.Pos
 ifexp' test' then' (AlexPn _ l c) = A.IfExp test' then' Nothing $ A.Pos l c
 whileexp t b (AlexPn _ l c) = A.WhileExp t b $ A.Pos l c
 forexp (_, s) lo hi body (AlexPn _ l c) = A.ForExp s True lo hi body $ A.Pos l c
-letexp decs body (AlexPn _ l c) = A.LetExp decs body $ A.Pos l c
+
+letexp decs body (AlexPn _ l c) = 
+  let
+    merge_decs (vds, A.FunctionDec fdecs, A.TypeDec tdecs) dec =
+      case dec of
+        A.FunctionDec fdecs' -> 
+          (vds, A.FunctionDec (fdecs ++ fdecs'), A.TypeDec tdecs)
+        A.TypeDec tdecs' ->
+          (vds, A.FunctionDec fdecs, A.TypeDec (tdecs ++ tdecs'))
+        vdec ->
+          (vds ++ [vdec], A.FunctionDec fdecs, A.TypeDec tdecs)
+    (vds, fd, td) = foldl merge_decs ([], A.FunctionDec [], A.TypeDec []) decs
+  in                                      
+    A.LetExp (fd:td:vds) body $ A.Pos l c
+
 arrayexp ((AlexPn _ l c), s) sz exp = A.ArrayExp s sz exp $ A.Pos l c
 
 seqexp_concat exp (A.SeqExp es) = A.SeqExp (exp : es)

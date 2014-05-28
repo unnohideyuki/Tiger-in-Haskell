@@ -8,5 +8,5 @@ main = do
   let tokens = alexScanTokens s
   let absyn = parse tokens
   -- print tokens
-  print absyn
+  -- print absyn
   print $ transExp base_venv base_tenv absyn

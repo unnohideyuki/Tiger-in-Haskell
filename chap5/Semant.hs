@@ -1,6 +1,6 @@
 module Semant where
 
-import System.IO.Unsafe
+import Debug.Trace
 
 import qualified Data.List as List
 
@@ -310,7 +310,7 @@ transTy tenv =
       let
         f A.Field { A.field_name = name, A.field_typ = typ } = 
           case S.lookup tenv typ of
-            Just ty -> (name, ty)
+            Just ty -> (name, ty) 
             Nothing -> error $ show pos ++ "undefined type (2): " ++ name
       in
        {- TODO: checkdup -}
@@ -366,6 +366,16 @@ transDec venv tenv =
           tenv'
           tdecs
         
+        {- 3rd pass ?? -}
+        tenv''' = 
+          foldl
+          (\acc (name, ty, _) -> 
+            case S.lookup acc name of
+              Just (T.NAME n _) -> 
+                S.insert acc n $ T.NAME n (Just $ transTy acc ty))
+          tenv''
+          tdecs
+
         names = fmap (\(n,_,_) -> n) tdecs
         poss = fmap (\(_,_,pos) -> pos) tdecs
         
@@ -384,7 +394,7 @@ transDec venv tenv =
                         False
                     _ -> True
           in
-           case S.lookup tenv'' name of
+           case S.lookup tenv''' name of
              Just (T.NAME _ ty) ->
                if chkcyc [name] ty pos then
                  check_cyclic_dep xs
@@ -394,7 +404,7 @@ transDec venv tenv =
       in
         if check_cyclic_dep tdecs && checkdup names poss
         then
-          (venv, tenv'')
+          (venv, tenv''')
         else
           undefined
           
