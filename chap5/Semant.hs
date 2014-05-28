@@ -16,7 +16,6 @@ data ExpTy = ExpTy { ty :: T.Ty } -- Translate.Exp has not been prepared yet.
 data Optype = Arith | Comp | Eq
 
 actual_ty ty pos =
-  {- TODO: to detect cyclic dependency -}
   case ty of
     T.NAME s t -> case t of
       Just ty' -> actual_ty ty' pos
@@ -317,5 +316,31 @@ transTy tenv =
         Nothing -> error $ show pos ++ "undefined type: " ++ sym
   in
    transty
+
+transDec venv tenv =
+  let
+    trdec A.VarDec { A.name' = name, A.typ' = typ, A.init' = init, 
+                     A.pos' = pos} = 
+      let                                     
+        ExpTy { ty=ty } = transExp venv tenv init
+      in
+       case typ of
+         Nothing -> if ty == T.NIL
+                    then
+                      error $ show pos ++ "nil can be used only in the long form."
+                    else
+                      ExpTy { ty=ty }
+         Just sym -> 
+           case S.lookup tenv sym of
+             Nothing -> error $ show pos ++ "type not found: " ++ sym
+             Just ty' -> if checkType ty ty' pos
+                         then
+                           ExpTy { ty = actual_ty ty' pos }
+                         else
+                           undefined
+
+    trdec (A.TypeDec tdecs) = undefined
+  in
+   trdec
 
 transdecs = undefined
