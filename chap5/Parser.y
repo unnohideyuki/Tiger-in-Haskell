@@ -70,7 +70,7 @@ ID      { Id $$ }
 program:        exp     { $1 }
 
 decs:           tydec decs   { $1 : $2 }
- |              vardec decs  { [] }
+ |              vardec decs  { $1 : $2 }
  |              fundec decs  { $1 : $2 }
  |              {- empty -}  { [] }
 

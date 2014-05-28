@@ -1,5 +1,7 @@
 module Semant where
 
+import System.IO.Unsafe
+
 import qualified Data.List as List
 
 import qualified Absyn as A
@@ -21,14 +23,14 @@ actual_ty ty pos =
   case ty of
     T.NAME s t -> case t of
       Just ty' -> actual_ty ty' pos
-      Nothing -> error $ show pos ++ "undefined type: " ++ s
+      Nothing -> error $ show pos ++ "undefined type (1): " ++ s
     T.ARRAY ty' u -> T.ARRAY (actual_ty ty' pos) u
     _ -> ty
 
-typeMismatch e a pos =
+type_mismatch e a pos =
   error $ show pos ++ "type mismatch: expected " ++ show e ++ ", actual " ++ show a
 
-checkType t1 t2 pos =
+check_type t1 t2 pos =
   let
     t1' = actual_ty t1 pos
     t2' = actual_ty t2 pos
@@ -38,7 +40,7 @@ checkType t1 t2 pos =
      case (t1', t2') of
        (T.RECORD _ _, T.NIL) -> True
        (T.NIL, T.RECORD _ _) -> True
-       _ -> typeMismatch t1' t2' pos
+       _ -> type_mismatch t1' t2' pos
    else True
        
 transExp venv tenv =
@@ -67,37 +69,37 @@ transExp venv tenv =
             A.EqOp -> Eq
             A.NeqOp -> Eq
         
-        checkInt ty pos = 
+        check_int ty pos = 
           case ty of
             T.INT -> True
             _     -> error $ show pos ++ ": integer required."
             
-        checkArith = checkInt lty pos && checkInt rty pos
+        check_arith = check_int lty pos && check_int rty pos
         
-        checkEq = 
+        check_eq = 
           case lty of
-            T.INT -> checkType lty rty pos
-            T.STRING -> checkType lty rty pos
-            T.ARRAY _ _ -> checkType lty rty pos
-            T.RECORD _ _ -> checkType lty rty pos
-            T.NIL -> checkType lty rty pos
+            T.INT -> check_type lty rty pos
+            T.STRING -> check_type lty rty pos
+            T.ARRAY _ _ -> check_type lty rty pos
+            T.RECORD _ _ -> check_type lty rty pos
+            T.NIL -> check_type lty rty pos
             _ -> error $ show pos ++ "type error for equality operator: " ++ show lty
             
-        checkComp =
+        check_comp =
           case lty of
-            T.INT -> checkType lty rty pos
-            T.STRING -> checkType lty rty pos
+            T.INT -> check_type lty rty pos
+            T.STRING -> check_type lty rty pos
             _ -> error $ show pos ++ "type error for comparison: " ++ show lty
             
       in
        case classify oper of
-         Arith -> if checkArith 
+         Arith -> if check_arith 
                   then ExpTy { ty=T.INT }
                   else undefined
-         Comp -> if checkComp
+         Comp -> if check_comp
                  then ExpTy { ty=T.INT }
                  else undefined
-         Eq -> if checkEq
+         Eq -> if check_eq
                then ExpTy { ty=T.INT }
                else undefined
                       
@@ -119,7 +121,7 @@ transExp venv tenv =
       where
         checkrecord ftys_ty ftys_exp pos = 
           let
-            checker ((_,t1), (ExpTy{ty=t2},pos')) = checkType t1 t2 pos'
+            checker ((_,t1), (ExpTy{ty=t2},pos')) = check_type t1 t2 pos'
             fs = zip ftys_ty ftys_exp
             szcheck = (length ftys_ty == length ftys_exp)
           in
@@ -139,7 +141,7 @@ transExp venv tenv =
         ExpTy { ty=vty } = trvar var
         ExpTy { ty=ety } = trexp exp
       in
-       if checkType vty ety pos
+       if check_type vty ety pos
        then ExpTy { ty=T.UNIT }
        else undefined
        
@@ -149,14 +151,14 @@ transExp venv tenv =
         ExpTy { ty=testty } = trexp test
         ExpTy { ty=thenty } = trexp thenexp
       in
-       if checkType T.INT testty pos
+       if check_type T.INT testty pos
        then
          case elseexp of
            Just elseexp' -> let ExpTy { ty=elsety } = trexp elseexp'
                             in
-                             if checkType thenty elsety pos
+                             if check_type thenty elsety pos
                              then ExpTy { ty=thenty } else undefined
-           Nothing -> if checkType T.UNIT thenty pos
+           Nothing -> if check_type T.UNIT thenty pos
                       then 
                         ExpTy { ty=thenty }
                       else
@@ -169,7 +171,7 @@ transExp venv tenv =
         ExpTy { ty=testty } = trexp test
         ExpTy { ty=bodyty } = trexp body
       in
-       if checkType T.INT testty pos && checkType T.UNIT bodyty pos
+       if check_type T.INT testty pos && check_type T.UNIT bodyty pos
        then
          ExpTy { ty=T.UNIT }
        else
@@ -179,7 +181,8 @@ transExp venv tenv =
     
     trexp A.LetExp { A.decs = decs, A.body = body, A.pos = pos } =
       let
-        (venv', tenv') = transdecs venv tenv decs
+        transdecs (venv, tenv) dec = transDec venv tenv dec
+        (venv', tenv') = foldl transdecs (venv, tenv) decs
         ExpTy { ty=bodyty } = transExp venv' tenv' body
       in
        ExpTy { ty=bodyty }
@@ -198,7 +201,7 @@ transExp venv tenv =
                  ExpTy { ty=sizety } = trexp size
                  ExpTy { ty=initty } = trexp init
                in
-                if checkType T.INT sizety pos && checkType ty' initty pos
+                if check_type T.INT sizety pos && check_type ty' initty pos
                 then
                   ExpTy { ty = ty }
                 else
@@ -249,7 +252,7 @@ transExp venv tenv =
             argtys = fmap trexp args
             checkformals formals argtys = 
               let
-                checker (t1, ExpTy { ty=t2 }) = checkType t1 t2 pos
+                checker (t1, ExpTy { ty=t2 }) = check_type t1 t2 pos
                 ts = zip formals argtys
                 szcheck = (length formals == length argtys)
               in
@@ -305,10 +308,10 @@ transTy tenv =
         
     transty (A.RecordTy fs pos) =
       let
-        f A.Field { A.field_name = name } = 
-          case S.lookup tenv name of
+        f A.Field { A.field_name = name, A.field_typ = typ } = 
+          case S.lookup tenv typ of
             Just ty -> (name, ty)
-            Nothing -> error $ show pos ++ "undefined type: " ++ name
+            Nothing -> error $ show pos ++ "undefined type (2): " ++ name
       in
        {- TODO: checkdup -}
        T.RECORD (fmap f fs) (pos2u pos)
@@ -316,7 +319,7 @@ transTy tenv =
     transty (A.ArrayTy sym pos) =
       case S.lookup tenv sym of
         Just ty -> T.ARRAY ty $ pos2u pos
-        Nothing -> error $ show pos ++ "undefined type: " ++ sym
+        Nothing -> error $ show pos ++ "undefined type (3): " ++ sym
   in
    transty
 
@@ -338,7 +341,7 @@ transDec venv tenv =
          Just sym -> 
            case S.lookup tenv sym of
              Nothing -> error $ show pos ++ "type not found: " ++ sym
-             Just ty' -> if checkType ty ty' pos
+             Just ty' -> if check_type ty ty' pos
                          then
                            ret name ty
                          else
@@ -442,7 +445,7 @@ transDec venv tenv =
             
             ExpTy { ty=bdty } = transExp venv_loc tenv body
           in
-           checkType rty bdty pos && acc
+           check_type rty bdty pos && acc
         
         check_bodies = foldl transbody True fundecs
       in
@@ -455,8 +458,6 @@ transDec venv tenv =
        
   in
    trdec
-
-transdecs = undefined
 
 checkdup [] _ = True
 checkdup (name:ns) (pos:ps) = 
