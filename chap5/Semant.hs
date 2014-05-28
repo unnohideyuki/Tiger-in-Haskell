@@ -204,17 +204,24 @@ transExp venv tenv =
                   
     trexp A.ForExp { A.svar = svar, A.lo = lo, A.hi = hi, A.body = body,
                      A.pos = pos } =
-      {- translate to let ... while -}
+      {- translate to let/while expresion -}
       let
         ivar = A.SimpleVar svar pos
+        limitvar = A.SimpleVar "limit" pos
         decs = [A.VarDec { A.name' = svar
                          , A.escape' = False
                          , A.typ' = Nothing
                          , A.init' = lo
-                         , A.pos' = pos }]
+                         , A.pos' = pos }
+               ,A.VarDec { A.name' = "limit"
+                         , A.escape' = False
+                         , A.typ' = Nothing
+                         , A.init' = hi
+                         , A.pos' = pos}
+               ]
         loop = A.WhileExp { A.test = A.OpExp { A.oper = A.LeOp
                                              , A.lhs = A.VarExp ivar
-                                             , A.rhs = hi
+                                             , A.rhs = A.VarExp limitvar
                                              , A.pos = pos }
                           , A.body = 
                                A.SeqExp [ body
