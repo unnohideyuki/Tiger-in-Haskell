@@ -250,13 +250,17 @@ transExp venv tenv =
         Just E.FunEntry { E.formals = formals, E.result = result } ->
           let
             argtys = fmap trexp args
-            checkformals formals argtys = 
+            checkformals formals argtys = trace (show (formals, argtys)) (
               let
                 checker (t1, ExpTy { ty=t2 }) = check_type t1 t2 pos
                 ts = zip formals argtys
-                szcheck = (length formals == length argtys)
+                szcheck = 
+                  if (length formals == length argtys) then
+                    True
+                  else
+                    error $ show pos ++ "wrong number of arguments."
               in
-               szcheck && (and $ fmap checker ts)
+               szcheck && (and $ fmap checker ts))
           in
            if checkformals formals argtys
            then 
