@@ -5,5 +5,4 @@ Lexer.hs
 Parser.hs
 driver
 parsetest
-testcases/*
 */support_files/*
