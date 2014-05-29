@@ -1,0 +1,12 @@
+let
+  type rt1 = { x: int, p: rt1 }
+  type rt2 = { x: int, p: rt1 }
+  
+  var a : rt1 := rt1 { x=0, p=nil }
+  var b : rt1 := rt1 { x=0, p=nil }
+  var c : rt2 := rt2 { x=0, p=nil }
+
+in
+  a = b.p
+end
+

@@ -1,12 +1,14 @@
 module Absyn where
 
+import qualified Symbol as S
+
 data Pos = Pos { line :: Int, column :: Int }
 
 instance Show Pos where
   show Pos { line=l, column=c } = (show l) ++ ":" ++ (show c) ++ ": "
 
 
-type Symbol = String -- TODO: It may not be the best
+type Symbol = S.Symbol
 
 data Var = SimpleVar Symbol Pos
          | FieldVar Var Symbol Pos
