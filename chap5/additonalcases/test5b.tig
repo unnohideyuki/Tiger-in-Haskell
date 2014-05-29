@@ -1,0 +1,11 @@
+/* define valid recursive types */
+let
+type intrec = {hd: int, tl: strrec} 
+type strrec = {hd: string, tl: intrec}
+
+var l1:intrec := intrec { hd=0, tl= nil } 
+var l2:strrec := strrec { hd="a", tl= nil } 
+
+in
+	l1.hd + ord(l2.hd)
+end
