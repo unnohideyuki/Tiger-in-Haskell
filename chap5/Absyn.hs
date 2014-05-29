@@ -1,7 +1,10 @@
 module Absyn where
 
 data Pos = Pos { line :: Int, column :: Int }
-           deriving(Show)
+
+instance Show Pos where
+  show Pos { line=l, column=c } = (show l) ++ ":" ++ (show c) ++ ": "
+
 
 type Symbol = String -- TODO: It may not be the best
 
