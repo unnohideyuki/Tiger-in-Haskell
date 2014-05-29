@@ -22,6 +22,3 @@ instance Eq Ty where
   x@UNIT         == y@UNIT          = True
   x@(NAME s t)   == y@(NAME s' t')  = (s == s') && (t == t')
   _              == _               = False
-  
-next :: Unique -> Unique
-next i = i + 1
