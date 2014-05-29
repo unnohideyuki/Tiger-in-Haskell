@@ -26,8 +26,8 @@
 ../testcases/test32.tig : ExpTy {ty = INT}
 ../testcases/test33.tig : ExpTy {ty = INT}
 ../testcases/test34.tig : driver: 5:9: type mismatch: expected INT, actual STRING
-../testcases/test35.tig : driver: Prelude.undefined
-../testcases/test36.tig : driver: Prelude.undefined
+../testcases/test35.tig : driver: 5:9: wrong number of arguments.
+../testcases/test36.tig : driver: 5:9: wrong number of arguments.
 ../testcases/test37.tig : ExpTy {ty = INT}
 ../testcases/test38.tig : ExpTy {ty = INT}
 ../testcases/test39.tig : ExpTy {ty = INT}
@@ -49,4 +49,5 @@
 ../testcases/test9.tig : driver: 3:1: type mismatch: expected INT, actual STRING
 ../additonalcases/reccmp.tig : ExpTy {ty = INT}
 ../additonalcases/test16b.tig : driver: 4:1: cyclic dependency: a
+../additonalcases/test19b.tig : driver: 8:29: undefined variable: a
 ../additonalcases/test5b.tig : ExpTy {ty = INT}
