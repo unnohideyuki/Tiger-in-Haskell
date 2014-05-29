@@ -313,8 +313,10 @@ transTy tenv =
             Just ty -> (name, ty) 
             Nothing -> error $ show pos ++ "undefined type (2): " ++ name
       in
-       {- TODO: checkdup -}
-       T.RECORD (fmap f fs) (pos2u pos)
+       if checkdup (fmap A.field_name fs) (fmap A.field_pos fs) then
+         T.RECORD (fmap f fs) (pos2u pos)
+       else
+         undefined
        
     transty (A.ArrayTy sym pos) =
       case S.lookup tenv sym of
