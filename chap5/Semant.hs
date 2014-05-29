@@ -311,15 +311,29 @@ transTy tenv =
         _ -> error "must not reach here, transy A.NameTy."
         
     transty (A.NameTy sym pos) True =
-      case S.lookup tenv sym of
-        Just ty -> case ty of
-          T.NAME s _ -> 
+      let
+        follow_ty seen s =
+          if List.all (/= s) seen then
             case S.lookup tenv s of
-              Just ty' -> T.NAME s (Just ty')
-              Nothing  -> error $ show pos ++ "couldn't update: " ++ s
-          ty -> ty
-        _ -> error "must not reach here, update A.NameTy."
+              Just (T.NAME s' (Just (T.NAME s'' _))) -> 
+                T.NAME s' (Just $ follow_ty (s:seen) s'')
+              Just ty -> ty
+          else
+            {- must not reach here? -}
+            error $ show pos ++ "cyclic dependency': " ++ sym
 
+      in
+       case S.lookup tenv sym of
+         Just ty -> 
+           case ty of
+             T.NAME s _ -> 
+               case S.lookup tenv s of
+                 Just (T.NAME s' (Just (T.NAME s'' _))) -> 
+                   T.NAME s' (Just $ follow_ty [sym] s'')
+                 Just ty -> ty
+             _ -> ty
+         _ -> error "must not reach here, update A.NameTy."
+       
     
     transty (A.RecordTy fs pos) _ =
       let
