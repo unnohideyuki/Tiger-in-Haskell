@@ -374,7 +374,7 @@ transDec venv tenv =
          Just sym -> 
            case S.lookup tenv sym of
              Nothing -> error $ show pos ++ "type not found: " ++ sym
-             Just ty' -> if check_type ty ty' pos
+             Just ty' -> if check_type ty' ty pos
                          then
                            ret name ty
                          else
