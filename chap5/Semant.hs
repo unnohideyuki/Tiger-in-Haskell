@@ -23,7 +23,7 @@ actual_ty ty pos =
   case ty of
     T.NAME s t -> case t of
       Just ty' -> actual_ty ty' pos
-      Nothing -> error $ show pos ++ "undefined type (1): " ++ s
+      Nothing -> error $ show pos ++ "type not found (in actual_ty): " ++ s
     T.ARRAY ty' u -> T.ARRAY (actual_ty ty' pos) u
     _ -> ty
 
@@ -301,27 +301,38 @@ transTy tenv =
     -- dirty hask: generate a unique number from the position.
     pos2u (A.Pos l c) = fromIntegral $ l * 10000 + c
     
-    transty (A.NameTy sym pos) =
+    transty (A.NameTy sym pos) False =
       case S.lookup tenv sym of
         Just ty -> ty
-        _ -> error "must not reach here"
+        _ -> error "must not reach here, transy A.NameTy."
         
-    transty (A.RecordTy fs pos) =
+    transty (A.NameTy sym pos) True =
+      case S.lookup tenv sym of
+        Just ty -> case ty of
+          T.NAME s _ -> 
+            case S.lookup tenv s of
+              Just ty' -> T.NAME s (Just ty')
+              Nothing  -> error $ show pos ++ "couldn't update: " ++ s
+          ty -> ty
+        _ -> error "must not reach here, update A.NameTy."
+
+    
+    transty (A.RecordTy fs pos) _ =
       let
         f A.Field { A.field_name = name, A.field_typ = typ } = 
           case S.lookup tenv typ of
             Just ty -> (name, ty) 
-            Nothing -> error $ show pos ++ "undefined type (2): " ++ name
+            Nothing -> error $ show pos ++ "type not defined (field): " ++ typ
       in
        if checkdup (fmap A.field_name fs) (fmap A.field_pos fs) then
          T.RECORD (fmap f fs) (pos2u pos)
        else
          undefined
        
-    transty (A.ArrayTy sym pos) =
+    transty (A.ArrayTy sym pos) _ =
       case S.lookup tenv sym of
         Just ty -> T.ARRAY ty $ pos2u pos
-        Nothing -> error $ show pos ++ "undefined type (3): " ++ sym
+        Nothing -> error $ show pos ++ "type not defined (array): " ++ sym
   in
    transty
 
@@ -351,30 +362,30 @@ transDec venv tenv =
 
     trdec (A.TypeDec tdecs) = 
       let
-        {- 1st pass -}
+        {- inserting headers -}
         tenv' = 
           foldl 
           (\acc (name, _, _) -> S.insert acc name (T.NAME name Nothing))
           tenv
           tdecs
         
-        {- 2nd pass -}
+        {- transTy 1st pass-}
         tenv'' = 
           foldl
           (\acc (name, ty, _) -> 
             case S.lookup acc name of
               Just (T.NAME n _) -> 
-                S.insert acc n $ T.NAME n (Just $ transTy acc ty))
+                S.insert acc n $ T.NAME n (Just $ transTy acc ty False))
           tenv'
           tdecs
         
-        {- 3rd pass ?? -}
+        {- transTy 2nd pass: updating -}
         tenv''' = 
           foldl
           (\acc (name, ty, _) -> 
             case S.lookup acc name of
               Just (T.NAME n _) -> 
-                S.insert acc n $ T.NAME n (Just $ transTy acc ty))
+                S.insert acc n $ T.NAME n (Just $ transTy acc ty True))
           tenv''
           tdecs
 
