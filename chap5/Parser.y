@@ -3,7 +3,6 @@
 module Parser (parse) where
 import Lexer
 import qualified Absyn as A
-import Debug.Trace
 
 }
 
@@ -186,8 +185,8 @@ letexp decs body (AlexPn _ l c) =
       in
         case (d1, d2) of
           (A.FunctionDec fdecs, A.FunctionDec fdecs') -> ds' ++ [A.FunctionDec (fdecs ++ fdecs')]
-	  (A.TypeDec tdecs, A.TypeDec tdecs') -> ds' ++ [A.TypeDec (tdecs ++ tdecs')]
-	  _ -> ds ++ [d2]
+          (A.TypeDec tdecs, A.TypeDec tdecs') -> ds' ++ [A.TypeDec (tdecs ++ tdecs')]
+          _ -> ds ++ [d2]
     decs' = foldl merge_decs [] decs
   in                                      
     A.LetExp decs' body $ A.Pos l c

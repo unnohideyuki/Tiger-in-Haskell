@@ -1,7 +1,5 @@
 module Semant where
 
-import Debug.Trace
-
 import qualified Data.List as List
 
 import qualified Absyn as A
