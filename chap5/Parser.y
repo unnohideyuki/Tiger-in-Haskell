@@ -3,6 +3,7 @@
 module Parser (parse) where
 import Lexer
 import qualified Absyn as A
+import Debug.Trace
 
 }
 
@@ -177,17 +178,19 @@ forexp (_, s) lo hi body (AlexPn _ l c) = A.ForExp s True lo hi body $ A.Pos l c
 
 letexp decs body (AlexPn _ l c) = 
   let
-    merge_decs (vds, A.FunctionDec fdecs, A.TypeDec tdecs) dec =
-      case dec of
-        A.FunctionDec fdecs' -> 
-          (vds, A.FunctionDec (fdecs ++ fdecs'), A.TypeDec tdecs)
-        A.TypeDec tdecs' ->
-          (vds, A.FunctionDec fdecs, A.TypeDec (tdecs ++ tdecs'))
-        vdec ->
-          (vds ++ [vdec], A.FunctionDec fdecs, A.TypeDec tdecs)
-    (vds, fd, td) = foldl merge_decs ([], A.FunctionDec [], A.TypeDec []) decs
+    merge_decs [] dec = [dec]
+    merge_decs ds d2 =
+      let
+        d1 = last ds
+        ds' = init ds
+      in
+        case (d1, d2) of
+          (A.FunctionDec fdecs, A.FunctionDec fdecs') -> ds' ++ [A.FunctionDec (fdecs ++ fdecs')]
+	  (A.TypeDec tdecs, A.TypeDec tdecs') -> ds' ++ [A.TypeDec (tdecs ++ tdecs')]
+	  _ -> ds ++ [d2]
+    decs' = foldl merge_decs [] decs
   in                                      
-    A.LetExp (fd:td:vds) body $ A.Pos l c
+    A.LetExp decs' body $ A.Pos l c
 
 arrayexp ((AlexPn _ l c), s) sz exp = A.ArrayExp s sz exp $ A.Pos l c
 
