@@ -110,23 +110,22 @@ transExp venv tenv =
       case S.lookup tenv typ of
         Nothing -> error $ show pos ++ "record type not found: " ++ typ
         Just ty -> case actual_ty ty pos of
-          T.RECORD ftys_from_ty u -> 
+          T.RECORD ftys_ty u -> 
             let 
-              ftys_from_exp = fmap (\(_,e,pos) -> (trexp e, pos)) fields
+              ftys_exp = fmap (\(_,e,pos) -> (trexp e, pos)) fields
             in
-             if checkrecord ftys_from_ty ftys_from_exp pos
+             if checkrecord ftys_ty ftys_exp pos
              then
-               ExpTy { ty = T.RECORD ftys_from_ty u }
+               ExpTy { ty = T.RECORD ftys_ty u }
              else
-               undefined
+               must_not_reach
       where
         checkrecord ftys_ty ftys_exp pos = 
           let
             checker ((_,t1), (ExpTy{ty=t2},pos')) = check_type t1 t2 pos'
             fs = zip ftys_ty ftys_exp
-            szcheck = (length ftys_ty == length ftys_exp)
           in
-           szcheck && (and $ fmap checker fs)
+            (length ftys_ty == length ftys_exp) && (and $ fmap checker fs)
         
     trexp (A.SeqExp exps) = 
       let 
