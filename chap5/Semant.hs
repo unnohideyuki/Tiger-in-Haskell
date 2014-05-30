@@ -41,6 +41,9 @@ check_type t1 t2 pos =
        _ -> type_mismatch t1' t2' pos
    else True
        
+must_not_reach =
+  error "fatal: must not reach here"
+
 transExp venv tenv =
   let
     trexp A.NilExp = ExpTy T.NIL
@@ -89,17 +92,17 @@ transExp venv tenv =
             T.STRING -> check_type lty rty pos
             _ -> error $ show pos ++ "type error for comparison: " ++ show lty
             
+        check_result =
+          case classify oper of
+            Arith -> check_arith 
+            Comp -> check_comp
+            Eq -> check_eq
+            
       in
-       case classify oper of
-         Arith -> if check_arith 
-                  then ExpTy { ty=T.INT }
-                  else undefined
-         Comp -> if check_comp
-                 then ExpTy { ty=T.INT }
-                 else undefined
-         Eq -> if check_eq
-               then ExpTy { ty=T.INT }
-               else undefined
+         if check_result then
+           ExpTy { ty=T.INT }
+         else 
+           must_not_reach
                       
     trexp (A.VarExp var) = trvar var
 
