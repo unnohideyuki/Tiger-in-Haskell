@@ -26,10 +26,10 @@ newLevel parent name formals temp =
    (Level { parent = parent ,name = label, formals=formals, frame=frame },
     temp'')
 
-allocLocal :: Level -> Bool -> Temp.Temp -> (Access, Frame.Frame, Temp.Temp)
+allocLocal :: Level -> Bool -> Temp.Temp -> (Access, Level, Temp.Temp)
 allocLocal level@Level{frame=frame} escapes temp =
   let
-    (access, frame, temp') = Frame.allocLocal frame escapes temp
+    (access, frame', temp') = Frame.allocLocal frame escapes temp
   in
-   (Access{level=level, access=access}, frame, temp')
+   (Access{level=level, access=access}, level{frame=frame'}, temp')
 
