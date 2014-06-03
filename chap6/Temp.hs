@@ -2,8 +2,8 @@ module Temp where
 
 import qualified Symbol
 
-data Temp = Temp { temps :: Int, labs :: Int }
 type Label = Symbol.Symbol
+data Temp = Temp { temps :: Int, labs :: Int }
 
 create :: Temp
 create = Temp { temps = 0, labs = 0 }
