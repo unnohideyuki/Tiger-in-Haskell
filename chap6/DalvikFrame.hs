@@ -7,6 +7,7 @@ data Frame = Frame { name :: Temp.Label
                    , formals :: [F.Access] 
                    , locals :: [F.Access]
                    }
+             deriving (Eq, Show)
 
 instance F.FrameBase Frame where
   newFrame = newFrame'

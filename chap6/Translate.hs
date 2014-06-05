@@ -12,8 +12,10 @@ data Level = Level { parent :: Level
                    , frame :: Frame.Frame
                    }
            | Outermost
+             deriving (Eq, Show)
 
 data Access = Access { level :: Level, access :: Frame.Access }
+              deriving (Eq, Show)
 
 outermost = Outermost
 
