@@ -1,0 +1,61 @@
+../testcases/test1.tig : ExpTy {ty = ARRAY INT 30025}
+../testcases/test10.tig : driver: 2:1: type mismatch: expected UNIT, actual INT
+../testcases/test11.tig : driver: 2:1: type mismatch: expected INT, actual STRING
+../testcases/test12.tig : ExpTy {ty = UNIT}
+../testcases/test13.tig : driver: 3:3: type mismatch: expected INT, actual STRING
+../testcases/test14.tig : driver: 12:16: type mismatch: expected RECORD [("name",STRING),("id",INT)] 60024, actual ARRAY INT 50024
+../testcases/test15.tig : driver: 3:1: type mismatch: expected UNIT, actual INT
+../testcases/test16.tig : ExpTy {ty = STRING}
+../testcases/test17.tig : ExpTy {ty = INT}
+../testcases/test18.tig : driver: 5:18: function not defined: do_nothing2
+../testcases/test19.tig : driver: 8:30: undefined variable: a
+../testcases/test2.tig : ExpTy {ty = ARRAY INT 40025}
+../testcases/test20.tig : driver: 3:18: undefined variable: i
+../testcases/test21.tig : driver: 8:32: : integer required.
+../testcases/test22.tig : driver: 7:13: field not found: nam
+../testcases/test23.tig : driver: 8:17: type mismatch: expected INT, actual STRING
+../testcases/test24.tig : driver: 5:10: not an array
+../testcases/test25.tig : driver: 5:10: not a record: INT
+../testcases/test26.tig : driver: 3:3: : integer required.
+../testcases/test27.tig : ExpTy {ty = INT}
+../testcases/test28.tig : driver: 7:13: type mismatch: expected RECORD [("name",STRING),("id",INT)] 40025, actual RECORD [("name",STRING),("id",INT)] 50025
+../testcases/test29.tig : driver: 7:13: type mismatch: expected ARRAY INT 40025, actual ARRAY INT 50025
+../testcases/test3.tig : ExpTy {ty = RECORD [("name",STRING),("age",INT)] 30025}
+../testcases/test30.tig : ExpTy {ty = INT}
+../testcases/test31.tig : driver: 3:13: type mismatch: expected INT, actual STRING
+../testcases/test32.tig : ExpTy {ty = INT}
+../testcases/test33.tig : ExpTy {ty = INT}
+../testcases/test34.tig : driver: 5:9: type mismatch: expected INT, actual STRING
+../testcases/test35.tig : driver: 5:9: wrong number of arguments.
+../testcases/test36.tig : driver: 5:9: wrong number of arguments.
+../testcases/test37.tig : ExpTy {ty = INT}
+../testcases/test38.tig : ExpTy {ty = INT}
+../testcases/test39.tig : ExpTy {ty = INT}
+../testcases/test4.tig : ExpTy {ty = INT}
+../testcases/test40.tig : driver: 3:18: type mismatch: expected UNIT, actual INT
+../testcases/test41.tig : ExpTy {ty = INT}
+../testcases/test42.tig : ExpTy {ty = UNIT}
+../testcases/test43.tig : driver: 6:11: : integer required.
+../testcases/test44.tig : ExpTy {ty = UNIT}
+../testcases/test45.tig : driver: 5:13: nil can be used only in the long form.
+../testcases/test46.tig : ExpTy {ty = INT}
+../testcases/test47.tig : ExpTy {ty = INT}
+../testcases/test48.tig : ExpTy {ty = INT}
+../testcases/test49.tig : driver: Parse Error at token nil at line 5, col 25
+../testcases/test5.tig : ExpTy {ty = RECORD [("hd",INT),("tl",NAME "intlist" (Just (RECORD [("hd",INT),("tl",NAME "intlist" Nothing)] 40016)))] 40016}
+../testcases/test6.tig : ExpTy {ty = UNIT}
+../testcases/test7.tig : ExpTy {ty = INT}
+../testcases/test8.tig : ExpTy {ty = INT}
+../testcases/test9.tig : driver: 3:1: type mismatch: expected INT, actual STRING
+../additonalcases/reccmp.tig : ExpTy {ty = INT}
+../additonalcases/test16b.tig : driver: 4:1: cyclic dependency: a
+../additonalcases/test17b.tig : driver: 4:12: type not defined (field): treelist
+../additonalcases/test19b.tig : driver: 8:29: undefined variable: a
+../additonalcases/test32b.tig : driver: 6:18: type mismatch: expected INT, actual STRING
+../additonalcases/test33b.tig : driver: 3:17: record type not found: rectype
+../additonalcases/test37b.tig : ExpTy {ty = STRING}
+../additonalcases/test38b.tig : driver: 5:9: duplicated defintion: a
+../additonalcases/test39b.tig : driver: 5:18: duplicated defintion: g
+../additonalcases/test41b.tig : ExpTy {ty = STRING}
+../additonalcases/test48b.tig : ExpTy {ty = INT}
+../additonalcases/test5b.tig : ExpTy {ty = INT}

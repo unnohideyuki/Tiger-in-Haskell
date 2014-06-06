@@ -46,6 +46,19 @@ check_type t1 t2 pos =
 must_not_reach =
   error "fatal: must not reach here"
 
+transProg :: S.Table E.EnvEntry -> S.Table T.Ty
+            -> A.Exp 
+            -> ExpTy
+            
+transProg venv tenv prog = 
+  let
+    temp = Temp.create
+    (mainlevel, temp') = 
+      TL.newLevel TL.outermost (Temp.namedLabel "main") [] temp
+  in
+   case transExp venv tenv mainlevel temp' prog of
+     (expty, _, _) -> expty
+
 transExp :: S.Table E.EnvEntry -> S.Table T.Ty -> TL.Level -> Temp.Temp
             -> A.Exp 
             -> (ExpTy, TL.Level, Temp.Temp)
@@ -122,8 +135,8 @@ transExp venv tenv =
           T.RECORD ftys_ty u -> 
             let 
               (level', temp', ftys_exp) = 
-                foldl 
-                (\(l, t, xs) (_,e,pos) -> case trexp l t e of
+                foldr
+                (\(_,e,pos) (l, t, xs) -> case trexp l t e of
                     (expty, l', t') -> (l', t', (expty, pos):xs)
                 ) 
                 (level, temp, [])
@@ -131,7 +144,7 @@ transExp venv tenv =
             in
              if checkrecord ftys_ty ftys_exp pos
              then
-               (ExpTy { ty = T.RECORD ftys_ty u }, level', temp')
+               (ExpTy {ty=T.RECORD ftys_ty u}, level', temp')
              else
                must_not_reach
       where
@@ -145,8 +158,8 @@ transExp venv tenv =
     trexp level temp (A.SeqExp exps) = 
       let 
         (lv', temp', es) = 
-          foldl 
-          (\(l, t, xs) exp -> case trexp l t exp of
+          foldr
+          (\exp (l, t, xs) -> case trexp l t exp of
               (e, l', t') -> (l', t', e:xs)
           )
           (level, temp, [])
@@ -277,8 +290,8 @@ transExp venv tenv =
         Just E.FunEntry{E.formals=formals, E.result=result } ->
           let
             (lv', temp', argtys) =  
-              foldl
-              (\(l, t, xs) exp -> case trexp l t exp of
+              foldr
+              (\exp (l, t, xs) -> case trexp l t exp of
                   (e, l', t') -> (l', t', e:xs))
               (level, temp, [])
               args
@@ -401,9 +414,11 @@ transDec venv tenv =
     trdec level temp A.VarDec{A.name'=name, A.typ'=typ, A.init'=init, 
                               A.pos'=pos} = 
       let                                     
-        (ExpTy{ty=ty}, lv', temp') = transExp venv tenv level temp init
+        (ExpTy{ty=ty}, lv', temp') =
+          transExp venv tenv level temp init
         ret name ty = 
-          (S.insert venv name E.VarEntry {E.ty=ty}, tenv, lv', temp')
+          (S.insert venv name E.VarEntry {E.access=undefined, E.ty=ty}, 
+           tenv, lv', temp')
       in
        case typ of
          Nothing -> if ty == T.NIL
@@ -506,7 +521,9 @@ transDec venv tenv =
               params
           in
            if checkdup (fmap A.field_name params) (fmap A.field_pos params) then
-             S.insert venv name E.FunEntry { E.formals = ftys
+             S.insert venv name E.FunEntry { E.level = undefined
+                                           , E.label = undefined
+                                           , E.formals = ftys
                                            , E.result = rty
                                            }
            else
@@ -525,7 +542,8 @@ transDec venv tenv =
               S.lookup venv' name
             
             transparam acc (A.Field { A.field_name = name }, ty) =
-              S.insert acc name $ E.VarEntry { E.ty=ty }
+              S.insert acc name $ E.VarEntry { E.access = undefined
+                                             , E.ty=ty }
 
             venv_loc = foldl transparam venv' $ zip params formals
             
