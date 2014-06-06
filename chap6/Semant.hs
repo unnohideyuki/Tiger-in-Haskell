@@ -247,7 +247,7 @@ transExp venv tenv =
     trexp A.CallExp { A.func = func, A.args = args, A.pos = pos } =
       case S.lookup venv func of
         Nothing -> error $ show pos ++ "function not defined: " ++ func
-        Just (E.VarEntry _) -> error $ show pos ++ "not a function: " ++ func
+        Just (E.VarEntry _ _) -> error $ show pos ++ "not a function: " ++ func
         Just E.FunEntry { E.formals = formals, E.result = result } ->
           let
             argtys = fmap trexp args
@@ -301,6 +301,7 @@ transExp venv tenv =
   in
    trexp
 
+transTy :: S.Table T.Ty -> A.Ty -> Bool -> T.Ty
 transTy tenv =
   let
     -- dirty hask: generate a unique number from the position.
@@ -357,6 +358,8 @@ transTy tenv =
   in
    transty
 
+transDec :: S.Table E.EnvEntry -> S.Table T.Ty -> A.Dec -> 
+            (S.Table E.EnvEntry, S.Table T.Ty)
 transDec venv tenv =
   let
     trdec A.VarDec { A.name' = name, A.typ' = typ, A.init' = init, 
