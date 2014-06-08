@@ -1,5 +1,5 @@
 module Translate ( Level, Access
-                 , outermost, newLevel
+                 , outermost, newLevel, allocLocal
                  ) where
 
 import qualified Temp

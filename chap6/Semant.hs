@@ -412,13 +412,16 @@ transDec venv tenv =
              -> (S.Table E.EnvEntry, S.Table T.Ty, TL.Level, Temp.Temp)
     
     trdec level temp A.VarDec{A.name'=name, A.typ'=typ, A.init'=init, 
-                              A.pos'=pos} = 
+                              A.escape'=esc, A.pos'=pos} = 
       let                                     
         (ExpTy{ty=ty}, lv', temp') =
           transExp venv tenv level temp init
+
+        (access, lv'', temp'') = TL.allocLocal lv' esc temp'
+
         ret name ty = 
-          (S.insert venv name E.VarEntry {E.access=undefined, E.ty=ty}, 
-           tenv, lv', temp')
+          (S.insert venv name E.VarEntry {E.access=access, E.ty=ty}, 
+           tenv, lv'', temp'')
       in
        case typ of
          Nothing -> if ty == T.NIL
