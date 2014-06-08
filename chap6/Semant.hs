@@ -503,9 +503,9 @@ transDec venv tenv =
     trdec level temp (A.FunctionDec fundecs) = 
       let
         {- 1st pass -}
-        transfun venv A.FuncDec{A.name=name, A.params=params, 
-                                         A.result=result, A.func_body=body, 
-                                         A.func_pos=pos } = 
+        transfun (venv, temp) A.FuncDec{A.name=name, A.params=params, 
+                                        A.result=result, A.func_body=body, 
+                                        A.func_pos=pos } = 
           let
             rty = 
               case result of
@@ -531,15 +531,16 @@ transDec venv tenv =
      
           in
            if checkdup (fmap A.field_name params) (fmap A.field_pos params) then
-             S.insert venv name E.FunEntry { E.level = lev
-                                           , E.label = label
-                                           , E.formals = ftys
-                                           , E.result = rty
-                                           }
+             (S.insert venv name E.FunEntry { E.level = lev
+                                            , E.label = label
+                                            , E.formals = ftys
+                                            , E.result = rty
+                                            },
+              temp'')
            else
              undefined
 
-        venv' = foldl transfun venv fundecs
+        (venv', temp') = foldl transfun (venv,temp) fundecs
         
         {- 2nd pass -}
         transbody
@@ -562,13 +563,13 @@ transDec venv tenv =
           in
            (check_type rty bdty pos && acc, lv', temp')
         
-        (check_bodies, level', temp') = 
-          foldl transbody (True, level, temp) fundecs
+        (check_bodies, level', temp'') = 
+          foldl transbody (True, level, temp') fundecs
       in
        if checkdup (fmap A.name fundecs) (fmap A.func_pos fundecs)
           && check_bodies 
        then
-         (venv', tenv, level', temp')
+         (venv', tenv, level', temp'')
        else
          undefined
        
