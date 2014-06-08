@@ -501,8 +501,8 @@ transDec venv tenv =
       let
         {- 1st pass -}
         transfun venv A.FuncDec{A.name=name, A.params=params, 
-                                A.result=result, A.func_body=body, 
-                                A.func_pos=pos } = 
+                                         A.result=result, A.func_body=body, 
+                                         A.func_pos=pos } = 
           let
             rty = 
               case result of
@@ -519,10 +519,17 @@ transDec venv tenv =
                   Just t -> t
                   Nothing -> error $ show pos ++ "type not found: " ++ typ)
               params
+            
+            (label, temp') = Temp.newLabel temp
+
+            formals = fmap A.field_esc params
+
+            (lev, temp'') = TL.newLevel level label formals temp'
+     
           in
            if checkdup (fmap A.field_name params) (fmap A.field_pos params) then
-             S.insert venv name E.FunEntry { E.level = undefined
-                                           , E.label = undefined
+             S.insert venv name E.FunEntry { E.level = lev
+                                           , E.label = label
                                            , E.formals = ftys
                                            , E.result = rty
                                            }
