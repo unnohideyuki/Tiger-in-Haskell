@@ -184,7 +184,7 @@ findEscape =
             
             params' = foldr'
                       (\f@A.Field{A.field_name=name} params ->
-                        if elem name fs_bd then
+                        if elem name fs2 then
                           f{A.field_esc=True}:params
                         else
                           f{A.field_esc=False}:params)
