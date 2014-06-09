@@ -12,146 +12,154 @@ import qualified Symbol as S
 -}
 
 
-findEscape :: A.Exp -> (A.Exp, [S.Symbol])
+findEscape :: A.Exp -> (A.Exp, [S.Symbol], [S.Symbol])
 
 findEscape =
   let
-    findesc exp@A.NilExp = (exp, [])
+    findesc exp@A.NilExp = (exp, [], [])
     
-    findesc exp@(A.IntExp _ _) = (exp, [])
+    findesc exp@(A.IntExp _ _) = (exp, [], [])
     
-    findesc exp@(A.StringExp _ _) = (exp, [])
+    findesc exp@(A.StringExp _ _) = (exp, [], [])
     
     findesc exp@A.OpExp {A.lhs=lhs, A.rhs=rhs} =
       let
-        (lhs', fs1) = findesc lhs
-        (rhs', fs2) = findesc rhs
+        (lhs', fs1, fs2) = findesc lhs
+        (rhs', fs1', fs2') = findesc rhs
       in
-       (exp{A.lhs=lhs', A.rhs=rhs'}, nub $ fs1 ++ fs2)
+       (exp{A.lhs=lhs', A.rhs=rhs'}, nub$fs1++fs1', nub$fs2++fs2')
        
-    findesc exp@(A.VarExp var) = undefined -- TODO
+    findesc exp@(A.VarExp var) = 
+      let
+        (var', fs1, fs2) = findescv var
+      in
+       (A.VarExp var', fs1, fs2)
     
     findesc exp@A.RecordExp{A.fields=fields} =
       let
-        (fields', fs) = foldr'
-                        (\(sym, exp, pos) (fields, frees) ->
-                          let
-                            (exp', fs) = findesc exp
-                          in
-                           ((sym, exp', pos):fields, nub $ fs ++ frees))
-                        ([], [])
-                        fields
+        (fields', fs1, fs2) = foldr'
+                              (\(sym, exp, pos) (fields, fs1, fs2) ->
+                                let
+                                  (exp', fs1', fs2') = findesc exp
+                                in
+                                 ((sym, exp', pos):fields, 
+                                  nub $ fs1'++ fs1, nub $ fs2' ++ fs2))
+                              ([], [], [])
+                              fields
       in
-       (exp{A.fields=fields'}, fs)
+       (exp{A.fields=fields'}, fs1, fs2)
        
     findesc (A.SeqExp exps) =
       let
-        (exps', fs) = foldr'
-                      (\e (es, fs) ->
-                        let
-                          (e', fs') = findesc e
-                        in
-                         (e':es, nub $ fs' ++ fs))
-                      ([], [])
-                      exps
+        (exps', fs1, fs2) = foldr'
+                            (\e (es, fs1, fs2) ->
+                              let
+                                (e', fs1', fs2') = findesc e
+                              in
+                               (e':es, nub$fs1'++fs1, nub$fs2'++fs2))
+                            ([], [], [])
+                            exps
       in
-       (A.SeqExp exps', fs)
+       (A.SeqExp exps', fs1, fs2)
                       
     findesc exp@A.AssignExp{A.vvar=var, A.exp=e} =
       let
-        (var', fs1) = findescv var
-        (e', fs2) = findesc e
+        (var', fs1, fs2) = findescv var
+        (e', fs1', fs2') = findesc e
       in
-       (exp{A.vvar=var', A.exp=e'}, nub $ fs1 ++ fs2)
+       (exp{A.vvar=var', A.exp=e'}, nub$fs1'++fs1, nub$fs2'++fs2)
        
     findesc exp@A.IfExp{A.test=test, A.thene=texp, A.elsee=eexp} =
       let
-        (test', fs1) = findesc test
-        (texp', fs2) = findesc texp
-        (eexp', fs3) = 
+        (test', fs1, fs2) = findesc test
+        (texp', fs1', fs2') = findesc texp
+        (eexp', fs1'', fs2'') = 
           case eexp of
-            Just e -> let (e', fs3') = findesc e
+            Just e -> let (e', fs1, fs2) = findesc e
                       in
-                       (Just e', fs3')
-            Nothing -> (Nothing, [])
+                       (Just e', fs1, fs2)
+            Nothing -> (Nothing, [], [])
       in
        (exp{A.test=test', A.thene=texp', A.elsee=eexp'},
-        nub $ fs1 ++ fs2 ++ fs3)
-
+        nub $ fs1 ++ fs1'++ fs1'',
+        nub $ fs2 ++ fs2'++ fs2'')
 
     findesc exp@A.WhileExp{A.test=test, A.body=body} =
       let
-        (test', fs1) = findesc test
-        (body', fs2) = findesc body
+        (test', fs1, fs2) = findesc test
+        (body', fs1', fs2') = findesc body
       in
-       (exp{A.test=test', A.body=body'}, nub $ fs1 ++ fs2)
+       (exp{A.test=test', A.body=body'}, nub$fs1++fs1',nub$fs2++fs2')
 
-    findesc exp@(A.BreakExp _) = (exp, [])
+    findesc exp@(A.BreakExp _) = (exp, [], [])
 
     findesc exp@A.LetExp{A.decs=decs, A.body=body} =
       let
-        fesc_decs dec (decs, names, fs) = 
+        fesc_decs dec (decs, names, fs1, fs2) = 
           let
-            (dec', names', fs') = findescd dec
+            (dec', names', fs1', fs2') = findescd dec fs1 fs2
           in
-           (dec':decs, nub $ names' ++ names, nub $ fs' ++ fs)
+           (dec':decs, nub$names'++names, nub$fs1'++fs1, nub$fs2'++fs2)
            
-        (decs', names, fs1) = foldr' fesc_decs ([], [], []) decs
-        
-        (body', fs2) = findesc body
-        
-        fs' = [s | s <- (nub $ fs1 ++ fs2), notElem s names]
+        (body', fs1b, fs2b) = findesc body
+        (decs', names, fs1, fs2) = foldr' fesc_decs ([], [], fs1b, fs2b) decs
       in
-       (exp{A.decs=decs', A.body=body'}, fs')
+       (exp{A.decs=decs', A.body=body'}, fs1, fs2)
 
     findesc exp@A.ArrayExp{A.size=size, A.init=init} =
       let
-        (size', fs1) = findesc size
-        (init', fs2) = findesc init
+        (size', fs1, fs2) = findesc size
+        (init', fs1', fs2') = findesc init
       in
-       (exp{A.size=size', A.init=init'}, nub $ fs1 ++ fs2)
+       (exp{A.size=size', A.init=init'}, nub$fs1++fs1', nub$fs2++fs2')
 
     findesc exp@A.ForExp {A.svar=svar, A.lo=lo, A.hi=hi, A.body=body} =
       let
-        (lo', fs1) = findesc lo
-        (hi', fs2) = findesc hi
-        (body', fs3) = findesc body
-        fs3' = [s | s<-fs3, s /= svar]
+        (lo', fs1, fs2) = findesc lo
+        (hi', fs1', fs2') = findesc hi
+        (body', fs1'', fs2'') = findesc body
+        
+        fs13 = [s | s<-fs1'', s /= svar]
+        fs23 = [s | s<-fs2'', s /= svar]
+        
+        esc = or [True | s<-fs2'', s == svar]
       in
-       (exp{A.lo=lo', A.hi=hi', A.body=body'}, nub $ fs1 ++ fs2 ++ fs3')
+       (exp{A.lo=lo', A.hi=hi', A.body=body', A.escape=esc}, 
+        nub $ fs1 ++ fs1' ++ fs13, nub $ fs2 ++ fs2' ++ fs23)
     
     findesc exp@A.CallExp{A.func=func, A.args=args} = 
       let
-        (args', fs') = foldr'
-                       (\arg (args, fs) ->
-                         let
-                           (arg', fs') = findesc arg
-                         in
-                          (arg':args, nub $ fs' ++ fs))
-                       ([], [])
-                       args
+        (args', fs1', fs2') = foldr'
+                              (\arg (args, fs1, fs2) ->
+                                let
+                                  (arg', fs1', fs2') = findesc arg
+                                in
+                                 (arg':args, nub$fs1'++fs1, nub$fs2'++fs2))
+                              ([], [], [])
+                              args
       in
-       (exp{A.args=args'}, nub $ func:fs')
+       (exp{A.args=args'}, nub $func:fs1', fs2')
 
 
-    findescv :: A.Var -> (A.Var, [S.Symbol])
+    findescv :: A.Var -> (A.Var, [S.Symbol], [S.Symbol])
     
-    findescv v@(A.SimpleVar sym _) = (v, [sym])
+    findescv v@(A.SimpleVar sym _) = (v, [sym], [])
     
     findescv (A.FieldVar var sym pos) =
       let
-        (var', fs) = findescv var
+        (var', fs1, fs2) = findescv var
       in
-       (A.FieldVar var' sym pos, fs)
+       (A.FieldVar var' sym pos, fs1, fs2)
        
     findescv (A.SubscriptVar var exp pos) =
       let
-        (var', fs1) = findescv var
-        (exp', fs2) = findesc exp
+        (var', fs1, fs2) = findescv var
+        (exp', fs1', fs2') = findesc exp
       in
-       (A.SubscriptVar var' exp' pos, nub $ fs1 ++ fs2)
+       (A.SubscriptVar var' exp' pos, nub$fs1++fs1', nub$fs2++fs2')
     
-    findescd :: A.Dec -> (A.Dec, [S.Symbol], [S.Symbol])
+    findescd :: A.Dec -> [S.Symbol] -> [S.Symbol]
+                -> (A.Dec, [S.Symbol], [S.Symbol], [S.Symbol])
     findescd = undefined
 
   in
