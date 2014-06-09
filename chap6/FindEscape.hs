@@ -104,6 +104,13 @@ findEscape =
       in
        (exp{A.decs=decs', A.body=body'}, fs')
 
+    findesc exp@A.ArrayExp{A.size=size, A.init=init} =
+      let
+        (size', fs1) = findesc size
+        (init', fs2) = findesc init
+      in
+       (exp{A.size=size', A.init=init'}, nub $ fs1 ++ fs2)
+
 
     findescv :: A.Var -> (A.Var, [S.Symbol])
     findescv = undefined  
