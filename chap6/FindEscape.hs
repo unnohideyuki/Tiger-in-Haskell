@@ -111,13 +111,48 @@ findEscape =
       in
        (exp{A.size=size', A.init=init'}, nub $ fs1 ++ fs2)
 
+    findesc exp@A.ForExp {A.svar=svar, A.lo=lo, A.hi=hi, A.body=body} =
+      let
+        (lo', fs1) = findesc lo
+        (hi', fs2) = findesc hi
+        (body', fs3) = findesc body
+        fs3' = [s | s<-fs3, s /= svar]
+      in
+       (exp{A.lo=lo', A.hi=hi', A.body=body'}, nub $ fs1 ++ fs2 ++ fs3')
+    
+    findesc exp@A.CallExp{A.func=func, A.args=args} = 
+      let
+        (args', fs') = foldr'
+                       (\arg (args, fs) ->
+                         let
+                           (arg', fs') = findesc arg
+                         in
+                          (arg':args, nub $ fs' ++ fs))
+                       ([], [])
+                       args
+      in
+       (exp{A.args=args'}, nub $ func:fs')
+
 
     findescv :: A.Var -> (A.Var, [S.Symbol])
-    findescv = undefined  
+    
+    findescv v@(A.SimpleVar sym _) = (v, [sym])
+    
+    findescv (A.FieldVar var sym pos) =
+      let
+        (var', fs) = findescv var
+      in
+       (A.FieldVar var' sym pos, fs)
+       
+    findescv (A.SubscriptVar var exp pos) =
+      let
+        (var', fs1) = findescv var
+        (exp', fs2) = findesc exp
+      in
+       (A.SubscriptVar var' exp' pos, nub $ fs1 ++ fs2)
     
     findescd :: A.Dec -> (A.Dec, [S.Symbol], [S.Symbol])
     findescd = undefined
-  
 
   in
    findesc
