@@ -95,14 +95,14 @@ findEscape =
 
     findesc exp@A.LetExp{A.decs=decs, A.body=body} =
       let
-        fesc_decs dec (decs, names, fs1, fs2) = 
+        fesc_decs dec (decs, fs1, fs2) = 
           let
-            (dec', names', fs1', fs2') = findescd dec fs1 fs2
+            (dec', fs1', fs2') = findescd dec fs1 fs2
           in
-           (dec':decs, nub$names'++names, nub$fs1'++fs1, nub$fs2'++fs2)
+           (dec':decs, nub$fs1'++fs1, nub$fs2'++fs2)
            
         (body', fs1b, fs2b) = findesc body
-        (decs', names, fs1, fs2) = foldr' fesc_decs ([], [], fs1b, fs2b) decs
+        (decs', fs1, fs2) = foldr' fesc_decs ([], fs1b, fs2b) decs
       in
        (exp{A.decs=decs', A.body=body'}, fs1, fs2)
 
@@ -159,9 +159,45 @@ findEscape =
        (A.SubscriptVar var' exp' pos, nub$fs1++fs1', nub$fs2++fs2')
     
     findescd :: A.Dec -> [S.Symbol] -> [S.Symbol]
-                -> (A.Dec, [S.Symbol], [S.Symbol], [S.Symbol])
-    findescd = undefined
+                -> (A.Dec, [S.Symbol], [S.Symbol])
+    
+    findescd d@A.VarDec{A.name'=name, A.init'=init} fs1 fs2 =
+      let
+        (init', fs1_ini, fs2_ini) = findesc init
+        
+        fs1' = [s | s <- fs1, s /= name]
+        fs2' = [s | s <- fs2, s /= name]
+        
+        esc = or [True | s <- fs2, s == name]
+      in
+       (d{A.init'=init', A.escape'=esc},
+        nub $ fs1_ini ++ fs1', nub $ fs2_ini ++ fs2')
 
+    findescd d@(A.TypeDec _) fs1 fs2 = (d, fs1, fs2)
+    
+    findescd (A.FunctionDec fundecs) fs1 fs2 =
+      let
+        funfs fdec@A.FuncDec {A.params=params, A.func_body=body} (fdecs, fs) =
+          let
+            (body', fs1, fs2) = findesc body
+            fs_bd = nub $ fs1 ++ fs2
+            
+            params' = foldr'
+                      (\f@A.Field{A.field_name=name} params ->
+                        if elem name fs_bd then
+                          f{A.field_esc=True}:params
+                        else
+                          f{A.field_esc=False}:params)
+                      []
+                      params
+                      
+            fs_bd' = [s | s <- fs_bd, notElem s $ map A.field_name params]
+          in
+           (fdec{A.params=params', A.func_body=body'}:fdecs,
+            nub $ fs_bd' ++ fs)
+        
+        (fundecs', fs_body) = foldr funfs ([], []) fundecs
+      in
+       (A.FunctionDec fundecs', fs1, nub $ fs_body ++ fs2)
   in
    findesc
-
