@@ -63,6 +63,29 @@ unEx temp =
   in
    unex
 
-
-
+unNx :: Temp.Temp -> Exp -> (T.Stm, Temp.Temp)
+unNx temp =
+  let
+    unnx (Ex e) = (T.EXP e, temp)
     
+    unnx (Cx genstm) =
+      let
+        (t, temp') = Temp.newLabel temp
+        e = T.ESEQ [genstm t t, T.LABEL t] $ T.CONST 0
+      in        
+       (T.EXP e, temp')
+       
+    unnx (Nx s) = (s, temp)
+  in
+   unnx
+       
+unCx :: Exp -> (Temp.Label -> Temp.Label -> T.Stm)
+unCx =
+  let
+    uncx (Ex (T.CONST 1)) = (\t _ -> T.JUMP (T.NAME t) [t])
+    uncx (Ex (T.CONST 0)) = (\_ f -> T.JUMP (T.NAME f) [f])
+    uncx (Ex e) = (\t f -> T.CJUMP T.NE e (T.CONST 0) t f)
+    uncx (Cx genstm) = genstm
+    uncx (Nx _) = undefined
+  in
+   uncx
