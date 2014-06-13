@@ -7,6 +7,7 @@ import Data.Foldable (foldr')
 data Frame = Frame { name :: Temp.Label
                    , formals :: [F.Access] 
                    , locals :: [F.Access]
+                   , fp :: Int
                    }
              deriving (Eq, Show)
 
@@ -29,13 +30,15 @@ newFrame' label fs temp =
          
     (formals, temp') = foldr' calc_formals ([], temp) $ zip fs [0..]
     
+    (fp, temp'') = Temp.newTemp temp'
+    
     frame = Frame { name = label
                   , formals = formals
                   , locals = []
+                  , fp = fp
                   }
-                    
   in
-   (frame, temp')
+   (frame, temp'')
    
    
    
