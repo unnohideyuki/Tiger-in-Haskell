@@ -3,6 +3,7 @@ module DalvikFrame where
 import qualified Frame as F
 import qualified Temp
 import Data.Foldable (foldr')
+import qualified Tree as T
 
 data Frame = Frame { name :: Temp.Label
                    , formals :: [F.Access] 
@@ -40,8 +41,6 @@ newFrame' label fs temp =
   in
    (frame, temp'')
    
-   
-   
 allocLocal' :: Frame -> Bool -> Temp.Temp -> (F.Access, Frame, Temp.Temp)
 allocLocal' f@Frame{locals=locals} escapes temp =
   let
@@ -58,3 +57,16 @@ allocLocal' f@Frame{locals=locals} escapes temp =
     locals' = l : locals
   in
    (l, f{locals=locals'}, temp')
+
+exp :: F.Access -> T.Exp -> T.Exp
+exp (F.InFrame k) fpexp =
+  T.MEM $ T.BINOP T.PLUS (T.CONST k) fpexp
+exp (F.InReg t) _ =  
+  T.TEMP t
+
+static_link :: Frame -> T.Exp -> T.Exp
+static_link frame fpexp = 
+  let
+    const0 = T.CONST 0
+  in
+   T.MEM $ T.BINOP T.PLUS const0 fpexp

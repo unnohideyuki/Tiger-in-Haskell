@@ -3,7 +3,7 @@ module Temp where
 import qualified Symbol
 
 type Label = Symbol.Symbol
-data Temp = Temp { temps :: Int, labs :: Int }
+data Temp = Temp { temps :: Int, labs :: Int, num :: Int}
 
 create :: Temp
 create = Temp { temps = 0, labs = 0 }
@@ -24,3 +24,6 @@ newLabel t@Temp{labs=labs} =
 
 namedLabel :: String -> Label
 namedLabel = Symbol.fromString
+
+newNum :: Temp -> (Int, Temp)
+newNum t@Temp{num=num} = (num, t{num=num+1})

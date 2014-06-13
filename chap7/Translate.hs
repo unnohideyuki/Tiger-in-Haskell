@@ -14,7 +14,10 @@ data Level = Level { parent :: Level
                    , uniq :: Int
                    }
            | Outermost
-             deriving (Eq, Show)
+             deriving (Show)
+                      
+instance Eq Level where
+  Level{uniq=u1} == Level{uniq=u2} = u1 == u2
 
 data Access = Access { level :: Level, access :: Frame.Access }
               deriving (Eq, Show)
@@ -91,3 +94,28 @@ unCx =
     uncx (Nx _) = undefined
   in
    uncx
+
+simpleVar :: Access -> Level -> Exp
+simpleVar Access{level=lev_dec, access=acc} lev_use =
+  let
+    fpexp = follow_links lev_use lev_dec
+        
+    follow_links lev_use lev_dec =
+      let
+        follow' levu levd fpexp =
+          if levu == levd then
+            fpexp
+          else
+            let
+              levu' = parent levu
+              fpexp' = Frame.static_link (frame levu) fpexp
+            in
+             follow' levu' levd fpexp'
+        
+        curr_frame = frame lev_use
+      in
+       follow' lev_use lev_dec $ T.TEMP $ Frame.fp curr_frame
+  in
+   Ex $ Frame.exp acc fpexp
+
+

@@ -2,7 +2,7 @@ module Tree where
 
 import qualified Temp
 
-data Exp = CONST Integer
+data Exp = CONST Int
          | NAME Temp.Label
          | TEMP Int
          | BINOP Binop Exp Exp
