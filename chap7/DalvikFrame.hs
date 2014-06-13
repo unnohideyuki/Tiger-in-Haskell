@@ -2,6 +2,7 @@ module DalvikFrame where
 
 import qualified Frame as F
 import qualified Temp
+import Data.Foldable (foldr')
 
 data Frame = Frame { name :: Temp.Label
                    , formals :: [F.Access] 
@@ -17,7 +18,7 @@ instance F.FrameBase Frame where
 newFrame' :: Temp.Label -> [Bool] -> Temp.Temp -> (Frame, Temp.Temp)
 newFrame' label fs temp = 
   let
-    calc_formals (acc, t) (escapes, n) =
+    calc_formals (escapes, n) (acc, t) =
       if escapes then
         (F.InFrame (-n) : acc, temp)
       else
@@ -26,7 +27,7 @@ newFrame' label fs temp =
         in
          (F.InReg m : acc, temp')
          
-    (formals, temp') = foldl calc_formals ([], temp) $ zip fs [0..]
+    (formals, temp') = foldr' calc_formals ([], temp) $ zip fs [0..]
     
     frame = Frame { name = label
                   , formals = formals
