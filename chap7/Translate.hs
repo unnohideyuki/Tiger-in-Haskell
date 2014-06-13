@@ -11,6 +11,7 @@ data Level = Level { parent :: Level
                    , name :: Temp.Label
                    , formals :: [Bool]
                    , frame :: Frame.Frame
+                   , uniq :: Int
                    }
            | Outermost
              deriving (Eq, Show)
@@ -25,9 +26,10 @@ newLevel parent name formals temp =
   let
     (label, temp') = Temp.newLabel temp
     (frame, temp'') = Frame.newFrame label formals temp'
+    (n, temp3) = Temp.newNum temp''
   in
-   (Level { parent = parent ,name = name, formals=formals, frame=frame },
-    temp'')
+   (Level{parent=parent ,name=name, formals=formals, frame=frame , uniq=n},
+    temp3)
 
 allocLocal :: Level -> Bool -> Temp.Temp -> (Access, Level, Temp.Temp)
 allocLocal level@Level{frame=frame} escapes temp =
