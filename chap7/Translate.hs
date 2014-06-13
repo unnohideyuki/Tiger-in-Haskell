@@ -26,7 +26,7 @@ newLevel parent name formals temp =
     (label, temp') = Temp.newLabel temp
     (frame, temp'') = Frame.newFrame label formals temp'
   in
-   (Level { parent = parent ,name = label, formals=formals, frame=frame },
+   (Level { parent = parent ,name = name, formals=formals, frame=frame },
     temp'')
 
 allocLocal :: Level -> Bool -> Temp.Temp -> (Access, Level, Temp.Temp)
