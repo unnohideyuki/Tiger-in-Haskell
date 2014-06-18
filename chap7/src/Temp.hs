@@ -6,7 +6,7 @@ type Label = Symbol.Symbol
 data Temp = Temp { temps :: Int, labs :: Int, num :: Int}
 
 create :: Temp
-create = Temp { temps = 0, labs = 0 }
+create = Temp {temps=0, labs=0, num=0}
 
 newTemp :: Temp -> (Int, Temp)
 newTemp t@Temp{temps=temps}  = (temps, t{ temps = temps + 1})

@@ -18,6 +18,8 @@ data Level = Level { parent :: Level
                       
 instance Eq Level where
   Level{uniq=u1} == Level{uniq=u2} = u1 == u2
+  Outermost == Outermost = True
+  _ == _ = False
 
 data Access = Access { level :: Level, access :: Frame.Access }
               deriving (Eq, Show)
@@ -117,5 +119,3 @@ simpleVar Access{level=lev_dec, access=acc} lev_use =
        follow' lev_use lev_dec $ T.TEMP $ Frame.fp curr_frame
   in
    Ex $ Frame.exp acc fpexp
-
-
