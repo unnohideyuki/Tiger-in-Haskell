@@ -121,3 +121,19 @@ simpleVar Access{level=lev_dec, access=acc} lev_use =
        follow' lev_use lev_dec $ T.TEMP $ Frame.fp curr_frame
   in
    Ex $ Frame.exp acc fpexp
+
+subscriptVar :: Exp -> Exp -> Temp.Temp -> (Exp, Temp.Temp)
+subscriptVar var idx temp =
+  let
+    (v, temp') = unEx temp var
+    (i, temp'') = unEx temp' idx
+  in
+   (Ex $ T.ARR v i, temp'')
+   
+fieldVar :: Exp -> Int -> Temp.Temp -> (Exp, Temp.Temp)
+fieldVar var i temp =
+  let (v, temp') = unEx temp var
+  in (Ex $ T.RCD v i, temp')
+
+    
+

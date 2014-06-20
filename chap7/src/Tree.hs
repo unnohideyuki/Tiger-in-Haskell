@@ -8,7 +8,7 @@ data Exp = CONST Int
          | BINOP Binop Exp Exp
          | MEM Exp
          | ARR Exp Exp
-         | RCD Exp Exp
+         | RCD Exp Int
          | CALL Exp [Exp]
          | ESEQ Stm Exp
            deriving(Eq, Show)
