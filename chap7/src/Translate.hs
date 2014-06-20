@@ -1,6 +1,4 @@
-module Translate ( Level, Access
-                 , outermost, newLevel, allocLocal
-                 ) where
+module Translate where
 
 import qualified Temp
 import qualified Frame
@@ -47,6 +45,9 @@ data Exp = Ex T.Exp
          | Nx T.Stm
          | Cx (Temp.Label -> Temp.Label -> T.Stm)
 
+mkseq (stm1:stm2:[]) = T.SEQ stm1 stm2
+mkseq (stm:stms) = T.SEQ stm $ mkseq stms
+
 unEx :: Temp.Temp -> Exp -> (T.Exp, Temp.Temp)
 unEx temp = 
   let
@@ -57,16 +58,17 @@ unEx temp =
           (t, temp'') = Temp.newLabel temp'
           (f, temp3) = Temp.newLabel temp''
 
-          e = T.ESEQ [T.MOVE (T.TEMP r) (T.CONST 1),
-                      genstm t f,
-                      T.LABEL f,
-                      T.MOVE (T.TEMP r) (T.CONST 0),
-                      T.LABEL t]
-              $ T.TEMP r
+          e = T.ESEQ 
+              (mkseq [T.MOVE (T.TEMP r) (T.CONST 1),
+                    genstm t f,
+                    T.LABEL f,
+                    T.MOVE (T.TEMP r) (T.CONST 0),
+                    T.LABEL t])
+              (T.TEMP r)
       in
        (e, temp3)
        
-    unex (Nx s) = (T.ESEQ [s] $ T.CONST 0, temp)
+    unex (Nx s) = (T.ESEQ s $ T.CONST 0, temp)
   in
    unex
 
@@ -78,7 +80,7 @@ unNx temp =
     unnx (Cx genstm) =
       let
         (t, temp') = Temp.newLabel temp
-        e = T.ESEQ [genstm t t, T.LABEL t] $ T.CONST 0
+        e = T.ESEQ (mkseq [genstm t t, T.LABEL t]) (T.CONST 0)
       in        
        (T.EXP e, temp')
        
@@ -110,7 +112,7 @@ simpleVar Access{level=lev_dec, access=acc} lev_use =
           else
             let
               levu' = parent levu
-              fpexp' = Frame.static_link (frame levu) fpexp
+              fpexp' = Frame.static_link fpexp
             in
              follow' levu' levd fpexp'
         

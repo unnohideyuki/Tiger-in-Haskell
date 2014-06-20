@@ -10,7 +10,7 @@ data Exp = CONST Int
          | ARR Exp Exp
          | RCD Exp Exp
          | CALL Exp [Exp]
-         | ESEQ [Stm] Exp
+         | ESEQ Stm Exp
            deriving(Eq, Show)
 
 data Stm = MOVE Exp Exp

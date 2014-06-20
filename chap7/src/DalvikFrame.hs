@@ -64,9 +64,5 @@ exp (F.InFrame k) fpexp =
 exp (F.InReg t) _ =  
   T.TEMP t
 
-static_link :: Frame -> T.Exp -> T.Exp
-static_link frame fpexp = 
-  let
-    const0 = T.CONST 0
-  in
-   T.MEM $ T.BINOP T.PLUS const0 fpexp
+static_link :: T.Exp -> T.Exp
+static_link fpexp = T.MEM $ T.BINOP T.PLUS (T.CONST (-3)) fpexp
