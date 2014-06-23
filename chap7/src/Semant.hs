@@ -13,9 +13,7 @@ type VEnv = S.Table E.EnvEntry
 type TEnv = S.Table T.Ty
 type Unique = T.Unique
 
-data ExpTy = ExpTy { ty :: T.Ty } -- Translate.Exp has not been prepared yet.
-             deriving (Show)
-
+data ExpTy = ExpTy {exp::TL.Exp, ty::T.Ty}
   
 data Optype = Arith | Comp | Eq
 
@@ -68,11 +66,11 @@ transExp venv tenv =
             -> A.Exp 
             -> (ExpTy, TL.Level, Temp.Temp)
             
-    trexp level temp A.NilExp = (ExpTy T.NIL, level, temp)
+    trexp level temp A.NilExp = (ExpTy undefined T.NIL, level, temp)
     
-    trexp level temp (A.IntExp _ _) = (ExpTy T.INT, level, temp)
+    trexp level temp (A.IntExp _ _) = (ExpTy undefined T.INT, level, temp)
     
-    trexp level temp (A.StringExp _ _) = (ExpTy T.STRING, level, temp)
+    trexp level temp (A.StringExp _ _) = (ExpTy undefined T.STRING, level, temp)
     
     trexp level temp A.OpExp{A.oper=oper, A.lhs=lhs, A.rhs=rhs, A.pos=pos} = 
       let
