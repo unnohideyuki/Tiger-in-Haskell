@@ -17,7 +17,7 @@ data Var = SimpleVar Symbol Pos
 
 data Exp = VarExp Var
          | NilExp
-         | IntExp Integer Pos
+         | IntExp Int Pos
          | StringExp String Pos
          | CallExp { func :: Symbol, args :: [Exp], pos :: Pos }
          | OpExp { oper :: Oper, lhs :: Exp, rhs :: Exp, pos :: Pos}

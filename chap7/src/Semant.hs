@@ -13,7 +13,7 @@ type VEnv = S.Table E.EnvEntry
 type TEnv = S.Table T.Ty
 type Unique = T.Unique
 
-data ExpTy = ExpTy {exp::TL.Exp, ty::T.Ty}
+data ExpTy = ExpTy {expr::TL.Exp, ty::T.Ty}
   
 data Optype = Arith | Comp | Eq
 
@@ -66,16 +66,16 @@ transExp venv tenv =
             -> A.Exp 
             -> (ExpTy, TL.Level, Temp.Temp)
             
-    trexp level temp A.NilExp = (ExpTy undefined T.NIL, level, temp)
+    trexp level temp A.NilExp = (ExpTy (TL.nilExp) T.NIL, level, temp)
     
-    trexp level temp (A.IntExp _ _) = (ExpTy undefined T.INT, level, temp)
+    trexp level temp (A.IntExp i _) = (ExpTy (TL.intExp i) T.INT, level, temp)
     
     trexp level temp (A.StringExp _ _) = (ExpTy undefined T.STRING, level, temp)
     
     trexp level temp A.OpExp{A.oper=oper, A.lhs=lhs, A.rhs=rhs, A.pos=pos} = 
       let
-        (ExpTy { ty=lty }, lv', temp')    = trexp level temp lhs
-        (ExpTy { ty=rty }, lv'', temp'')  = trexp lv' temp' rhs
+        (ExpTy {expr=e1, ty=lty }, lv', temp')   = trexp level temp lhs
+        (ExpTy {expr=e2, ty=rty }, lv'', temp'') = trexp lv' temp' rhs
         
         classify op = 
           case op of
@@ -118,9 +118,25 @@ transExp venv tenv =
             Comp -> check_comp
             Eq -> check_eq
             
+        (binExp, temp3) = 
+          let
+            c = 
+              case oper of
+                A.PlusOp -> TL.plusOp
+                A.MinusOp -> TL.minusOp
+                A.TimesOp -> TL.timesOp
+                A.DivideOp -> TL.divideOp
+                A.LtOp -> TL.ltOp
+                A.GtOp -> TL.gtOp
+                A.LeOp -> TL.leOp
+                A.GeOp -> TL.geOp
+                A.EqOp -> TL.eqOp
+                A.NeqOp -> TL.neqOp
+          in
+           c e1 e2 temp''
       in
          if check_result then
-           (ExpTy { ty=T.INT }, lv'', temp'')
+           (ExpTy{expr=binExp, ty=T.INT}, lv'', temp3)
          else 
            must_not_reach
                       
@@ -142,7 +158,7 @@ transExp venv tenv =
             in
              if checkrecord ftys_ty ftys_exp pos
              then
-               (ExpTy {ty=T.RECORD ftys_ty u}, level', temp')
+               (ExpTy {expr=undefined, ty=T.RECORD ftys_ty u}, level', temp')
              else
                must_not_reach
       where
@@ -166,7 +182,7 @@ transExp venv tenv =
               then T.UNIT
               else case last es of ExpTy{ty=ty} -> ty
       in
-       (ExpTy{ty=ty'}, lv', temp')
+       (ExpTy{expr=undefined, ty=ty'}, lv', temp')
                
     trexp level temp A.AssignExp{A.vvar=var, A.exp=exp, A.pos=pos} = 
       let 
@@ -174,7 +190,7 @@ transExp venv tenv =
         (ExpTy { ty=ety }, lv'', temp'') = trexp lv' temp' exp
       in
        if check_type vty ety pos
-       then (ExpTy { ty=T.UNIT }, lv'', temp'')
+       then (ExpTy {expr=undefined, ty=T.UNIT }, lv'', temp'')
        else undefined
        
     trexp level temp A.IfExp{ A.test=test, A.thene=thenexp, A.elsee=elseexp, 
@@ -191,11 +207,11 @@ transExp venv tenv =
                (ExpTy{ty=elsety}, lv3, temp3) = trexp lv'' temp'' elseexp'
              in
               if check_type thenty elsety pos then
-                (ExpTy { ty=thenty }, lv3, temp3) 
+                (ExpTy{expr=undefined, ty=thenty}, lv3, temp3) 
               else undefined
            Nothing -> if check_type T.UNIT thenty pos
                       then 
-                        (ExpTy{ty=thenty}, lv'', temp'')
+                        (ExpTy{expr=undefined, ty=thenty}, lv'', temp'')
                       else
                         undefined
        else
@@ -208,11 +224,12 @@ transExp venv tenv =
       in
        if check_type T.INT testty pos && check_type T.UNIT bodyty pos
        then
-         (ExpTy{ty=T.UNIT}, lv'', temp'')
+         (ExpTy{expr=undefined, ty=T.UNIT}, lv'', temp'')
        else
          undefined
 
-    trexp level temp (A.BreakExp _) = (ExpTy { ty=T.UNIT }, level, temp)
+    trexp level temp (A.BreakExp _) = 
+      (ExpTy {expr=undefined, ty=T.UNIT}, level, temp)
     
     trexp level temp A.LetExp{A.decs=decs, A.body=body, A.pos=pos} =
       let
@@ -222,7 +239,7 @@ transExp venv tenv =
         (ExpTy { ty=bodyty }, lv'', temp'') = 
           transExp venv' tenv' lv' temp' body
       in
-       (ExpTy{ty=bodyty}, lv'', temp'')
+       (ExpTy{expr=undefined, ty=bodyty}, lv'', temp'')
 
     trexp level temp A.ArrayExp {A.typ=typ, A.size=size, A.init=init,
                        A.pos=pos} =
@@ -240,7 +257,7 @@ transExp venv tenv =
                in
                 if check_type T.INT sizety pos && check_type ty' initty pos
                 then
-                  (ExpTy { ty = ty }, lv'', temp'')
+                  (ExpTy {expr=undefined, ty=ty}, lv'', temp'')
                 else
                   undefined
                   
@@ -307,13 +324,14 @@ transExp venv tenv =
           in
            if checkformals formals argtys
            then 
-             (ExpTy { ty = actual_ty result pos }, level, temp)
+             (ExpTy {expr=undefined, ty=actual_ty result pos}, level, temp)
            else
              undefined
 
     trvar level temp (A.SimpleVar sym pos) = 
       case S.lookup venv sym of
-        Just E.VarEntry { E.ty=ty } -> (ExpTy { ty=ty }, level, temp)
+        Just E.VarEntry {E.ty=ty} 
+          -> (ExpTy {expr=undefined, ty=ty}, level, temp)
         Just _ -> error $ show pos ++ "not a variable: " ++ sym
         _ -> error $ show pos ++ "undefined variable: " ++ sym
     
@@ -325,7 +343,8 @@ transExp venv tenv =
          T.RECORD fs _ ->
            case lookup id fs of
              Nothing -> error $ show pos ++ "field not found: " ++ id
-             Just ty' -> (ExpTy{ty = actual_ty ty' pos}, lv', temp')
+             Just ty' 
+               -> (ExpTy{expr=undefined, ty=actual_ty ty' pos}, lv', temp')
          _ -> error $ show pos ++ "not a record: " ++ show ty
          
     trvar level temp (A.SubscriptVar var exp pos) = 
@@ -337,7 +356,7 @@ transExp venv tenv =
            let (ExpTy{ty=ty''}, lv'', temp'') = trexp lv' temp' exp
            in
             case ty'' of
-              T.INT -> (ExpTy { ty=ty' }, lv'', temp'')
+              T.INT -> (ExpTy {expr=undefined, ty=ty'}, lv'', temp'')
               _ -> error $ show pos ++ "array subscript type:" ++ show ty''
          _ -> error $ show pos ++ "not an array"
   in
