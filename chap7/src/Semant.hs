@@ -196,22 +196,26 @@ transExp venv tenv =
     trexp level temp A.IfExp{ A.test=test, A.thene=thenexp, A.elsee=elseexp, 
                     A.pos=pos} =
       let
-        (ExpTy{ty=testty}, lv', temp') = trexp level temp test
-        (ExpTy{ty=thenty}, lv'', temp'') = trexp lv' temp' thenexp
+        (ExpTy{expr=e1, ty=testty}, lv', temp') = trexp level temp test
+        (ExpTy{expr=e2, ty=thenty}, lv'', temp'') = trexp lv' temp' thenexp
       in
        if check_type T.INT testty pos
        then
          case elseexp of
            Just elseexp' -> 
              let 
-               (ExpTy{ty=elsety}, lv3, temp3) = trexp lv'' temp'' elseexp'
+               (ExpTy{expr=e3, ty=elsety}, lv3, temp3) = trexp lv'' temp'' elseexp'
+               (e, temp4) = TL.ifThenElse e1 e2 e3 temp3
              in
               if check_type thenty elsety pos then
-                (ExpTy{expr=undefined, ty=thenty}, lv3, temp3) 
+                (ExpTy{expr=e, ty=thenty}, lv3, temp4)
               else undefined
            Nothing -> if check_type T.UNIT thenty pos
                       then 
-                        (ExpTy{expr=undefined, ty=thenty}, lv'', temp'')
+                        let
+                          (e, temp3) = TL.ifThen e1 e2 temp''
+                        in
+                         (ExpTy{expr=e, ty=thenty}, lv'', temp3)
                       else
                         undefined
        else

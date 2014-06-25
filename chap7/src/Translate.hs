@@ -151,6 +151,47 @@ eqOp = relOp T.EQ
 neqOp :: Exp -> Exp -> Temp.Temp -> (Exp, Temp.Temp)
 neqOp = relOp T.NE
 
+ifThenElse :: Exp -> Exp -> Exp -> Temp.Temp -> (Exp, Temp.Temp)
+ifThenElse e1 e2 e3 temp = 
+  let
+    genstm = unCx e1
+    (e2', temp') = unEx temp e2
+    (e3', temp'') = unEx temp' e3
+    (r, temp3) = Temp.newTemp temp''
+    (t, temp4) = Temp.newLabel temp3
+    (f, temp5) = Temp.newLabel temp4
+    (j, temp6) = Temp.newLabel temp5
+    
+    e = T.ESEQ
+        (mkseq [genstm t f,
+                T.LABEL t,
+                T.MOVE (T.TEMP r) e2',
+                T.JUMP (T.NAME j) [j],
+                T.LABEL f,
+                T.MOVE (T.TEMP r) e3',
+                T.LABEL j])
+        (T.TEMP r)
+  in
+   (Ex e, temp6)
+
+ifThen :: Exp -> Exp -> Temp.Temp -> (Exp, Temp.Temp)
+ifThen e1 e2 temp = 
+  let
+    genstm = unCx e1
+    (s, temp') = unNx temp e2
+    (r, temp'') = Temp.newTemp temp'
+    (t, temp3) = Temp.newLabel temp''
+    (f, temp4) = Temp.newLabel temp3
+    
+    e = T.ESEQ
+        (mkseq [genstm t f,
+                T.LABEL t,
+                s,
+                T.LABEL f])
+        (T.CONST 0)
+  in
+   (Ex e, temp4)
+                
 simpleVar :: Access -> Level -> Exp
 simpleVar Access{level=lev_dec, access=acc} lev_use =
   let
@@ -188,4 +229,3 @@ fieldVar var i temp =
   in (Ex $ T.RCD v i, temp')
 
     
-
