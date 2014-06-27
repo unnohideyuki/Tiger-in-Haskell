@@ -182,7 +182,7 @@ transExp venv tenv =
               then T.UNIT
               else case last es of ExpTy{ty=ty} -> ty
       in
-       (ExpTy{expr=undefined, ty=ty'}, lv', temp')
+       (ExpTy{expr=TL.dummy, ty=ty'}, lv', temp')
                
     trexp level temp A.AssignExp{A.vvar=var, A.exp=exp, A.pos=pos} = 
       let 

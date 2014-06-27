@@ -139,9 +139,98 @@ arith_test =
            Tree.CJUMP Tree.NE (Tree.CONST 19) (Tree.CONST 20) "t" "f"
        it "return INT" $ do ty expty10 `shouldBe` Types.INT
 
+if_test :: IO ()
+if_test =
+  let
+    pos=A.Pos{A.line=0,A.column=0}
+    
+    venv = E.base_venv
+    tenv = E.base_tenv
+    
+    expr expty = case expty of ExpTy{expr=TL.Ex e} -> e
+    ty expty = case expty of ExpTy{ty=t} -> t
+                             
+    expty1 = transProg venv tenv A.IfExp { A.test=A.IntExp 1 pos
+                                         , A.thene=A.IntExp 2 pos
+                                         , A.elsee=Just $ A.IntExp 3 pos
+                                         , A.pos=pos}
+             
+    expected1 =  Tree.ESEQ 
+                 (Tree.SEQ (Tree.JUMP (Tree.NAME "L1") ["L1"]) 
+                  (Tree.SEQ (Tree.LABEL "L1")
+                   (Tree.SEQ (Tree.MOVE (Tree.TEMP 1) (Tree.CONST 2)) 
+                    (Tree.SEQ (Tree.JUMP (Tree.NAME "L3") ["L3"]) 
+                     (Tree.SEQ (Tree.LABEL "L2") 
+                      (Tree.SEQ (Tree.MOVE (Tree.TEMP 1) (Tree.CONST 3)) 
+                       (Tree.LABEL "L3"))))))) 
+                 (Tree.TEMP 1)
+
+    expty2 = transProg venv tenv A.IfExp { A.test=A.IntExp 0 pos
+                                         , A.thene=A.IntExp 4 pos
+                                         , A.elsee=Just $ A.IntExp 5 pos
+                                         , A.pos=pos}
+             
+    expected2 =  Tree.ESEQ 
+                 (Tree.SEQ (Tree.JUMP (Tree.NAME "L2") ["L2"]) 
+                  (Tree.SEQ (Tree.LABEL "L1")
+                   (Tree.SEQ (Tree.MOVE (Tree.TEMP 1) (Tree.CONST 4)) 
+                    (Tree.SEQ (Tree.JUMP (Tree.NAME "L3") ["L3"]) 
+                     (Tree.SEQ (Tree.LABEL "L2") 
+                      (Tree.SEQ (Tree.MOVE (Tree.TEMP 1) (Tree.CONST 5)) 
+                       (Tree.LABEL "L3"))))))) 
+                 (Tree.TEMP 1)
+                 
+    expty3 = transProg venv tenv A.IfExp { A.test=A.OpExp{A.oper=A.EqOp
+                                                         ,A.lhs=A.IntExp 6 pos
+                                                         ,A.rhs=A.IntExp 7 pos
+                                                         ,A.pos=pos}
+                                         , A.thene=A.IntExp 8 pos
+                                         , A.elsee=Just $ A.IntExp 9 pos
+                                         , A.pos=pos}
+    expected3 =  Tree.ESEQ 
+                 (Tree.SEQ (Tree.CJUMP 
+                            Tree.EQ (Tree.CONST 6)(Tree.CONST 7) "L1" "L2") 
+                  (Tree.SEQ (Tree.LABEL "L1") 
+                   (Tree.SEQ (Tree.MOVE (Tree.TEMP 1) (Tree.CONST 8)) 
+                    (Tree.SEQ (Tree.JUMP (Tree.NAME "L3") ["L3"]) 
+                     (Tree.SEQ (Tree.LABEL "L2") 
+                      (Tree.SEQ (Tree.MOVE (Tree.TEMP 1) (Tree.CONST 9)) 
+                       (Tree.LABEL "L3")))))))
+                 (Tree.TEMP 1)
+    
+    expty4 = transProg venv tenv A.IfExp { A.test=A.OpExp{A.oper=A.EqOp
+                                                         ,A.lhs=A.IntExp 10 pos
+                                                         ,A.rhs=A.IntExp 11 pos
+                                                         ,A.pos=pos}
+                                         , A.thene=A.SeqExp []
+                                         , A.elsee=Nothing
+                                         , A.pos=pos}
+    expected4 = Tree.ESEQ 
+                (Tree.SEQ (Tree.CJUMP Tree.EQ (Tree.CONST 10) (Tree.CONST 11) "L1" "L2") 
+                 (Tree.SEQ (Tree.LABEL "L1")
+                  (Tree.SEQ (Tree.EXP (Tree.CONST 0)) (Tree.LABEL "L2")))) 
+                (Tree.CONST 0)
+      
+  in
+   hspec $ do
+     describe "IfThenElse" $ do
+       it "returns always true pattern" $ do
+         expr expty1 `shouldBe` expected1
+         ty expty1 `shouldBe` Types.INT
+       it "returns always false pattern" $ do
+         expr expty2 `shouldBe` expected2
+         ty expty2 `shouldBe` Types.INT
+       it "returns if-then-else" $ do
+         expr expty3 `shouldBe` expected3
+         ty expty3 `shouldBe` Types.INT
+       it "returns if-then" $ do
+         expr expty4 `shouldBe` expected4
+         ty expty4 `shouldBe` Types.UNIT
+                                               
 main :: IO ()
 main = do
   nil_test
   int_test
   arith_test
+  if_test
   

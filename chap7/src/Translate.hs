@@ -172,6 +172,7 @@ ifThenElse e1 e2 e3 temp =
                 T.LABEL j])
         (T.TEMP r)
   in
+   -- TODO: optimize the case when e2 or e3 is not Ex
    (Ex e, temp6)
 
 ifThen :: Exp -> Exp -> Temp.Temp -> (Exp, Temp.Temp)
@@ -192,6 +193,10 @@ ifThen e1 e2 temp =
   in
    (Ex e, temp4)
                 
+-- TODO: must delete dummy
+dummy :: Exp
+dummy = Nx $ T.EXP $ T.CONST 0
+
 simpleVar :: Access -> Level -> Exp
 simpleVar Access{level=lev_dec, access=acc} lev_use =
   let
