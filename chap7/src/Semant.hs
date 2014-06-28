@@ -356,14 +356,16 @@ transExp venv tenv =
          
     trvar level temp (A.SubscriptVar var exp pos) = 
       let
-        (ExpTy{ty=ty}, lv', temp') = trvar level temp var
+        (ExpTy{expr=e1, ty=ty}, lv', temp') = trvar level temp var
       in
        case actual_ty ty pos of
          T.ARRAY ty' _ -> 
-           let (ExpTy{ty=ty''}, lv'', temp'') = trexp lv' temp' exp
+           let 
+             (ExpTy{expr=e2, ty=ty''}, lv'', temp'') = trexp lv' temp' exp
+             (e, temp3) = TL.subscriptVar e1 e2 temp''
            in
             case ty'' of
-              T.INT -> (ExpTy {expr=undefined, ty=ty'}, lv'', temp'')
+              T.INT -> (ExpTy {expr=e, ty=ty'}, lv'', temp3)
               _ -> error $ show pos ++ "array subscript type:" ++ show ty''
          _ -> error $ show pos ++ "not an array"
   in
