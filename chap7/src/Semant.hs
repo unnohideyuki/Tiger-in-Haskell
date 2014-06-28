@@ -341,14 +341,17 @@ transExp venv tenv =
     
     trvar level temp (A.FieldVar var id pos) = 
       let
-        (ExpTy{ty=ty}, lv', temp') = trvar level temp var
+        (ExpTy{expr=e1, ty=ty}, lv', temp') = trvar level temp var
       in
        case ty of
          T.RECORD fs _ ->
-           case lookup id fs of
+           case lookup id [(s, (i, ty))| (i, (s, ty)) <- zip [0..] fs] of
              Nothing -> error $ show pos ++ "field not found: " ++ id
-             Just ty' 
-               -> (ExpTy{expr=undefined, ty=actual_ty ty' pos}, lv', temp')
+             Just (i, ty') ->
+               let
+                 (e, temp'') = TL.fieldVar e1 i temp'
+               in
+                (ExpTy{expr=e, ty=actual_ty ty' pos}, lv', temp'')
          _ -> error $ show pos ++ "not a record: " ++ show ty
          
     trvar level temp (A.SubscriptVar var exp pos) = 
