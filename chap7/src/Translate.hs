@@ -193,10 +193,6 @@ ifThen e1 e2 temp =
   in
    (Ex e, temp4)
                 
--- TODO: must delete dummy
-dummy :: Exp
-dummy = Nx $ T.EXP $ T.CONST 0
-
 simpleVar :: Access -> Level -> Exp
 simpleVar Access{level=lev_dec, access=acc} lev_use =
   let
@@ -247,3 +243,23 @@ recordExp cs temp =
     len = T.CONST $ length cs
   in
    (Ex $ T.CALL (T.NAME $ Temp.namedLabel "initRecord") (len:xs), temp')
+   
+seqExp :: [Exp] -> Temp.Temp -> (Exp, Temp.Temp)
+seqExp [] temp = (Nx $ T.EXP $ T.CONST 0, temp)
+seqExp es temp = 
+  let
+    (lst, temp') = unEx temp (last es) 
+    (int, temp'') = foldr
+                   (\e (es, temp) -> case unNx temp e of
+                       (e', temp') -> (e':es, temp')
+                   )
+                   ([], temp)
+                   (init es)
+  in
+   case length es of
+     1 -> (Ex $ lst, temp')
+     2 -> (Ex $ T.ESEQ (head int) lst, temp'')
+     _ -> (Ex $ T.ESEQ (mkseq int) lst, temp'')
+      
+
+      

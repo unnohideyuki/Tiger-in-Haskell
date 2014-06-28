@@ -195,8 +195,9 @@ transExp venv tenv =
         ty' = if null exps
               then T.UNIT
               else case last es of ExpTy{ty=ty} -> ty
+        (e, temp'') = TL.seqExp [e | ExpTy{expr=e} <- es] temp'
       in
-       (ExpTy{expr=TL.dummy, ty=ty'}, lv', temp')
+       (ExpTy{expr=e, ty=ty'}, lv', temp')
                
     trexp level temp A.AssignExp{A.vvar=var, A.exp=exp, A.pos=pos} = 
       let 
