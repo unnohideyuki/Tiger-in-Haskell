@@ -150,8 +150,8 @@ transExp venv tenv =
             let 
               (level', temp', ftys_exp) = 
                 foldr
-                (\(_,e,pos) (l, t, xs) -> case trexp l t e of
-                    (expty, l', t') -> (l', t', (expty, pos):xs)
+                (\(sym,e,pos) (l, t, xs) -> case trexp l t e of
+                    (expty, l', t') -> (l', t', (sym, expty, pos):xs)
                 ) 
                 (level, temp, [])
                 fields
@@ -164,10 +164,12 @@ transExp venv tenv =
       where
         checkrecord ftys_ty ftys_exp pos = 
           let
-            checker ((_,t1), (ExpTy{ty=t2},pos')) = check_type t1 t2 pos'
-            fs = zip ftys_ty ftys_exp
+            checker (sym, ExpTy{ty=t2}, pos') = 
+              case lookup sym ftys_ty of
+                Just t1 -> check_type t1 t2 pos'
+                Nothing -> error $ show pos ++ "field not found: " ++ sym
           in
-            (length ftys_ty == length ftys_exp) && (and $ fmap checker fs)
+            (length ftys_ty == length ftys_exp) && (and $ fmap checker ftys_exp)
         
     trexp level temp (A.SeqExp exps) = 
       let 
