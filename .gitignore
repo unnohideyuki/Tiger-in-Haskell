@@ -6,3 +6,4 @@ Parser.hs
 driver
 parsetest
 */support_files/*
+*.exe
