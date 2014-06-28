@@ -32,6 +32,7 @@
 ../testcases/test37.tig : ExpTy {ty = INT}
 ../testcases/test38.tig : ExpTy {ty = INT}
 ../testcases/test39.tig : ExpTy {ty = INT}
+../testcases/test3b.tig : ExpTy {ty = RECORD [("name",STRING),("age",INT)] 30025}
 ../testcases/test4.tig : ExpTy {ty = INT}
 ../testcases/test40.tig : driver.exe: 3:18: type mismatch: expected UNIT, actual INT
 ../testcases/test41.tig : ExpTy {ty = INT}
