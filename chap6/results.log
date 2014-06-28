@@ -4,7 +4,8 @@
 ../testcases/test11.tig : driver.exe: 2:1: type mismatch: expected INT, actual STRING
 ../testcases/test12.tig : ExpTy {ty = UNIT}
 ../testcases/test13.tig : driver.exe: 3:3: type mismatch: expected INT, actual STRING
-../testcases/test14.tig : ../testcases/test15.tig : driver.exe: 3:1: type mismatch: expected UNIT, actual INT
+../testcases/test14.tig : driver.exe: 12:16: type mismatch: expected RECORD [("name",STRING),("id",INT)] 60024, actual ARRAY INT 50024
+../testcases/test15.tig : driver.exe: 3:1: type mismatch: expected UNIT, actual INT
 ../testcases/test16.tig : ExpTy {ty = STRING}
 ../testcases/test17.tig : ExpTy {ty = INT}
 ../testcases/test18.tig : driver.exe: 5:18: function not defined: do_nothing2
