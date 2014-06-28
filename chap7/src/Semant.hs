@@ -155,10 +155,22 @@ transExp venv tenv =
                 ) 
                 (level, temp, [])
                 fields
+                
+              (cs, level'', temp'') =
+                foldr
+                (\(sym,_) (cs, level, temp) ->
+                  case lookup sym [(s,e)|(s,e,_)<-fields] of
+                    Just e -> case trexp level temp e of
+                      (ExpTy{expr=expr}, l', t') -> (expr:cs, l', t')
+                )
+                ([], level', temp')
+                ftys_ty
+                
+              (e, temp3) = TL.recordExp cs temp''
             in
              if checkrecord ftys_ty ftys_exp pos
              then
-               (ExpTy {expr=undefined, ty=T.RECORD ftys_ty u}, level', temp')
+               (ExpTy {expr=e, ty=T.RECORD ftys_ty u}, level', temp3)
              else
                must_not_reach
       where

@@ -233,4 +233,17 @@ fieldVar var i temp =
   let (v, temp') = unEx temp var
   in (Ex $ T.RCD v i, temp')
 
-    
+recordExp :: [Exp] -> Temp.Temp -> (Exp, Temp.Temp)
+recordExp cs temp = 
+  let
+    (xs, temp') = foldr
+                   (\e (xs, temp) ->
+                     case unEx temp e of
+                       (x, temp') -> (x:xs, temp')
+                   )
+                   ([], temp)
+                   cs
+                   
+    len = T.CONST $ length cs
+  in
+   (Ex $ T.CALL (T.NAME $ Temp.namedLabel "initRecord") (len:xs), temp')
