@@ -334,8 +334,8 @@ transExp venv tenv =
 
     trvar level temp (A.SimpleVar sym pos) = 
       case S.lookup venv sym of
-        Just E.VarEntry {E.ty=ty} 
-          -> (ExpTy {expr=undefined, ty=ty}, level, temp)
+        Just E.VarEntry {E.access=acc, E.ty=ty} 
+          -> (ExpTy {expr=TL.simpleVar acc level, ty=ty}, level, temp)
         Just _ -> error $ show pos ++ "not a variable: " ++ sym
         _ -> error $ show pos ++ "undefined variable: " ++ sym
     
