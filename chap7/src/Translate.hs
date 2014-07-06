@@ -261,5 +261,12 @@ seqExp es temp =
      2 -> (Ex $ T.ESEQ (head int) lst, temp'')
      _ -> (Ex $ T.ESEQ (mkseq int) lst, temp'')
       
+assignExp :: Exp -> Exp -> Temp.Temp -> (Exp, Temp.Temp)
+assignExp lhs rhs temp = 
+  let
+    (e1, temp') = unEx temp lhs
+    (e2, temp'') = unEx temp' rhs
+  in
+   (Nx $ T.MOVE e1 e2, temp'')
 
       

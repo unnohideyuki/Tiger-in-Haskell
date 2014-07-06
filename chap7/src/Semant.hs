@@ -201,11 +201,12 @@ transExp venv tenv =
                
     trexp level temp A.AssignExp{A.vvar=var, A.exp=exp, A.pos=pos} = 
       let 
-        (ExpTy { ty=vty }, lv', temp') = trvar level temp var
-        (ExpTy { ty=ety }, lv'', temp'') = trexp lv' temp' exp
+        (ExpTy {expr=lhs, ty=vty }, lv', temp') = trvar level temp var
+        (ExpTy {expr=rhs, ty=ety }, lv'', temp'') = trexp lv' temp' exp
+        (e, temp3) = TL.assignExp lhs rhs temp''
       in
        if check_type vty ety pos
-       then (ExpTy {expr=undefined, ty=T.UNIT }, lv'', temp'')
+       then (ExpTy {expr=e, ty=T.UNIT }, lv'', temp3)
        else undefined
        
     trexp level temp A.IfExp{ A.test=test, A.thene=thenexp, A.elsee=elseexp, 
