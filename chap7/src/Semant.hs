@@ -251,7 +251,7 @@ transExp venv tenv brkdest =
          undefined
 
     trexp level temp (A.BreakExp _) = 
-      (ExpTy {expr=undefined, ty=T.UNIT}, level, temp)
+      (ExpTy {expr=TL.breakExp brkdest, ty=T.UNIT}, level, temp)
     
     trexp level temp A.LetExp{A.decs=decs, A.body=body, A.pos=pos} =
       let

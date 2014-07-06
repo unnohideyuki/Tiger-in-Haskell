@@ -285,6 +285,10 @@ whileExp test body brkdest temp =
                  T.LABEL brkdest]
   in
    (Nx tree, temp3)
+   
+breakExp :: Temp.Label -> Exp
+breakExp brkdest = Nx $ T.JUMP (T.NAME brkdest) [brkdest]
+
                  
 
    
