@@ -268,5 +268,25 @@ assignExp lhs rhs temp =
     (e2, temp'') = unEx temp' rhs
   in
    (Nx $ T.MOVE e1 e2, temp'')
+   
+whileExp :: Exp -> Exp -> Temp.Label -> Temp.Temp -> (Exp, Temp.Temp)
+whileExp test body brkdest temp = 
+  let
+    genstm = unCx test
+    (sbody, temp') = unNx temp body
+    (l1, temp'') = Temp.newLabel temp'
+    (l2, temp3) = Temp.newLabel temp''
+
+    tree = mkseq[T.LABEL l1,
+                 genstm l2 brkdest,
+                 T.LABEL l2,
+                 sbody,
+                 T.JUMP (T.NAME l1) [l1],
+                 T.LABEL brkdest]
+  in
+   (Nx tree, temp3)
+                 
+
+   
 
       

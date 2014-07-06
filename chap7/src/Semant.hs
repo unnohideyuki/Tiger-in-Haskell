@@ -51,14 +51,15 @@ transProg venv tenv prog =
     temp = Temp.create
     (mainlevel, temp') = 
       TL.newLevel TL.outermost (Temp.namedLabel "main") [] temp
+    errdest = Temp.namedLabel "_CanNotBreak_"
   in
-   case transExp venv tenv mainlevel temp' prog of
+   case transExp venv tenv errdest mainlevel temp' prog of
      (expty, _, _) -> expty
 
-transExp :: VEnv-> TEnv -> TL.Level -> Temp.Temp
+transExp :: VEnv-> TEnv -> Temp.Label -> TL.Level -> Temp.Temp
             -> A.Exp 
             -> (ExpTy, TL.Level, Temp.Temp)
-transExp venv tenv =
+transExp venv tenv brkdest =
   let
     trexp :: TL.Level -> Temp.Temp
             -> A.Exp 
@@ -237,12 +238,15 @@ transExp venv tenv =
 
     trexp level temp A.WhileExp{A.test=test, A.body=body, A.pos=pos} =
       let
-        (ExpTy{ty=testty}, lv', temp') = trexp level temp test
-        (ExpTy{ty=bodyty}, lv'', temp'') = trexp lv' temp' body
+        (newdest, temp') = Temp.newLabel temp
+        (ExpTy{expr=e1, ty=testty}, lv', temp'') = trexp level temp' test
+        (ExpTy{expr=e2, ty=bodyty}, lv'', temp3) = 
+          transExp venv tenv newdest lv' temp'' body
+        (e, temp4) = TL.whileExp e1 e2 newdest temp3
       in
        if check_type T.INT testty pos && check_type T.UNIT bodyty pos
        then
-         (ExpTy{expr=undefined, ty=T.UNIT}, lv'', temp'')
+         (ExpTy{expr=e, ty=T.UNIT}, lv'', temp4)
        else
          undefined
 
@@ -251,11 +255,11 @@ transExp venv tenv =
     
     trexp level temp A.LetExp{A.decs=decs, A.body=body, A.pos=pos} =
       let
-        transdecs (venv, tenv, lv, tmp) dec = transDec venv tenv lv tmp dec
+        transdecs (venv, tenv, lv, tmp) dec = transDec venv tenv brkdest lv tmp dec
         (venv', tenv', lv', temp') = 
           foldl transdecs (venv, tenv, level, temp) decs
         (ExpTy { ty=bodyty }, lv'', temp'') = 
-          transExp venv' tenv' lv' temp' body
+          transExp venv' tenv' brkdest lv' temp' body
       in
        (ExpTy{expr=undefined, ty=bodyty}, lv'', temp'')
 
@@ -442,10 +446,10 @@ transTy tenv =
   in
    transty
 
-transDec :: VEnv -> TEnv -> TL.Level -> Temp.Temp
+transDec :: VEnv -> TEnv -> Temp.Label -> TL.Level -> Temp.Temp
             -> A.Dec 
             -> (S.Table E.EnvEntry, S.Table T.Ty, TL.Level, Temp.Temp)
-transDec venv tenv =
+transDec venv tenv brkdest =
   let
     trdec :: TL.Level -> Temp.Temp
              -> A.Dec 
@@ -455,7 +459,7 @@ transDec venv tenv =
                               A.escape'=esc, A.pos'=pos} = 
       let                                     
         (ExpTy{ty=ty}, lv', temp') =
-          transExp venv tenv level temp init
+          transExp venv tenv brkdest level temp init
 
         (access, lv'', temp'') = TL.allocLocal lv' esc temp'
 
@@ -599,7 +603,7 @@ transDec venv tenv =
             venv_loc = foldl transparam venv' $ zip params formals
             
             (ExpTy{ty=bdty}, lv', temp') = 
-              transExp venv_loc tenv level temp body
+              transExp venv_loc tenv brkdest level temp body
           in
            (check_type rty bdty pos && acc, lv', temp')
         
