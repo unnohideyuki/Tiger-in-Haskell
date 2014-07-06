@@ -55,7 +55,7 @@ transProg venv tenv prog =
    case transExp venv tenv mainlevel temp' prog of
      (expty, _, _) -> expty
 
-transExp :: S.Table E.EnvEntry -> S.Table T.Ty -> TL.Level -> Temp.Temp
+transExp :: VEnv-> TEnv -> TL.Level -> Temp.Temp
             -> A.Exp 
             -> (ExpTy, TL.Level, Temp.Temp)
 transExp venv tenv =
