@@ -288,13 +288,13 @@ transExp venv tenv brkdest =
       {- translate to let/while expresion -}
       let
         ivar = A.SimpleVar svar pos
-        limitvar = A.SimpleVar "limit" pos
+        limitvar = A.SimpleVar "_limit" pos
         decs = [A.VarDec { A.name' = svar
                          , A.escape' = False
                          , A.typ' = Nothing
                          , A.init' = lo
                          , A.pos' = pos }
-               ,A.VarDec { A.name' = "limit"
+               ,A.VarDec { A.name' = "_limit"
                          , A.escape' = False
                          , A.typ' = Nothing
                          , A.init' = hi
@@ -317,7 +317,7 @@ transExp venv tenv brkdest =
                                         ]
                           , A.pos = pos }
       in
-       trexp level temp A.LetExp{A.decs=decs, A.body=loop, A.pos=pos }
+       trexp level temp A.LetExp{A.decs=decs, A.body=loop, A.pos=pos}
                                                   
     trexp level temp A.CallExp{A.func=func, A.args=args, A.pos=pos } =
       case S.lookup venv func of
