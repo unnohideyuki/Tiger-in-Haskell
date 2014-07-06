@@ -442,7 +442,7 @@ transTy tenv =
   in
    transty
 
-transDec :: S.Table E.EnvEntry -> S.Table T.Ty -> TL.Level -> Temp.Temp
+transDec :: VEnv -> TEnv -> TL.Level -> Temp.Temp
             -> A.Dec 
             -> (S.Table E.EnvEntry, S.Table T.Ty, TL.Level, Temp.Temp)
 transDec venv tenv =
