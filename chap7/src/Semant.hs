@@ -44,9 +44,7 @@ check_type t1 t2 pos =
 must_not_reach =
   error "fatal: must not reach here"
 
-transProg :: S.Table E.EnvEntry -> S.Table T.Ty
-            -> A.Exp 
-            -> ExpTy
+transProg :: VEnv-> TEnv -> A.Exp -> ExpTy
             
 transProg venv tenv prog = 
   let
