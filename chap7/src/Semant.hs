@@ -392,7 +392,7 @@ transExp venv tenv brkdest =
 transTy :: S.Table T.Ty -> A.Ty -> Bool -> T.Ty
 transTy tenv =
   let
-    -- dirty hask: generate a unique number from the position.
+    -- dirty hack: generate a unique number from the position.
     pos2u (A.Pos l c) = fromIntegral $ l * 10000 + c
     
     transty (A.NameTy sym pos) False =
