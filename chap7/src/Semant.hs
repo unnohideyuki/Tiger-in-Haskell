@@ -258,12 +258,13 @@ transExp venv tenv brkdest =
     trexp level temp A.LetExp{A.decs=decs, A.body=body, A.pos=pos} =
       let
         transdecs (venv, tenv, lv, tmp, es, fs) dec = transDec venv tenv brkdest lv tmp dec
-        (venv', tenv', lv', temp', es', fs') = 
+        (venv', tenv', lv', temp', es, fs) = 
           foldl transdecs (venv, tenv, level, temp, [], []) decs
-        (ExpTy { ty=bodyty }, lv'', temp'') = 
+        (ExpTy {expr=ebody, ty=bodyty }, lv'', temp'') = 
           transExp venv' tenv' brkdest lv' temp' body
+        (e, temp3) = TL.letExp es ebody temp''
       in
-       (ExpTy{expr=undefined, ty=bodyty}, lv'', temp'')
+       (ExpTy{expr=undefined, ty=bodyty}, lv'', temp3)
 
     trexp level temp A.ArrayExp {A.typ=typ, A.size=size, A.init=init,
                        A.pos=pos} =
@@ -623,6 +624,7 @@ transDec venv tenv brkdest =
             (ExpTy{expr=ebody, ty=bdty}, lv', temp') = 
               transExp venv_loc tenv brkdest level temp body
               
+            -- TODO: unNx should not be public.
             (stm, temp'') = TL.unNx temp' ebody
               
             frag = Frame.Proc {Frame.body=stm, Frame.frame=TL.frame lv'}

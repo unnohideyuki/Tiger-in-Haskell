@@ -289,6 +289,24 @@ whileExp test body brkdest temp =
 breakExp :: Temp.Label -> Exp
 breakExp brkdest = Nx $ T.JUMP (T.NAME brkdest) [brkdest]
 
+letExp :: [Exp] -> Exp -> Temp.Temp -> (Exp, Temp.Temp)
+letExp es ebody temp = 
+  let
+    (ss, temp') = foldr
+                  (\e (ss, temp) ->
+                    let
+                      (s, temp') = unNx temp e
+                    in
+                     (s:ss, temp')
+                  )
+                  ([], temp)
+                  es
+    (e, temp'') = unEx temp' ebody
+    tree = T.ESEQ (mkseq ss) e
+  in
+   (Ex tree, temp'')
+
+
                  
 
    
