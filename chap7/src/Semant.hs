@@ -606,7 +606,7 @@ transDec venv tenv brkdest =
         
         {- 2nd pass -}
         transbody
-          (acc, level, temp)
+          (acc, level, temp, frags)
           A.FuncDec { A.name = name, A.params = params, 
                       A.result = result, A.func_body = body, 
                       A.func_pos = pos } = 
@@ -620,18 +620,22 @@ transDec venv tenv brkdest =
 
             venv_loc = foldl transparam venv' $ zip params formals
             
-            (ExpTy{ty=bdty}, lv', temp') = 
+            (ExpTy{expr=ebody, ty=bdty}, lv', temp') = 
               transExp venv_loc tenv brkdest level temp body
+              
+            (stm, temp'') = TL.unNx temp' ebody
+              
+            frag = Frame.Proc {Frame.body=stm, Frame.frame=TL.frame lv'}
           in
-           (check_type rty bdty pos && acc, lv', temp')
+           (check_type rty bdty pos && acc, lv', temp'', frag:frags)
         
-        (check_bodies, level', temp'') = 
-          foldl transbody (True, level, temp') fundecs
+        (check_bodies, level', temp'', frags) = 
+          foldl transbody (True, level, temp', []) fundecs
       in
        if checkdup (fmap A.name fundecs) (fmap A.func_pos fundecs)
           && check_bodies 
        then
-         (venv', tenv, level', temp'', [], [])
+         (venv', tenv, level', temp'', [], frags)
        else
          undefined
        

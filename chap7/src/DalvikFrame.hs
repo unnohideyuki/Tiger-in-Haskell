@@ -19,6 +19,7 @@ instance F.FrameBase Frame where
   
 data Frag = Proc {body::T.Stm, frame::Frame}
           | Str Temp.Label String
+            deriving Show
 
 newFrame' :: Temp.Label -> [Bool] -> Temp.Temp -> (Frame, Temp.Temp)
 newFrame' label fs temp = 
