@@ -472,14 +472,18 @@ transDec venv tenv brkdest =
     trdec level temp A.VarDec{A.name'=name, A.typ'=typ, A.init'=init, 
                               A.escape'=esc, A.pos'=pos} = 
       let                                     
-        (ExpTy{ty=ty}, lv', temp') =
+        (ExpTy{expr=rhs, ty=ty}, lv', temp') =
           transExp venv tenv brkdest level temp init
 
         (access, lv'', temp'') = TL.allocLocal lv' esc temp'
+        
+        lhs = TL.simpleVar access lv''
+        
+        (e, temp3) = TL.assignExp lhs rhs temp''
 
         ret name ty = 
           (S.insert venv name E.VarEntry {E.access=access, E.ty=ty}, 
-           tenv, lv'', temp'', [], [])
+           tenv, lv'', temp3, [e], [])
       in
        case typ of
          Nothing -> if ty == T.NIL
