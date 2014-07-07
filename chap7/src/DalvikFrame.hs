@@ -17,6 +17,9 @@ instance F.FrameBase Frame where
   formals = formals
   allocLocal = allocLocal'
   
+data Frag = Proc {body::T.Stm, frame::Frame}
+          | Str Temp.Label String
+
 newFrame' :: Temp.Label -> [Bool] -> Temp.Temp -> (Frame, Temp.Temp)
 newFrame' label fs temp = 
   let

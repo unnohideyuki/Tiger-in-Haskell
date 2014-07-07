@@ -8,6 +8,8 @@ import qualified Symbol as S
 import qualified Types as T
 import qualified Translate as TL
 import qualified Temp
+import qualified Frame
+import qualified DalvikFrame as Frame
 
 type VEnv = S.Table E.EnvEntry
 type TEnv = S.Table T.Ty
@@ -255,9 +257,9 @@ transExp venv tenv brkdest =
     
     trexp level temp A.LetExp{A.decs=decs, A.body=body, A.pos=pos} =
       let
-        transdecs (venv, tenv, lv, tmp) dec = transDec venv tenv brkdest lv tmp dec
-        (venv', tenv', lv', temp') = 
-          foldl transdecs (venv, tenv, level, temp) decs
+        transdecs (venv, tenv, lv, tmp, es, fs) dec = transDec venv tenv brkdest lv tmp dec
+        (venv', tenv', lv', temp', es', fs') = 
+          foldl transdecs (venv, tenv, level, temp, [], []) decs
         (ExpTy { ty=bodyty }, lv'', temp'') = 
           transExp venv' tenv' brkdest lv' temp' body
       in
@@ -448,12 +450,24 @@ transTy tenv =
 
 transDec :: VEnv -> TEnv -> Temp.Label -> TL.Level -> Temp.Temp
             -> A.Dec 
-            -> (S.Table E.EnvEntry, S.Table T.Ty, TL.Level, Temp.Temp)
+            -> (S.Table E.EnvEntry
+               , S.Table T.Ty
+               , TL.Level
+               , Temp.Temp
+               , [TL.Exp]
+               , [Frame.Frag]
+               )
 transDec venv tenv brkdest =
   let
     trdec :: TL.Level -> Temp.Temp
              -> A.Dec 
-             -> (S.Table E.EnvEntry, S.Table T.Ty, TL.Level, Temp.Temp)
+             -> (S.Table E.EnvEntry
+                , S.Table T.Ty
+                , TL.Level
+                , Temp.Temp
+                , [TL.Exp]
+                , [Frame.Frag]
+                )
     
     trdec level temp A.VarDec{A.name'=name, A.typ'=typ, A.init'=init, 
                               A.escape'=esc, A.pos'=pos} = 
@@ -465,7 +479,7 @@ transDec venv tenv brkdest =
 
         ret name ty = 
           (S.insert venv name E.VarEntry {E.access=access, E.ty=ty}, 
-           tenv, lv'', temp'')
+           tenv, lv'', temp'', [], [])
       in
        case typ of
          Nothing -> if ty == T.NIL
@@ -540,7 +554,7 @@ transDec venv tenv brkdest =
       in
         if check_cyclic_dep tdecs && checkdup names poss
         then
-          (venv, tenv''', level, temp)
+          (venv, tenv''', level, temp, [], [])
         else
           undefined
           
@@ -613,7 +627,7 @@ transDec venv tenv brkdest =
        if checkdup (fmap A.name fundecs) (fmap A.func_pos fundecs)
           && check_bodies 
        then
-         (venv', tenv, level', temp'')
+         (venv', tenv, level', temp'', [], [])
        else
          undefined
        
