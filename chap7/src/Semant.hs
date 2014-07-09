@@ -55,28 +55,30 @@ transProg venv tenv prog =
       TL.newLevel TL.outermost (Temp.namedLabel "main") [] temp
     errdest = Temp.namedLabel "_CanNotBreak_"
   in
-   case transExp venv tenv errdest mainlevel temp' prog of
-     (expty, _, _) -> expty
+   case transExp venv tenv errdest mainlevel [] temp' prog of
+     (expty, _, _, _) -> expty
 
-transExp :: VEnv-> TEnv -> Temp.Label -> TL.Level -> Temp.Temp
+transExp :: VEnv-> TEnv -> Temp.Label -> TL.Level -> [Frame.Frag]
+            -> Temp.Temp
             -> A.Exp 
-            -> (ExpTy, TL.Level, Temp.Temp)
+            -> (ExpTy, TL.Level, [Frame.Frag], Temp.Temp)
+            
 transExp venv tenv brkdest =
   let
-    trexp :: TL.Level -> Temp.Temp
+    trexp :: TL.Level -> [Frame.Frag] -> Temp.Temp
             -> A.Exp 
-            -> (ExpTy, TL.Level, Temp.Temp)
+            -> (ExpTy, TL.Level, [Frame.Frag], Temp.Temp)
             
-    trexp level temp A.NilExp = (ExpTy (TL.nilExp) T.NIL, level, temp)
+    trexp level frgs temp A.NilExp = (ExpTy (TL.nilExp) T.NIL, level, frgs, temp)
     
-    trexp level temp (A.IntExp i _) = (ExpTy (TL.intExp i) T.INT, level, temp)
+    trexp level frgs temp (A.IntExp i _) = (ExpTy (TL.intExp i) T.INT, level, frgs, temp)
     
-    trexp level temp (A.StringExp _ _) = (ExpTy undefined T.STRING, level, temp)
+    trexp level frgs temp (A.StringExp _ _) = (ExpTy undefined T.STRING, level, frgs, temp)
     
-    trexp level temp A.OpExp{A.oper=oper, A.lhs=lhs, A.rhs=rhs, A.pos=pos} = 
+    trexp level frgs temp A.OpExp{A.oper=oper, A.lhs=lhs, A.rhs=rhs, A.pos=pos} = 
       let
-        (ExpTy {expr=e1, ty=lty }, lv', temp')   = trexp level temp lhs
-        (ExpTy {expr=e2, ty=rty }, lv'', temp'') = trexp lv' temp' rhs
+        (ExpTy {expr=e1, ty=lty }, lv', frgs', temp')   = trexp level frgs temp lhs
+        (ExpTy {expr=e2, ty=rty }, lv'', frgs'', temp'') = trexp lv' frgs' temp' rhs
         
         classify op = 
           case op of
@@ -137,41 +139,41 @@ transExp venv tenv brkdest =
            c e1 e2 temp''
       in
          if check_result then
-           (ExpTy{expr=binExp, ty=T.INT}, lv'', temp3)
+           (ExpTy{expr=binExp, ty=T.INT}, lv'', frgs'', temp3)
          else 
            must_not_reach
                       
-    trexp level temp (A.VarExp var) = trvar level temp var
+    trexp level frgs temp (A.VarExp var) = trvar level frgs temp var
 
-    trexp level temp A.RecordExp{A.fields=fields, A.typ=typ, A.pos=pos} = 
+    trexp level frgs temp A.RecordExp{A.fields=fields, A.typ=typ, A.pos=pos} = 
       case S.lookup tenv typ of
         Nothing -> error $ show pos ++ "record type not found: " ++ typ
         Just ty -> case actual_ty ty pos of
           T.RECORD ftys_ty u -> 
             let 
-              (level', temp', ftys_exp) = 
+              (level', frgs', temp', ftys_exp) = 
                 foldr
-                (\(sym,e,pos) (l, t, xs) -> case trexp l t e of
-                    (expty, l', t') -> (l', t', (sym, expty, pos):xs)
+                (\(sym,e,pos) (l, f, t, xs) -> case trexp l f t e of
+                    (expty, l', f', t') -> (l', f', t', (sym, expty, pos):xs)
                 ) 
-                (level, temp, [])
+                (level, frgs, temp, [])
                 fields
                 
-              (cs, level'', temp'') =
+              (cs, level'', frgs'', temp'') =
                 foldr
-                (\(sym,_) (cs, level, temp) ->
+                (\(sym,_) (cs, level, frgs, temp) ->
                   case lookup sym [(s,e)|(s,e,_)<-fields] of
-                    Just e -> case trexp level temp e of
-                      (ExpTy{expr=expr}, l', t') -> (expr:cs, l', t')
+                    Just e -> case trexp level frgs temp e of
+                      (ExpTy{expr=expr}, l', f', t') -> (expr:cs, l', f', t')
                 )
-                ([], level', temp')
+                ([], level', frgs', temp')
                 ftys_ty
                 
               (e, temp3) = TL.recordExp cs temp''
             in
              if checkrecord ftys_ty ftys_exp pos
              then
-               (ExpTy {expr=e, ty=T.RECORD ftys_ty u}, level', temp3)
+               (ExpTy {expr=e, ty=T.RECORD ftys_ty u}, level', frgs'', temp3)
              else
                must_not_reach
       where
@@ -184,90 +186,90 @@ transExp venv tenv brkdest =
           in
             (length ftys_ty == length ftys_exp) && (and $ fmap checker ftys_exp)
         
-    trexp level temp (A.SeqExp exps) = 
+    trexp level frgs temp (A.SeqExp exps) = 
       let 
-        (lv', temp', es) = 
+        (lv', frgs', temp', es) = 
           foldr
-          (\exp (l, t, xs) -> case trexp l t exp of
-              (e, l', t') -> (l', t', e:xs)
+          (\exp (l, f, t, xs) -> case trexp l f t exp of
+              (e, l', f', t') -> (l', f', t', e:xs)
           )
-          (level, temp, [])
+          (level, frgs, temp, [])
           exps
         ty' = if null exps
               then T.UNIT
               else case last es of ExpTy{ty=ty} -> ty
         (e, temp'') = TL.seqExp [e | ExpTy{expr=e} <- es] temp'
       in
-       (ExpTy{expr=e, ty=ty'}, lv', temp')
+       (ExpTy{expr=e, ty=ty'}, lv', frgs, temp')
                
-    trexp level temp A.AssignExp{A.vvar=var, A.exp=exp, A.pos=pos} = 
+    trexp level frgs temp A.AssignExp{A.vvar=var, A.exp=exp, A.pos=pos} = 
       let 
-        (ExpTy {expr=lhs, ty=vty }, lv', temp') = trvar level temp var
-        (ExpTy {expr=rhs, ty=ety }, lv'', temp'') = trexp lv' temp' exp
+        (ExpTy {expr=lhs, ty=vty }, lv', frgs', temp') = trvar level frgs temp var
+        (ExpTy {expr=rhs, ty=ety }, lv'', frgs'', temp'') = trexp lv' frgs' temp' exp
         (e, temp3) = TL.assignExp lhs rhs temp''
       in
        if check_type vty ety pos
-       then (ExpTy {expr=e, ty=T.UNIT }, lv'', temp3)
+       then (ExpTy {expr=e, ty=T.UNIT }, lv'', frgs'', temp3)
        else undefined
        
-    trexp level temp A.IfExp{ A.test=test, A.thene=thenexp, A.elsee=elseexp, 
-                    A.pos=pos} =
+    trexp level frgs temp A.IfExp{ A.test=test, A.thene=thenexp, A.elsee=elseexp, 
+                                   A.pos=pos} =
       let
-        (ExpTy{expr=e1, ty=testty}, lv', temp') = trexp level temp test
-        (ExpTy{expr=e2, ty=thenty}, lv'', temp'') = trexp lv' temp' thenexp
+        (ExpTy{expr=e1, ty=testty}, lv', frgs', temp') = trexp level frgs temp test
+        (ExpTy{expr=e2, ty=thenty}, lv'', frgs'', temp'') = trexp lv' frgs' temp' thenexp
       in
        if check_type T.INT testty pos
        then
          case elseexp of
            Just elseexp' -> 
              let 
-               (ExpTy{expr=e3, ty=elsety}, lv3, temp3) = trexp lv'' temp'' elseexp'
+               (ExpTy{expr=e3, ty=elsety}, lv3, frgs3, temp3) = trexp lv'' frgs'' temp'' elseexp'
                (e, temp4) = TL.ifThenElse e1 e2 e3 temp3
              in
               if check_type thenty elsety pos then
-                (ExpTy{expr=e, ty=thenty}, lv3, temp4)
+                (ExpTy{expr=e, ty=thenty}, lv3, frgs3, temp4)
               else undefined
            Nothing -> if check_type T.UNIT thenty pos
                       then 
                         let
                           (e, temp3) = TL.ifThen e1 e2 temp''
                         in
-                         (ExpTy{expr=e, ty=thenty}, lv'', temp3)
+                         (ExpTy{expr=e, ty=thenty}, lv'', frgs'', temp3)
                       else
                         undefined
        else
          undefined
 
-    trexp level temp A.WhileExp{A.test=test, A.body=body, A.pos=pos} =
+    trexp level frgs temp A.WhileExp{A.test=test, A.body=body, A.pos=pos} =
       let
         (newdest, temp') = Temp.newLabel temp
-        (ExpTy{expr=e1, ty=testty}, lv', temp'') = trexp level temp' test
-        (ExpTy{expr=e2, ty=bodyty}, lv'', temp3) = 
-          transExp venv tenv newdest lv' temp'' body
+        (ExpTy{expr=e1, ty=testty}, lv', frgs', temp'') = trexp level frgs temp' test
+        (ExpTy{expr=e2, ty=bodyty}, lv'', frgs'', temp3) = 
+          transExp venv tenv newdest lv' frgs' temp'' body
         (e, temp4) = TL.whileExp e1 e2 newdest temp3
       in
        if check_type T.INT testty pos && check_type T.UNIT bodyty pos
        then
-         (ExpTy{expr=e, ty=T.UNIT}, lv'', temp4)
+         (ExpTy{expr=e, ty=T.UNIT}, lv'', frgs'', temp4)
        else
          undefined
 
-    trexp level temp (A.BreakExp _) = 
-      (ExpTy {expr=TL.breakExp brkdest, ty=T.UNIT}, level, temp)
+    trexp level frgs temp (A.BreakExp _) = 
+      (ExpTy {expr=TL.breakExp brkdest, ty=T.UNIT}, level, frgs, temp)
     
-    trexp level temp A.LetExp{A.decs=decs, A.body=body, A.pos=pos} =
+    trexp level frgs temp A.LetExp{A.decs=decs, A.body=body, A.pos=pos} =
       let
-        transdecs (venv, tenv, lv, tmp, es, fs) dec = transDec venv tenv brkdest lv tmp dec
-        (venv', tenv', lv', temp', es, fs) = 
-          foldl transdecs (venv, tenv, level, temp, [], []) decs
-        (ExpTy {expr=ebody, ty=bodyty }, lv'', temp'') = 
-          transExp venv' tenv' brkdest lv' temp' body
+        transdecs (venv, tenv, lv, tmp, es, fs) dec = transDec venv tenv brkdest lv frgs tmp dec
+        (venv', tenv', lv', temp', es, frgs') = 
+          foldl transdecs (venv, tenv, level, temp, [], frgs) decs
+        (ExpTy {expr=ebody, ty=bodyty }, lv'', frgs'', temp'') = 
+          transExp venv' tenv' brkdest lv' frgs' temp' body
         (e, temp3) = TL.letExp es ebody temp''
       in
-       (ExpTy{expr=undefined, ty=bodyty}, lv'', temp3)
+       (ExpTy{expr=undefined, ty=bodyty}, lv'', frgs'', temp3)
 
-    trexp level temp A.ArrayExp {A.typ=typ, A.size=size, A.init=init,
-                       A.pos=pos} =
+    trexp level frgs temp A.ArrayExp {A.typ=typ, A.size=size, A.init=init,
+                                      A.pos=pos} =
       case S.lookup tenv typ of
         Nothing -> error $ show pos ++ "type not found: " ++ typ
         Just t -> 
@@ -277,17 +279,17 @@ transExp venv tenv brkdest =
            case ty of
              T.ARRAY ty' u ->
                let 
-                 (ExpTy{ty=sizety}, lv', temp') = trexp level temp size
-                 (ExpTy{ty=initty}, lv'', temp'') = trexp lv' temp' init
+                 (ExpTy{ty=sizety}, lv', frgs', temp') = trexp level frgs temp size
+                 (ExpTy{ty=initty}, lv'', frgs'', temp'') = trexp lv' frgs' temp' init
                in
                 if check_type T.INT sizety pos && check_type ty' initty pos
                 then
-                  (ExpTy {expr=undefined, ty=ty}, lv'', temp'')
+                  (ExpTy {expr=undefined, ty=ty}, lv'', frgs'', temp'')
                 else
                   undefined
                   
-    trexp level temp A.ForExp{A.svar=svar, A.lo=lo, A.hi=hi, A.body=body,
-                     A.pos=pos } =
+    trexp level frgs temp A.ForExp{A.svar=svar, A.lo=lo, A.hi=hi, A.body=body,
+                                   A.pos=pos } =
       {- translate to let/while expresion -}
       let
         ivar = A.SimpleVar svar pos
@@ -320,20 +322,20 @@ transExp venv tenv brkdest =
                                         ]
                           , A.pos = pos }
       in
-       trexp level temp A.LetExp{A.decs=decs, A.body=loop, A.pos=pos}
+       trexp level frgs temp A.LetExp{A.decs=decs, A.body=loop, A.pos=pos}
                                                   
-    trexp level temp A.CallExp{A.func=func, A.args=args, A.pos=pos } =
+    trexp level frgs temp A.CallExp{A.func=func, A.args=args, A.pos=pos } =
       case S.lookup venv func of
         Nothing -> error $ show pos ++ "function not defined: " ++ func
         Just (E.VarEntry _ _) -> 
           error $ show pos ++ "not a function: " ++ func
         Just E.FunEntry{E.formals=formals, E.result=result } ->
           let
-            (lv', temp', argtys) =  
+            (lv', frgs', temp', argtys) =  
               foldr
-              (\exp (l, t, xs) -> case trexp l t exp of
-                  (e, l', t') -> (l', t', e:xs))
-              (level, temp, [])
+              (\exp (l, f, t, xs) -> case trexp l f t exp of
+                  (e, l', f', t') -> (l', f', t', e:xs))
+              (level, frgs, temp, [])
               args
             checkformals formals argtys =
               let
@@ -349,20 +351,20 @@ transExp venv tenv brkdest =
           in
            if checkformals formals argtys
            then 
-             (ExpTy {expr=undefined, ty=actual_ty result pos}, level, temp)
+             (ExpTy {expr=undefined, ty=actual_ty result pos}, level, frgs, temp)
            else
              undefined
 
-    trvar level temp (A.SimpleVar sym pos) = 
+    trvar level frgs temp (A.SimpleVar sym pos) = 
       case S.lookup venv sym of
         Just E.VarEntry {E.access=acc, E.ty=ty} 
-          -> (ExpTy {expr=TL.simpleVar acc level, ty=ty}, level, temp)
+          -> (ExpTy {expr=TL.simpleVar acc level, ty=ty}, level, frgs, temp)
         Just _ -> error $ show pos ++ "not a variable: " ++ sym
         _ -> error $ show pos ++ "undefined variable: " ++ sym
     
-    trvar level temp (A.FieldVar var id pos) = 
+    trvar level frgs temp (A.FieldVar var id pos) = 
       let
-        (ExpTy{expr=e1, ty=ty}, lv', temp') = trvar level temp var
+        (ExpTy{expr=e1, ty=ty}, lv', frgs', temp') = trvar level frgs temp var
       in
        case ty of
          T.RECORD fs _ ->
@@ -372,21 +374,21 @@ transExp venv tenv brkdest =
                let
                  (e, temp'') = TL.fieldVar e1 i temp'
                in
-                (ExpTy{expr=e, ty=actual_ty ty' pos}, lv', temp'')
+                (ExpTy{expr=e, ty=actual_ty ty' pos}, lv', frgs', temp'')
          _ -> error $ show pos ++ "not a record: " ++ show ty
          
-    trvar level temp (A.SubscriptVar var exp pos) = 
+    trvar level frgs temp (A.SubscriptVar var exp pos) = 
       let
-        (ExpTy{expr=e1, ty=ty}, lv', temp') = trvar level temp var
+        (ExpTy{expr=e1, ty=ty}, lv', frgs', temp') = trvar level frgs temp var
       in
        case actual_ty ty pos of
          T.ARRAY ty' _ -> 
            let 
-             (ExpTy{expr=e2, ty=ty''}, lv'', temp'') = trexp lv' temp' exp
+             (ExpTy{expr=e2, ty=ty''}, lv'', frgs'', temp'') = trexp lv' frgs' temp' exp
              (e, temp3) = TL.subscriptVar e1 e2 temp''
            in
             case ty'' of
-              T.INT -> (ExpTy {expr=e, ty=ty'}, lv'', temp3)
+              T.INT -> (ExpTy {expr=e, ty=ty'}, lv'', frgs'', temp3)
               _ -> error $ show pos ++ "array subscript type:" ++ show ty''
          _ -> error $ show pos ++ "not an array"
   in
@@ -449,7 +451,7 @@ transTy tenv =
   in
    transty
 
-transDec :: VEnv -> TEnv -> Temp.Label -> TL.Level -> Temp.Temp
+transDec :: VEnv -> TEnv -> Temp.Label -> TL.Level -> [Frame.Frag] -> Temp.Temp
             -> A.Dec 
             -> (S.Table E.EnvEntry
                , S.Table T.Ty
@@ -460,7 +462,7 @@ transDec :: VEnv -> TEnv -> Temp.Label -> TL.Level -> Temp.Temp
                )
 transDec venv tenv brkdest =
   let
-    trdec :: TL.Level -> Temp.Temp
+    trdec :: TL.Level -> [Frame.Frag] -> Temp.Temp
              -> A.Dec 
              -> (S.Table E.EnvEntry
                 , S.Table T.Ty
@@ -470,11 +472,11 @@ transDec venv tenv brkdest =
                 , [Frame.Frag]
                 )
     
-    trdec level temp A.VarDec{A.name'=name, A.typ'=typ, A.init'=init, 
-                              A.escape'=esc, A.pos'=pos} = 
+    trdec level frgs temp A.VarDec{A.name'=name, A.typ'=typ, A.init'=init, 
+                                   A.escape'=esc, A.pos'=pos} = 
       let                                     
-        (ExpTy{expr=rhs, ty=ty}, lv', temp') =
-          transExp venv tenv brkdest level temp init
+        (ExpTy{expr=rhs, ty=ty}, lv', frgs', temp') =
+          transExp venv tenv brkdest level frgs temp init
 
         (access, lv'', temp'') = TL.allocLocal lv' esc temp'
         
@@ -484,7 +486,7 @@ transDec venv tenv brkdest =
 
         ret name ty = 
           (S.insert venv name E.VarEntry {E.access=access, E.ty=ty}, 
-           tenv, lv'', temp3, [e], [])
+           tenv, lv'', temp3, [e], frgs')
       in
        case typ of
          Nothing -> if ty == T.NIL
@@ -502,7 +504,7 @@ transDec venv tenv brkdest =
                          else
                            undefined
 
-    trdec level temp (A.TypeDec tdecs) = 
+    trdec level frgs temp (A.TypeDec tdecs) = 
       let
         {- inserting headers -}
         tenv' = 
@@ -559,11 +561,11 @@ transDec venv tenv brkdest =
       in
         if check_cyclic_dep tdecs && checkdup names poss
         then
-          (venv, tenv''', level, temp, [], [])
+          (venv, tenv''', level, temp, [], frgs)
         else
           undefined
           
-    trdec level temp (A.FunctionDec fundecs) = 
+    trdec level frgs temp (A.FunctionDec fundecs) = 
       let
         {- 1st pass -}
         transfun (venv, temp) A.FuncDec{A.name=name, A.params=params, 
@@ -607,7 +609,7 @@ transDec venv tenv brkdest =
         
         {- 2nd pass -}
         transbody
-          (acc, level, temp, frags)
+          (acc, level, temp, frgs)
           A.FuncDec { A.name = name, A.params = params, 
                       A.result = result, A.func_body = body, 
                       A.func_pos = pos } = 
@@ -621,23 +623,23 @@ transDec venv tenv brkdest =
 
             venv_loc = foldl transparam venv' $ zip params formals
             
-            (ExpTy{expr=ebody, ty=bdty}, lv', temp') = 
-              transExp venv_loc tenv brkdest level temp body
+            (ExpTy{expr=ebody, ty=bdty}, lv', frgs', temp') = 
+              transExp venv_loc tenv brkdest level frgs temp body
               
             -- TODO: unNx should not be public.
             (stm, temp'') = TL.unNx temp' ebody
               
             frag = Frame.Proc {Frame.body=stm, Frame.frame=TL.frame lv'}
           in
-           (check_type rty bdty pos && acc, lv', temp'', frag:frags)
+           (check_type rty bdty pos && acc, lv', temp'', frag:frgs')
         
-        (check_bodies, level', temp'', frags) = 
-          foldl transbody (True, level, temp', []) fundecs
+        (check_bodies, level', temp'', frgs') = 
+          foldl transbody (True, level, temp', frgs) fundecs
       in
        if checkdup (fmap A.name fundecs) (fmap A.func_pos fundecs)
           && check_bodies 
        then
-         (venv', tenv, level', temp'', [], frags)
+         (venv', tenv, level', temp'', [], frgs')
        else
          undefined
        
