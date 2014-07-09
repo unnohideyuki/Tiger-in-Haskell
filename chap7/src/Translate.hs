@@ -306,6 +306,20 @@ letExp es ebody temp =
   in
    (Ex tree, temp'')
 
+callExp :: Temp.Label -> [Exp] -> Temp.Temp -> (Exp, Temp.Temp)
+callExp f exprs temp = 
+  let
+    (temp', args) = foldr
+                    (\expr (temp, es) ->
+                      let
+                        (e, temp') = unEx temp expr
+                      in
+                       (temp', e:es)
+                    )
+                    (temp, [])
+                    exprs
+  in
+   (Ex $ T.CALL (T.NAME f) args, temp')
 
                  
 

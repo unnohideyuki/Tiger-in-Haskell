@@ -266,7 +266,7 @@ transExp venv tenv brkdest =
           transExp venv' tenv' brkdest lv' frgs' temp' body
         (e, temp3) = TL.letExp es ebody temp''
       in
-       (ExpTy{expr=undefined, ty=bodyty}, lv'', frgs'', temp3)
+       (ExpTy{expr=e, ty=bodyty}, lv'', frgs'', temp3)
 
     trexp level frgs temp A.ArrayExp {A.typ=typ, A.size=size, A.init=init,
                                       A.pos=pos} =
@@ -279,12 +279,13 @@ transExp venv tenv brkdest =
            case ty of
              T.ARRAY ty' u ->
                let 
-                 (ExpTy{ty=sizety}, lv', frgs', temp') = trexp level frgs temp size
-                 (ExpTy{ty=initty}, lv'', frgs'', temp'') = trexp lv' frgs' temp' init
+                 (ExpTy{expr=siz, ty=sizety}, lv', frgs', temp') = trexp level frgs temp size
+                 (ExpTy{expr=ini, ty=initty}, lv'', frgs'', temp'') = trexp lv' frgs' temp' init
+                 (e, temp3) = TL.callExp (Temp.namedLabel "_initArray") [siz, ini] temp''
                in
                 if check_type T.INT sizety pos && check_type ty' initty pos
                 then
-                  (ExpTy {expr=undefined, ty=ty}, lv'', frgs'', temp'')
+                  (ExpTy {expr=e, ty=ty}, lv'', frgs'', temp3)
                 else
                   undefined
                   
