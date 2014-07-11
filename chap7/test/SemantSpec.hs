@@ -7,13 +7,24 @@ import qualified Absyn as A
 import qualified Translate as TL
 import qualified Tree
 import qualified Types
+import qualified Temp
+
+trprog' venv tenv prog = 
+  let
+    temp = Temp.create
+    (mainlevel, temp') = 
+      TL.newLevel TL.outermost (Temp.namedLabel "main") [] temp
+    errdest = Temp.namedLabel "_CanNotBreak_"
+  in
+   case transExp venv tenv errdest mainlevel [] temp' prog of
+     (expty, _, _, _) -> expty
 
 nil_test :: IO ()
 nil_test =
   let
     venv = E.base_venv
     tenv = E.base_tenv
-    ExpTy{expr=expr, ty=t} = transProg venv tenv A.NilExp
+    ExpTy{expr=expr, ty=t} = trprog' venv tenv A.NilExp
     e = case expr of TL.Ex e -> e
   in
    hspec $ do
@@ -28,7 +39,7 @@ int_test =
   let
     venv = E.base_venv
     tenv = E.base_tenv
-    expty i = transProg venv tenv (A.IntExp i undefined)
+    expty i = trprog' venv tenv (A.IntExp i undefined)
     expr i = case expty i of ExpTy{expr=TL.Ex e} -> e
     ty i = case expty i of ExpTy{ty=t} -> t
   in      
@@ -52,44 +63,44 @@ arith_test =
     
     ty expty = case expty of ExpTy{ty=t} -> t
     
-    expty1 = transProg venv tenv A.OpExp{ A.oper=A.PlusOp
+    expty1 = trprog' venv tenv A.OpExp{ A.oper=A.PlusOp
                                         , A.lhs=A.IntExp 1 undefined
                                         , A.rhs=A.IntExp 2 undefined
                                         , A.pos=undefined}
-    expty2 = transProg venv tenv A.OpExp{ A.oper=A.MinusOp
+    expty2 = trprog' venv tenv A.OpExp{ A.oper=A.MinusOp
                                         , A.lhs=A.IntExp 3 undefined
                                         , A.rhs=A.IntExp 4 undefined
                                         , A.pos=undefined}
-    expty3 = transProg venv tenv A.OpExp{ A.oper=A.TimesOp
+    expty3 = trprog' venv tenv A.OpExp{ A.oper=A.TimesOp
                                         , A.lhs=A.IntExp 5 undefined
                                         , A.rhs=A.IntExp 6 undefined
                                         , A.pos=undefined}
-    expty4 = transProg venv tenv A.OpExp{ A.oper=A.DivideOp
+    expty4 = trprog' venv tenv A.OpExp{ A.oper=A.DivideOp
                                         , A.lhs=A.IntExp 7 undefined
                                         , A.rhs=A.IntExp 8 undefined
                                         , A.pos=undefined}
   
-    expty5 = transProg venv tenv A.OpExp{ A.oper=A.LtOp
+    expty5 = trprog' venv tenv A.OpExp{ A.oper=A.LtOp
                                         , A.lhs=A.IntExp 9 undefined
                                         , A.rhs=A.IntExp 10 undefined
                                         , A.pos=undefined}
-    expty6 = transProg venv tenv A.OpExp{ A.oper=A.GtOp
+    expty6 = trprog' venv tenv A.OpExp{ A.oper=A.GtOp
                                         , A.lhs=A.IntExp 11 undefined
                                         , A.rhs=A.IntExp 12 undefined
                                         , A.pos=undefined}
-    expty7 = transProg venv tenv A.OpExp{ A.oper=A.LeOp
+    expty7 = trprog' venv tenv A.OpExp{ A.oper=A.LeOp
                                         , A.lhs=A.IntExp 13 undefined
                                         , A.rhs=A.IntExp 14 undefined
                                         , A.pos=undefined}
-    expty8 = transProg venv tenv A.OpExp{ A.oper=A.GeOp
+    expty8 = trprog' venv tenv A.OpExp{ A.oper=A.GeOp
                                         , A.lhs=A.IntExp 15 undefined
                                         , A.rhs=A.IntExp 16 undefined
                                         , A.pos=undefined}
-    expty9 = transProg venv tenv A.OpExp{ A.oper=A.EqOp
+    expty9 = trprog' venv tenv A.OpExp{ A.oper=A.EqOp
                                         , A.lhs=A.IntExp 17 undefined
                                         , A.rhs=A.IntExp 18 undefined
                                         , A.pos=undefined}
-    expty10 = transProg venv tenv A.OpExp{ A.oper=A.NeqOp
+    expty10 = trprog' venv tenv A.OpExp{ A.oper=A.NeqOp
                                          , A.lhs=A.IntExp 19 undefined
                                          , A.rhs=A.IntExp 20 undefined
                                          , A.pos=undefined}
@@ -150,37 +161,37 @@ if_test =
     expr expty = case expty of ExpTy{expr=TL.Ex e} -> e
     ty expty = case expty of ExpTy{ty=t} -> t
                              
-    expty1 = transProg venv tenv A.IfExp { A.test=A.IntExp 1 pos
+    expty1 = trprog' venv tenv A.IfExp { A.test=A.IntExp 1 pos
                                          , A.thene=A.IntExp 2 pos
                                          , A.elsee=Just $ A.IntExp 3 pos
                                          , A.pos=pos}
              
     expected1 =  Tree.ESEQ 
-                 (Tree.SEQ (Tree.JUMP (Tree.NAME "L1") ["L1"]) 
-                  (Tree.SEQ (Tree.LABEL "L1")
+                 (Tree.SEQ (Tree.JUMP (Tree.NAME "L0") ["L0"]) 
+                  (Tree.SEQ (Tree.LABEL "L0")
                    (Tree.SEQ (Tree.MOVE (Tree.TEMP 1) (Tree.CONST 2)) 
-                    (Tree.SEQ (Tree.JUMP (Tree.NAME "L3") ["L3"]) 
-                     (Tree.SEQ (Tree.LABEL "L2") 
+                    (Tree.SEQ (Tree.JUMP (Tree.NAME "L2") ["L2"]) 
+                     (Tree.SEQ (Tree.LABEL "L1") 
                       (Tree.SEQ (Tree.MOVE (Tree.TEMP 1) (Tree.CONST 3)) 
-                       (Tree.LABEL "L3"))))))) 
+                       (Tree.LABEL "L2"))))))) 
                  (Tree.TEMP 1)
 
-    expty2 = transProg venv tenv A.IfExp { A.test=A.IntExp 0 pos
+    expty2 = trprog' venv tenv A.IfExp { A.test=A.IntExp 0 pos
                                          , A.thene=A.IntExp 4 pos
                                          , A.elsee=Just $ A.IntExp 5 pos
                                          , A.pos=pos}
              
     expected2 =  Tree.ESEQ 
-                 (Tree.SEQ (Tree.JUMP (Tree.NAME "L2") ["L2"]) 
-                  (Tree.SEQ (Tree.LABEL "L1")
+                 (Tree.SEQ (Tree.JUMP (Tree.NAME "L1") ["L1"]) 
+                  (Tree.SEQ (Tree.LABEL "L0")
                    (Tree.SEQ (Tree.MOVE (Tree.TEMP 1) (Tree.CONST 4)) 
-                    (Tree.SEQ (Tree.JUMP (Tree.NAME "L3") ["L3"]) 
-                     (Tree.SEQ (Tree.LABEL "L2") 
+                    (Tree.SEQ (Tree.JUMP (Tree.NAME "L2") ["L2"]) 
+                     (Tree.SEQ (Tree.LABEL "L1") 
                       (Tree.SEQ (Tree.MOVE (Tree.TEMP 1) (Tree.CONST 5)) 
-                       (Tree.LABEL "L3"))))))) 
+                       (Tree.LABEL "L2"))))))) 
                  (Tree.TEMP 1)
                  
-    expty3 = transProg venv tenv A.IfExp { A.test=A.OpExp{A.oper=A.EqOp
+    expty3 = trprog' venv tenv A.IfExp { A.test=A.OpExp{A.oper=A.EqOp
                                                          ,A.lhs=A.IntExp 6 pos
                                                          ,A.rhs=A.IntExp 7 pos
                                                          ,A.pos=pos}
@@ -189,16 +200,16 @@ if_test =
                                          , A.pos=pos}
     expected3 =  Tree.ESEQ 
                  (Tree.SEQ (Tree.CJUMP 
-                            Tree.EQ (Tree.CONST 6)(Tree.CONST 7) "L1" "L2") 
-                  (Tree.SEQ (Tree.LABEL "L1") 
+                            Tree.EQ (Tree.CONST 6)(Tree.CONST 7) "L0" "L1") 
+                  (Tree.SEQ (Tree.LABEL "L0") 
                    (Tree.SEQ (Tree.MOVE (Tree.TEMP 1) (Tree.CONST 8)) 
-                    (Tree.SEQ (Tree.JUMP (Tree.NAME "L3") ["L3"]) 
-                     (Tree.SEQ (Tree.LABEL "L2") 
+                    (Tree.SEQ (Tree.JUMP (Tree.NAME "L2") ["L2"]) 
+                     (Tree.SEQ (Tree.LABEL "L1") 
                       (Tree.SEQ (Tree.MOVE (Tree.TEMP 1) (Tree.CONST 9)) 
-                       (Tree.LABEL "L3")))))))
+                       (Tree.LABEL "L2")))))))
                  (Tree.TEMP 1)
     
-    expty4 = transProg venv tenv A.IfExp { A.test=A.OpExp{A.oper=A.EqOp
+    expty4 = trprog' venv tenv A.IfExp { A.test=A.OpExp{A.oper=A.EqOp
                                                          ,A.lhs=A.IntExp 10 pos
                                                          ,A.rhs=A.IntExp 11 pos
                                                          ,A.pos=pos}
@@ -206,9 +217,9 @@ if_test =
                                          , A.elsee=Nothing
                                          , A.pos=pos}
     expected4 = Tree.ESEQ 
-                (Tree.SEQ (Tree.CJUMP Tree.EQ (Tree.CONST 10) (Tree.CONST 11) "L1" "L2") 
-                 (Tree.SEQ (Tree.LABEL "L1")
-                  (Tree.SEQ (Tree.EXP (Tree.CONST 0)) (Tree.LABEL "L2")))) 
+                (Tree.SEQ (Tree.CJUMP Tree.EQ (Tree.CONST 10) (Tree.CONST 11) "L0" "L1") 
+                 (Tree.SEQ (Tree.LABEL "L0")
+                  (Tree.SEQ (Tree.EXP (Tree.CONST 0)) (Tree.LABEL "L1")))) 
                 (Tree.CONST 0)
       
   in

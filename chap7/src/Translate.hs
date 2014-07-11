@@ -27,12 +27,11 @@ outermost = Outermost
 newLevel :: Level -> Temp.Label -> [Bool] -> Temp.Temp -> (Level, Temp.Temp)
 newLevel parent name formals temp = 
   let
-    (label, temp') = Temp.newLabel temp
-    (frame, temp'') = Frame.newFrame label formals temp'
-    (n, temp3) = Temp.newNum temp''
+    (frame, temp') = Frame.newFrame name formals temp
+    (n, temp'') = Temp.newNum temp'
   in
    (Level{parent=parent ,name=name, formals=formals, frame=frame , uniq=n},
-    temp3)
+    temp'')
 
 allocLocal :: Level -> Bool -> Temp.Temp -> (Access, Level, Temp.Temp)
 allocLocal level@Level{frame=frame} escapes temp =
@@ -46,6 +45,7 @@ data Exp = Ex T.Exp
          | Cx (Temp.Label -> Temp.Label -> T.Stm)
 
 mkseq (stm1:stm2:[]) = T.SEQ stm1 stm2
+mkseq [] = T.EXP $ T.CONST 0
 mkseq (stm:stms) = T.SEQ stm $ mkseq stms
 
 unEx :: Temp.Temp -> Exp -> (T.Exp, Temp.Temp)
@@ -315,8 +315,12 @@ callExp f exprs temp =
   in
    (Ex $ T.CALL (T.NAME f) args, temp')
 
-                 
-
-   
-
-      
+stringExp :: String -> Temp.Temp -> (Exp, Frame.Frag, Temp.Temp)
+stringExp s temp =
+  let
+    (label, temp') = Temp.newLabel temp
+    frag = Frame.Str label s
+    expr = Ex $ T.NAME label
+  in
+   (expr, frag, temp')
+  

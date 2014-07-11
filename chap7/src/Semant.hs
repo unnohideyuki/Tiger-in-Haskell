@@ -46,7 +46,7 @@ check_type t1 t2 pos =
 must_not_reach =
   error "fatal: must not reach here"
 
-transProg :: VEnv-> TEnv -> A.Exp -> ExpTy
+transProg :: VEnv-> TEnv -> A.Exp -> (T.Ty, [Frame.Frag])
             
 transProg venv tenv prog = 
   let
@@ -54,9 +54,13 @@ transProg venv tenv prog =
     (mainlevel, temp') = 
       TL.newLevel TL.outermost (Temp.namedLabel "main") [] temp
     errdest = Temp.namedLabel "_CanNotBreak_"
+    (expty, _, frgs, temp'') = transExp venv tenv errdest mainlevel [] temp' prog
+    
+    -- TODO: unNx should not be public.
+    (stm, _) = TL.unNx temp'' (expr expty)
+    frag = Frame.Proc {Frame.body=stm, Frame.frame=TL.frame mainlevel}
   in
-   case transExp venv tenv errdest mainlevel [] temp' prog of
-     (expty, _, _, _) -> expty
+   (ty expty, frag:frgs)
 
 transExp :: VEnv-> TEnv -> Temp.Label -> TL.Level -> [Frame.Frag]
             -> Temp.Temp
@@ -73,7 +77,11 @@ transExp venv tenv brkdest =
     
     trexp level frgs temp (A.IntExp i _) = (ExpTy (TL.intExp i) T.INT, level, frgs, temp)
     
-    trexp level frgs temp (A.StringExp _ _) = (ExpTy undefined T.STRING, level, frgs, temp)
+    trexp level frgs temp (A.StringExp s _) = 
+      let
+        (e, frag, temp') = TL.stringExp s temp
+      in
+       (ExpTy{expr=e, ty=T.STRING}, level, frag:frgs, temp')
     
     trexp level frgs temp A.OpExp{A.oper=oper, A.lhs=lhs, A.rhs=rhs, A.pos=pos} = 
       let
@@ -330,7 +338,7 @@ transExp venv tenv brkdest =
         Nothing -> error $ show pos ++ "function not defined: " ++ func
         Just (E.VarEntry _ _) -> 
           error $ show pos ++ "not a function: " ++ func
-        Just E.FunEntry{E.formals=formals, E.result=result } ->
+        Just E.FunEntry{E.label=label, E.formals=formals, E.result=result} ->
           let
             (lv', frgs', temp', argtys) =  
               foldr
@@ -352,7 +360,7 @@ transExp venv tenv brkdest =
                szcheck && (and $ fmap checker ts)
                
             es = fmap expr argtys
-            (e, temp'') = TL.callExp func es temp'
+            (e, temp'') = TL.callExp label es temp'
           in
            if checkformals formals argtys
            then 
@@ -593,7 +601,8 @@ transDec venv tenv brkdest =
                   Nothing -> error $ show pos ++ "type not found: " ++ typ)
               params
             
-            (label, temp') = Temp.newLabel temp
+            (tlabel, temp') = Temp.newLabel temp
+            label = tlabel ++ "_" ++ name
 
             formals = fmap A.field_esc params
 
@@ -623,7 +632,7 @@ transDec venv tenv brkdest =
               S.lookup venv' name
             
             transparam acc (A.Field { A.field_name = name }, ty) =
-              S.insert acc name $ E.VarEntry { E.access = undefined
+              S.insert acc name $ E.VarEntry { E.access = error "n/a!"
                                              , E.ty=ty }
 
             venv_loc = foldl transparam venv' $ zip params formals
