@@ -281,7 +281,7 @@ transExp venv tenv brkdest =
                let 
                  (ExpTy{expr=siz, ty=sizety}, lv', frgs', temp') = trexp level frgs temp size
                  (ExpTy{expr=ini, ty=initty}, lv'', frgs'', temp'') = trexp lv' frgs' temp' init
-                 (e, temp3) = TL.callExp (Temp.namedLabel "_initArray") [siz, ini] temp''
+                 (e, temp3) = TL.arrayExp siz ini temp''
                in
                 if check_type T.INT sizety pos && check_type ty' initty pos
                 then

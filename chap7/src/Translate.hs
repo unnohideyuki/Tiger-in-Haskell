@@ -232,18 +232,14 @@ fieldVar var i temp =
 recordExp :: [Exp] -> Temp.Temp -> (Exp, Temp.Temp)
 recordExp cs temp = 
   let
-    (xs, temp') = foldr
-                   (\e (xs, temp) ->
-                     case unEx temp e of
-                       (x, temp') -> (x:xs, temp')
-                   )
-                   ([], temp)
-                   cs
-                   
-    len = T.CONST $ length cs
+    len = Ex $ T.CONST $ length cs
   in
-   (Ex $ T.CALL (T.NAME $ Temp.namedLabel "initRecord") (len:xs), temp')
+   callExp (Temp.namedLabel "_initRecord") (len:cs) temp
    
+arrayExp :: Exp -> Exp -> Temp.Temp -> (Exp, Temp.Temp)
+arrayExp size init temp =
+  callExp (Temp.namedLabel "_initArray") [size, init] temp
+
 seqExp :: [Exp] -> Temp.Temp -> (Exp, Temp.Temp)
 seqExp [] temp = (Nx $ T.EXP $ T.CONST 0, temp)
 seqExp es temp = 
@@ -311,10 +307,8 @@ callExp f exprs temp =
   let
     (temp', args) = foldr
                     (\expr (temp, es) ->
-                      let
-                        (e, temp') = unEx temp expr
-                      in
-                       (temp', e:es)
+                      case unEx temp expr of
+                        (e, temp') -> (temp', e:es)
                     )
                     (temp, [])
                     exprs
