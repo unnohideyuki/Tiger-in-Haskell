@@ -325,7 +325,7 @@ transExp venv tenv brkdest =
       in
        trexp level frgs temp A.LetExp{A.decs=decs, A.body=loop, A.pos=pos}
                                                   
-    trexp level frgs temp A.CallExp{A.func=func, A.args=args, A.pos=pos } =
+    trexp level frgs temp A.CallExp{A.func=func, A.args=args, A.pos=pos} =
       case S.lookup venv func of
         Nothing -> error $ show pos ++ "function not defined: " ++ func
         Just (E.VarEntry _ _) -> 
@@ -338,9 +338,10 @@ transExp venv tenv brkdest =
                   (e, l', f', t') -> (l', f', t', e:xs))
               (level, frgs, temp, [])
               args
+              
             checkformals formals argtys =
               let
-                checker (t1, ExpTy { ty=t2 }) = check_type t1 t2 pos
+                checker (t1, ExpTy {ty=t2}) = check_type t1 t2 pos
                 ts = zip formals argtys
                 szcheck = 
                   if (length formals == length argtys) then
@@ -349,10 +350,13 @@ transExp venv tenv brkdest =
                     error $ show pos ++ "wrong number of arguments."
               in
                szcheck && (and $ fmap checker ts)
+               
+            es = fmap expr argtys
+            (e, temp'') = TL.callExp func es temp'
           in
            if checkformals formals argtys
            then 
-             (ExpTy {expr=undefined, ty=actual_ty result pos}, level, frgs, temp)
+             (ExpTy{expr=e, ty=actual_ty result pos}, lv', frgs', temp'')
            else
              undefined
 
