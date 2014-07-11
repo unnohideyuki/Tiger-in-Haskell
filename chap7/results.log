@@ -1,0 +1,63 @@
+../testcases/nested_funcs.tig : driver.exe: 17:18: type error for equality operator: NAME "tree" (Just (RECORD [("key",STRING),("left",NAME "tree" (Just (RECORD [("key",STRING),("left",NAME "tree" Nothing),("right",NAME "tree" Nothing)] 30013))),("right",NAME "tree" (Just (RECORD [("key",STRING),("left",NAME "tree" Nothing),("right",NAME "tree" Nothing)] 30013)))] 30013))
+../testcases/test1.tig : (ARRAY INT 30025,[Proc {body = EXP (ESEQ (SEQ (MOVE (TEMP 1) (CALL (NAME "_initArray") [CONST 10,CONST 0])) (EXP (CONST 0))) (TEMP 1)), frame = Frame {name = "main", formals = [], locals = [], fp = 0}}])
+../testcases/test10.tig : driver.exe: 2:1: type mismatch: expected UNIT, actual INT
+../testcases/test11.tig : driver.exe: 2:1: type mismatch: expected INT, actual STRING
+../testcases/test12.tig : (UNIT,[Proc {body = EXP (ESEQ (SEQ (MOVE (TEMP 1) (CONST 0)) (EXP (CONST 0))) (ESEQ (SEQ (MOVE (TEMP 3) (CONST 100)) (EXP (CONST 0))) (ESEQ (SEQ (LABEL "L1") (SEQ (CJUMP LE (TEMP 2) (TEMP 3) "L2" "L0") (SEQ (LABEL "L2") (SEQ (EXP (ESEQ (EXP (ESEQ (MOVE (TEMP 1) (BINOP PLUS (TEMP 1) (CONST 1))) (ESEQ (EXP (CONST 0)) (CONST 0)))) (ESEQ (MOVE (TEMP 2) (BINOP PLUS (TEMP 2) (CONST 1))) (CONST 0)))) (SEQ (JUMP (NAME "L1") ["L1"]) (LABEL "L0")))))) (CONST 0)))), frame = Frame {name = "main", formals = [], locals = [], fp = 0}}])
+../testcases/test13.tig : driver.exe: 3:3: type mismatch: expected INT, actual STRING
+../testcases/test14.tig : driver.exe: 12:16: type mismatch: expected RECORD [("name",STRING),("id",INT)] 60024, actual ARRAY INT 50024
+../testcases/test15.tig : driver.exe: 3:1: type mismatch: expected UNIT, actual INT
+../testcases/test16.tig : driver.exe: 4:1: cyclic dependency: a
+../testcases/test17.tig : (INT,[Proc {body = EXP (ESEQ (EXP (CONST 0)) (TEMP 1)), frame = Frame {name = "main", formals = [], locals = [], fp = 0}}])
+../testcases/test18.tig : driver.exe: 5:18: function not defined: do_nothing2
+../testcases/test19.tig : driver.exe: 8:30: undefined variable: a
+../testcases/test2.tig : (ARRAY INT 40025,[Proc {body = EXP (ESEQ (SEQ (MOVE (TEMP 1) (CALL (NAME "_initArray") [CONST 10,CONST 0])) (EXP (CONST 0))) (TEMP 1)), frame = Frame {name = "main", formals = [], locals = [], fp = 0}}])
+../testcases/test20.tig : driver.exe: 3:18: undefined variable: i
+../testcases/test21.tig : driver.exe: 8:32: : integer required.
+../testcases/test22.tig : driver.exe: 7:13: field not found: nam
+../testcases/test23.tig : driver.exe: 8:17: type mismatch: expected INT, actual STRING
+../testcases/test24.tig : driver.exe: 5:10: not an array
+../testcases/test25.tig : driver.exe: 5:10: not a record: INT
+../testcases/test26.tig : driver.exe: 3:3: : integer required.
+../testcases/test27.tig : driver.exe: n/a!
+../testcases/test28.tig : driver.exe: 7:13: type mismatch: expected RECORD [("name",STRING),("id",INT)] 40025, actual RECORD [("name",STRING),("id",INT)] 50025
+../testcases/test29.tig : driver.exe: 7:13: type mismatch: expected ARRAY INT 40025, actual ARRAY INT 50025
+../testcases/test3.tig : (RECORD [("name",STRING),("age",INT)] 30025,[Proc {body = EXP (ESEQ (SEQ (MOVE (TEMP 1) (CALL (NAME "_initRecord") [CONST 2,NAME "L1",CONST 1000])) (EXP (CONST 0))) (ESEQ (MOVE (RCD (TEMP 1) 0) (NAME "L2")) (TEMP 1))), frame = Frame {name = "main", formals = [], locals = [], fp = 0}},Str "L1" "Nobody",Str "L0" "Nobody"])
+../testcases/test30.tig : (INT,[Proc {body = EXP (ESEQ (SEQ (MOVE (TEMP 1) (CALL (NAME "_initArray") [CONST 10,CONST 0])) (EXP (CONST 0))) (ARR (TEMP 1) (CONST 2))), frame = Frame {name = "main", formals = [], locals = [], fp = 0}}])
+../testcases/test31.tig : driver.exe: 3:13: type mismatch: expected INT, actual STRING
+../testcases/test32.tig : driver.exe: 6:18: type mismatch: expected INT, actual STRING
+../testcases/test33.tig : driver.exe: 3:17: record type not found: rectype
+../testcases/test34.tig : driver.exe: 5:9: type mismatch: expected INT, actual STRING
+../testcases/test35.tig : driver.exe: 5:9: wrong number of arguments.
+../testcases/test36.tig : driver.exe: 5:9: wrong number of arguments.
+../testcases/test37.tig : (INT,[Proc {body = EXP (ESEQ (SEQ (MOVE (TEMP 2) (NAME "L0")) (EXP (CONST 0))) (CONST 0)), frame = Frame {name = "main", formals = [], locals = [], fp = 0}},Str "L0" " "])
+../testcases/test38.tig : driver.exe: 5:9: duplicated defintion: a
+../testcases/test39.tig : driver.exe: 5:18: duplicated defintion: g
+../testcases/test3b.tig : (RECORD [("name",STRING),("age",INT)] 30025,[Proc {body = EXP (ESEQ (SEQ (MOVE (TEMP 1) (CALL (NAME "_initRecord") [CONST 2,NAME "L1",CONST 1000])) (EXP (CONST 0))) (ESEQ (MOVE (RCD (TEMP 1) 0) (NAME "L2")) (TEMP 1))), frame = Frame {name = "main", formals = [], locals = [], fp = 0}},Str "L1" "Nobody",Str "L0" "Nobody"])
+../testcases/test4.tig : driver.exe: n/a!
+../testcases/test40.tig : driver.exe: 3:18: type mismatch: expected UNIT, actual INT
+../testcases/test41.tig : (INT,[Proc {body = EXP (ESEQ (EXP (CONST 0)) (ESEQ (EXP (CONST 0)) (CONST 0))), frame = Frame {name = "main", formals = [], locals = [], fp = 0}}])
+../testcases/test42.tig : (UNIT,[Proc {body = EXP (ESEQ (SEQ (MOVE (TEMP 5) (CALL (NAME "_initRecord") [CONST 2,NAME "L10",CALL (NAME "_initArray") [CONST 3,CONST 1900]])) (EXP (CONST 0))) (ESEQ (SEQ (MOVE (ARR (TEMP 1) (CONST 0)) (CONST 1)) (SEQ (MOVE (ARR (TEMP 1) (CONST 9)) (CONST 3)) (SEQ (MOVE (RCD (ARR (TEMP 2) (CONST 3)) 0) (NAME "L13")) (SEQ (MOVE (RCD (ARR (TEMP 2) (CONST 1)) 3) (CONST 23)) (SEQ (MOVE (ARR (TEMP 3) (CONST 34)) (NAME "L12")) (SEQ (MOVE (RCD (TEMP 4) 0) (NAME "L11")) (MOVE (ARR (RCD (TEMP 5) 1) (CONST 0)) (CONST 2323)))))))) (ESEQ (MOVE (ARR (RCD (TEMP 5) 1) (CONST 2)) (CONST 2323)) (CONST 0)))), frame = Frame {name = "main", formals = [], locals = [], fp = 0}},Str "L10" "Allos",Str "L9" "Allos"])
+../testcases/test43.tig : driver.exe: 6:11: : integer required.
+../testcases/test44.tig : (UNIT,[Proc {body = EXP (ESEQ (SEQ (MOVE (TEMP 1) (CONST 0)) (EXP (CONST 0))) (ESEQ (MOVE (TEMP 1) (CONST 0)) (CONST 0))), frame = Frame {name = "main", formals = [], locals = [], fp = 0}}])
+../testcases/test45.tig : driver.exe: 5:13: nil can be used only in the long form.
+../testcases/test46.tig : (INT,[Proc {body = EXP (ESEQ (SEQ (MOVE (TEMP 1) (CONST 0)) (EXP (CONST 0))) (ESEQ (EXP (ESEQ (SEQ (CJUMP EQ (TEMP 1) (CONST 0) "L0" "L0") (LABEL "L0")) (CONST 0))) (ESEQ (SEQ (MOVE (TEMP 2) (CONST 1)) (SEQ (CJUMP NE (TEMP 1) (CONST 0) "L0" "L1") (SEQ (LABEL "L1") (SEQ (MOVE (TEMP 2) (CONST 0)) (LABEL "L0"))))) (TEMP 2)))), frame = Frame {name = "main", formals = [], locals = [], fp = 0}}])
+../testcases/test47.tig : (INT,[Proc {body = EXP (ESEQ (EXP (CONST 0)) (CONST 0)), frame = Frame {name = "main", formals = [], locals = [], fp = 0}}])
+../testcases/test48.tig : driver.exe: n/a!
+../testcases/test49.tig : driver.exe: Parse Error at token nil at line 5, col 25
+../testcases/test5.tig : (RECORD [("hd",INT),("tl",NAME "intlist" (Just (RECORD [("hd",INT),("tl",NAME "intlist" Nothing)] 40016)))] 40016,[Proc {body = EXP (ESEQ (SEQ (MOVE (TEMP 1) (CALL (NAME "_initRecord") [CONST 2,CONST 0,CONST 0])) (EXP (CONST 0))) (TEMP 1)), frame = Frame {name = "main", formals = [], locals = [], fp = 0}}])
+../testcases/test6.tig : driver.exe: n/a!
+../testcases/test7.tig : driver.exe: n/a!
+../testcases/test8.tig : (INT,[Proc {body = EXP (ESEQ (SEQ (CJUMP NE (ESEQ (SEQ (MOVE (TEMP 1) (CONST 1)) (SEQ (CJUMP GT (CONST 10) (CONST 20) "L0" "L1") (SEQ (LABEL "L1") (SEQ (MOVE (TEMP 1) (CONST 0)) (LABEL "L0"))))) (TEMP 1)) (CONST 0) "L0" "L1") (SEQ (LABEL "L0") (SEQ (MOVE (TEMP 1) (CONST 30)) (SEQ (JUMP (NAME "L2") ["L2"]) (SEQ (LABEL "L1") (SEQ (MOVE (TEMP 1) (CONST 40)) (LABEL "L2"))))))) (TEMP 1)), frame = Frame {name = "main", formals = [], locals = [], fp = 0}}])
+../testcases/test9.tig : driver.exe: 3:1: type mismatch: expected INT, actual STRING
+../additonalcases/reccmp.tig : (INT,[Proc {body = EXP (ESEQ (SEQ (MOVE (TEMP 3) (CALL (NAME "_initRecord") [CONST 2,CONST 0,CONST 0])) (EXP (CONST 0))) (ESEQ (SEQ (MOVE (TEMP 4) (CONST 1)) (SEQ (CJUMP EQ (TEMP 1) (RCD (TEMP 2) 1) "L0" "L1") (SEQ (LABEL "L1") (SEQ (MOVE (TEMP 4) (CONST 0)) (LABEL "L0"))))) (TEMP 4))), frame = Frame {name = "main", formals = [], locals = [], fp = 0}}])
+../additonalcases/test16b.tig : driver.exe: 4:1: cyclic dependency: a
+../additonalcases/test17b.tig : driver.exe: 4:12: type not defined (field): treelist
+../additonalcases/test19b.tig : driver.exe: 8:29: undefined variable: a
+../additonalcases/test32b.tig : driver.exe: 6:18: type mismatch: expected INT, actual STRING
+../additonalcases/test33b.tig : driver.exe: 3:17: record type not found: rectype
+../additonalcases/test37b.tig : (STRING,[Proc {body = EXP (ESEQ (SEQ (MOVE (TEMP 2) (NAME "L0")) (EXP (CONST 0))) (TEMP 2)), frame = Frame {name = "main", formals = [], locals = [], fp = 0}},Str "L0" " "])
+../additonalcases/test38b.tig : driver.exe: 5:9: duplicated defintion: a
+../additonalcases/test39b.tig : driver.exe: 5:18: duplicated defintion: g
+../additonalcases/test41b.tig : (STRING,[Proc {body = EXP (ESEQ (SEQ (MOVE (TEMP 1) (CONST 0)) (EXP (CONST 0))) (ESEQ (SEQ (MOVE (TEMP 2) (NAME "L0")) (EXP (CONST 0))) (TEMP 2))), frame = Frame {name = "main", formals = [], locals = [], fp = 0}}])
+../additonalcases/test48b.tig : driver.exe: n/a!
+../additonalcases/test5b.tig : (INT,[Proc {body = EXP (ESEQ (SEQ (MOVE (TEMP 2) (CALL (NAME "_initRecord") [CONST 2,NAME "L1",CONST 0])) (EXP (CONST 0))) (BINOP PLUS (RCD (TEMP 1) 0) (CALL (NAME "ord") [RCD (TEMP 2) 0]))), frame = Frame {name = "main", formals = [], locals = [], fp = 0}},Str "L1" "a",Str "L0" "a"])
