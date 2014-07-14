@@ -644,7 +644,7 @@ transDec venv tenv brkdest =
               foldl transparam venv' $ zip3 params formals as
             
             (ExpTy{expr=ebody, ty=bdty}, lv', frgs', temp') = 
-              transExp venv_loc tenv brkdest level frgs temp body
+              transExp venv_loc tenv brkdest lev frgs temp body
               
             -- TODO: unNx should not be public.
             (stm, temp'') = TL.unNx temp' ebody
