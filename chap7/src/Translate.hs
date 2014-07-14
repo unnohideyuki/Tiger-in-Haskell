@@ -1,7 +1,7 @@
 module Translate where
 
 import qualified Temp
-import qualified Frame
+import qualified Frame hiding (formals)
 import qualified DalvikFrame as Frame
 import qualified Tree as T
 
@@ -37,8 +37,9 @@ allocLocal :: Level -> Bool -> Temp.Temp -> (Access, Level, Temp.Temp)
 allocLocal level@Level{frame=frame} escapes temp =
   let
     (access, frame', temp') = Frame.allocLocal frame escapes temp
+    level' = level{frame=frame'}
   in
-   (Access{level=level, access=access}, level{frame=frame'}, temp')
+   (Access{level=level', access=access}, level', temp')
 
 data Exp = Ex T.Exp
          | Nx T.Stm
@@ -323,4 +324,12 @@ stringExp s temp =
     expr = Ex $ T.NAME label
   in
    (expr, frag, temp')
-  
+   
+acc_formals :: Level -> [Access]
+acc_formals level =
+    fmap 
+    (\a -> Access{level=level, access=a})
+    (Frame.formals $ frame level)
+
+   
+    

@@ -1,5 +1,7 @@
 module Semant where
 
+import Debug.Trace
+
 import qualified Data.List as List
 
 import qualified Absyn as A
@@ -628,14 +630,18 @@ transDec venv tenv brkdest =
                       A.result = result, A.func_body = body, 
                       A.func_pos = pos } = 
           let
-            Just E.FunEntry { E.result = rty, E.formals = formals } = 
+            Just E.FunEntry { E.level = lev
+                            , E.result = rty
+                            , E.formals = formals } = 
               S.lookup venv' name
             
-            transparam acc (A.Field { A.field_name = name }, ty) =
-              S.insert acc name $ E.VarEntry { E.access = error "n/a!"
-                                             , E.ty=ty }
+            transparam ve (A.Field{A.field_name=name}, ty, a) =
+              S.insert ve name $ E.VarEntry {E.access=a, E.ty=ty}
+            
+            as = TL.acc_formals lev
 
-            venv_loc = foldl transparam venv' $ zip params formals
+            venv_loc = 
+              foldl transparam venv' $ zip3 params formals as
             
             (ExpTy{expr=ebody, ty=bdty}, lv', frgs', temp') = 
               transExp venv_loc tenv brkdest level frgs temp body
