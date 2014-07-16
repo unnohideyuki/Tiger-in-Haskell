@@ -332,4 +332,6 @@ acc_formals level =
     (Frame.formals $ frame level)
 
    
-    
+fpExp :: Level -> Exp
+fpExp level = 
+   Ex $ T.TEMP $ Frame.fp $ frame level

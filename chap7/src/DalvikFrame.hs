@@ -26,12 +26,12 @@ newFrame' label fs temp =
   let
     calc_formals (escapes, n) (acc, t) =
       if escapes then
-        (F.InFrame (-n) : acc, temp)
+        (F.InFrame (-3 - n) : acc, temp)
       else
         let
-          (m, temp') = Temp.newTemp temp
+          (m, t') = Temp.newTemp t
         in
-         (F.InReg m : acc, temp')
+         (F.InReg m : acc, t')
          
     (formals, temp') = foldr' calc_formals ([], temp) $ zip fs [0..]
     

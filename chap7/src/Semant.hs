@@ -54,7 +54,8 @@ transProg venv tenv prog =
   let
     temp = Temp.create
     (mainlevel, temp') = 
-      TL.newLevel TL.outermost (Temp.namedLabel "main") [] temp
+      TL.newLevel 
+      TL.outermost (Temp.namedLabel "main") [True] temp
     errdest = Temp.namedLabel "_CanNotBreak_"
     (expty, _, frgs, temp'') = transExp venv tenv errdest mainlevel [] temp' prog
     
@@ -269,11 +270,11 @@ transExp venv tenv brkdest =
     
     trexp level frgs temp A.LetExp{A.decs=decs, A.body=body, A.pos=pos} =
       let
-        transdecs (venv, tenv, lv, tmp, es, fs) dec = transDec venv tenv brkdest lv frgs tmp dec
+        transdecs (venv, tenv, lv, tmp, es, fs) dec = transDec venv tenv brkdest lv fs tmp dec
         (venv', tenv', lv', temp', es, frgs') = 
           foldl transdecs (venv, tenv, level, temp, [], frgs) decs
         (ExpTy {expr=ebody, ty=bodyty }, lv'', frgs'', temp'') = 
-          transExp venv' tenv' brkdest lv' frgs' temp' body
+          transExp venv' tenv' brkdest level frgs' temp' body 
         (e, temp3) = TL.letExp es ebody temp''
       in
        (ExpTy{expr=e, ty=bodyty}, lv'', frgs'', temp3)
@@ -362,7 +363,9 @@ transExp venv tenv brkdest =
                szcheck && (and $ fmap checker ts)
                
             es = fmap expr argtys
-            (e, temp'') = TL.callExp label es temp'
+            sl = TL.fpExp lv'
+            
+            (e, temp'') = TL.callExp label (sl:es) temp'
           in
            if checkformals formals argtys
            then 
@@ -608,7 +611,8 @@ transDec venv tenv brkdest =
 
             formals = fmap A.field_esc params
 
-            (lev, temp'') = TL.newLevel level label formals temp'
+            -- (True:formals) corresponds to (sl:args)
+            (lev, temp'') = TL.newLevel level label (True:formals) temp'
      
           in
            if checkdup (fmap A.field_name params) (fmap A.field_pos params) then
