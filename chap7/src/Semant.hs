@@ -642,7 +642,8 @@ transDec venv tenv brkdest =
             transparam ve (A.Field{A.field_name=name}, ty, a) =
               S.insert ve name $ E.VarEntry {E.access=a, E.ty=ty}
             
-            as = TL.acc_formals lev
+            -- drop the access for the static_link.
+            (_:as) = TL.acc_formals lev
 
             venv_loc = 
               foldl transparam venv' $ zip3 params formals as
