@@ -211,7 +211,7 @@ transExp venv tenv brkdest =
               else case last es of ExpTy{ty=ty} -> ty
         (e, temp'') = TL.seqExp [e | ExpTy{expr=e} <- es] temp'
       in
-       (ExpTy{expr=e, ty=ty'}, lv', frgs, temp')
+       (ExpTy{expr=e, ty=ty'}, lv', frgs', temp'')
                
     trexp level frgs temp A.AssignExp{A.vvar=var, A.exp=exp, A.pos=pos} = 
       let 
