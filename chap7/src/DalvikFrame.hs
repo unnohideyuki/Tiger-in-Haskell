@@ -26,7 +26,7 @@ newFrame' label fs temp =
   let
     calc_formals (escapes, n) (acc, t) =
       if escapes then
-        (F.InFrame (-3 - n) : acc, temp)
+        (F.InFrame (-3 - n) : acc, t)
       else
         let
           (m, t') = Temp.newTemp t
