@@ -331,7 +331,14 @@ acc_formals level =
     (\a -> Access{level=level, access=a})
     (Frame.formals $ frame level)
 
-   
 fpExp :: Level -> Exp
 fpExp level = 
    Ex $ T.TEMP $ Frame.fp $ frame level
+   
+strcmpExp :: Exp -> Exp -> (Exp -> Exp -> Temp.Temp -> (Exp, Temp.Temp)) -> Temp.Temp
+             -> (Exp, Temp.Temp)
+strcmpExp lhs rhs bcon temp = 
+  let
+    (call, temp') = callExp (Temp.namedLabel "_strcmp") [lhs, rhs] temp
+  in
+   bcon call (Ex $ T.CONST 0) temp'

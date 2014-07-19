@@ -132,25 +132,35 @@ transExp venv tenv brkdest =
             Comp -> check_comp
             Eq -> check_eq
             
+        trop oper = 
+          case oper of
+            A.PlusOp -> TL.plusOp
+            A.MinusOp -> TL.minusOp
+            A.TimesOp -> TL.timesOp
+            A.DivideOp -> TL.divideOp
+            A.LtOp -> TL.ltOp
+            A.GtOp -> TL.gtOp
+            A.LeOp -> TL.leOp
+            A.GeOp -> TL.geOp
+            A.EqOp -> TL.eqOp
+            A.NeqOp -> TL.neqOp
+
         (binExp, temp3) = 
           let
-            c = 
-              case oper of
-                A.PlusOp -> TL.plusOp
-                A.MinusOp -> TL.minusOp
-                A.TimesOp -> TL.timesOp
-                A.DivideOp -> TL.divideOp
-                A.LtOp -> TL.ltOp
-                A.GtOp -> TL.gtOp
-                A.LeOp -> TL.leOp
-                A.GeOp -> TL.geOp
-                A.EqOp -> TL.eqOp
-                A.NeqOp -> TL.neqOp
+            c = trop oper
           in
            c e1 e2 temp''
+           
+        (strcmpExp, temp3s) =
+          let
+            op = trop oper
+          in
+           TL.strcmpExp e1 e2 op temp''
       in
          if check_result then
-           (ExpTy{expr=binExp, ty=T.INT}, lv'', frgs'', temp3)
+           case lty of
+             T.STRING -> (ExpTy{expr=strcmpExp, ty=T.INT}, lv'', frgs'', temp3s)
+             _ -> (ExpTy{expr=binExp, ty=T.INT}, lv'', frgs'', temp3)
          else 
            must_not_reach
                       
