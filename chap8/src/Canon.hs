@@ -27,7 +27,52 @@ linearize stm0 =
       in if commute (stms', e)
          then (stms % stms', e::el, temp')
          else let (t, temp'') = Temp.newTemp temp'
-              in (stms % (T.MOVE (T.TEMP t) e) % stms', T.TEMP t:el)
+              in (stms % (T.MOVE (T.TEMP t) e) % stms', T.TEMP t:el, temp'')
     reorder [] temp = (nop, [], temp)
+    
+    reorder_exp el build temp =
+      let
+        (stms, el', temp') = reorder el temp
+      in
+       (stms, build el', temp')
+       
+    reorder_stm el build temp =
+      let
+        (stms, el', temp') = reorder el temp
+      in
+       (stms % build el', temp')
+       
+    do_stm (T.SEQ a b) temp = 
+      let 
+        (s1, t1) = do_stm a temp 
+        (s2, t2) = do_stm b t1
+      in
+       (s1 % s2, t2)
+       
+    do_stm (T.JUMP e labs) temp = reorder_stm [e] (\[e'] -> T.JUMP e' labs) temp
+  
+    do_stm (T.CJUMP p a b t f) temp =
+      reorder_stm [a, b] (\[a', b'] -> T.CJUMP p a' b' t f) temp
+    
+    do_stm (T.MOVE (T.TEMP t) (T.CALL e el)) temp =
+      reorder_stm (e:el) (\(e':el') -> T.MOVE (T.TEMP t) (T.CALL e' el')) temp
+
+    do_stm (T.MOVE (T.TEMP t) b) temp =
+      reorder_stm [b] (\[b'] -> T.MOVE (T.TEMP t) b') temp
+    
+    -- TODO: ARR and RCD are also can be a l-value
+    do_stm (T.MOVE (T.MEM e) b) temp =
+      reorder_stm [e, b] (\[e', b'] -> T.MOVE e' b') temp
+                            
+    do_stm (T.MOVE (T.ESEQ s e) b) temp = do_stm (T.SEQ s (T.MOVE e b)) temp
+    
+    do_stm (T.EXP (T.CALL e el)) temp =
+      reorder_stm (e:el) (\(e':el') -> T.EXP $ T.CALL e' el') temp
+      
+    do_stm (T.EXP e) temp = reorder_stm [e] (\[e'] -> T.EXP e') temp
+    
+    do_stm s temp = reorder_stm [] (\_ -> s) temp
+    
+    do_exp = undefined
   in
    undefined
