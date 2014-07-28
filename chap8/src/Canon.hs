@@ -109,3 +109,38 @@ linearize stm0 temp0 =
     (ss, tret) = do_stm stm0 temp0
   in {- body of linearize -}
    (linear ss [], tret)
+   
+type Block = [T.Stm]
+
+basicBlocks :: [T.Stm] -> Temp.Temp -> ([Block], Temp.Temp, Temp.Label)
+basicBlocks stms0 temp0 =
+  let
+    (done, temp1) = Temp.newLabel temp0
+    blocks (hd@(T.LABEL _):tl) blist temp = 
+      let
+        next (s@(T.JUMP _ _):rest) thisblock t = endblock rest (s:thisblock) t
+        next (s@(T.CJUMP _ _ _ _ _):rest) thisblock t =
+          endblock rest (s:thisblock) t
+        next stms@(T.LABEL lab:_) thisblock t =
+          next ((T.JUMP (T.NAME lab) [lab]):stms) thisblock t
+        next (s:rest) thisblock t = next rest (s:thisblock) t
+        next [] thisblock t =
+          next [T.JUMP (T.NAME done) [done]] thisblock t
+        
+        endblock stms thisblock t = 
+          blocks stms (reverse thisblock:blist) t
+      in
+       next tl [hd] temp
+    
+    blocks [] blist temp = (reverse blist, temp)
+    
+    blocks stms blist temp = 
+      let
+        (label, temp') = Temp.newLabel temp
+      in
+       blocks (T.LABEL label:stms) blist temp'
+    
+    (bs, tret) = blocks stms0 [] temp1
+  in
+   (bs, tret, done)
+ 
