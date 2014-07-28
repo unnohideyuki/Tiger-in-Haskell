@@ -148,3 +148,13 @@ basicBlocks stms0 temp0 =
 enterblock :: [T.Stm] -> Symbol.Table [T.Stm] -> Symbol.Table [T.Stm]
 enterblock b@(T.LABEL s:_) table = Symbol.insert table s b
 enterblock _ table = table
+
+splitlast :: [a] -> ([a], a)
+splitlast [x] = ([], x)
+splitlast (h:t) =
+  let
+    (t', last') = splitlast t
+  in
+   (h:t', last')
+splitlast [] = error "splitlast []"
+
