@@ -8,11 +8,11 @@ type Table = Map.Map Symbol
 fromString:: String -> String
 fromString = id
 
-empty :: Map.Map k a
+empty :: Table a
 empty = Map.empty
 
-insert :: Ord k => Map.Map k a -> k -> a -> Map.Map k a
+insert :: Table a -> Symbol -> a -> Table a
 insert table s v = Map.insert s v table
 
-lookup :: Ord k => Map.Map k a -> k -> Maybe a
+lookup :: Table a -> Symbol -> Maybe a
 lookup table s = Map.lookup s table

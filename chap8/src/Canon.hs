@@ -2,6 +2,7 @@ module Canon where
 
 import qualified Tree as T
 import qualified Temp
+import qualified Symbol
 
 linearize :: T.Stm -> Temp.Temp -> ([T.Stm], Temp.Temp)
 linearize stm0 temp0 =
@@ -144,3 +145,6 @@ basicBlocks stms0 temp0 =
   in
    (bs, tret, done)
  
+enterblock :: [T.Stm] -> Symbol.Table [T.Stm] -> Symbol.Table [T.Stm]
+enterblock b@(T.LABEL s:_) table = Symbol.insert table s b
+enterblock _ table = table
