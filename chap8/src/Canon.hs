@@ -3,8 +3,8 @@ module Canon where
 import qualified Tree as T
 import qualified Temp
 
-linearize :: T.Stm -> [T.Stm]
-linearize stm0 =
+linearize :: T.Stm -> Temp.Temp -> ([T.Stm], Temp.Temp)
+linearize stm0 temp0 =
   let
     infixl 0 %
     (T.EXP (T.CONST _)) % x = x
@@ -22,12 +22,12 @@ linearize stm0 =
       let (t, temp') = Temp.newTemp temp
       in reorder (T.ESEQ (T.MOVE (T.TEMP t) e) (T.TEMP t) : rest) temp'
     reorder (a:rest) temp =
-      let (stms, e) = do_exp a
-          (stms', el, temp') = reorder rest temp
+      let (stms, e, temp') = do_exp a temp
+          (stms', el, temp'') = reorder rest temp'
       in if commute (stms', e)
-         then (stms % stms', e::el, temp')
-         else let (t, temp'') = Temp.newTemp temp'
-              in (stms % (T.MOVE (T.TEMP t) e) % stms', T.TEMP t:el, temp'')
+         then (stms % stms', e:el, temp'')
+         else let (t, temp3) = Temp.newTemp temp''
+              in (stms % (T.MOVE (T.TEMP t) e) % stms', T.TEMP t:el, temp3)
     reorder [] temp = (nop, [], temp)
     
     reorder_exp el build temp =
@@ -60,10 +60,15 @@ linearize stm0 =
     do_stm (T.MOVE (T.TEMP t) b) temp =
       reorder_stm [b] (\[b'] -> T.MOVE (T.TEMP t) b') temp
     
-    -- TODO: ARR and RCD are also can be a l-value
     do_stm (T.MOVE (T.MEM e) b) temp =
-      reorder_stm [e, b] (\[e', b'] -> T.MOVE e' b') temp
+      reorder_stm [e, b] (\[e', b'] -> T.MOVE (T.MEM e') b') temp
                             
+    do_stm (T.MOVE (T.ARR v i) b) temp =
+      reorder_stm [v, i, b] (\[v', i', b'] -> T.MOVE (T.ARR v' i') b') temp
+      
+    do_stm (T.MOVE (T.RCD e n) b) temp =
+      reorder_stm [e, b] (\[e', b'] -> T.MOVE (T.RCD e' n) b') temp
+    
     do_stm (T.MOVE (T.ESEQ s e) b) temp = do_stm (T.SEQ s (T.MOVE e b)) temp
     
     do_stm (T.EXP (T.CALL e el)) temp =
@@ -73,6 +78,34 @@ linearize stm0 =
     
     do_stm s temp = reorder_stm [] (\_ -> s) temp
     
-    do_exp = undefined
-  in
-   undefined
+    do_exp (T.BINOP p a b) temp =
+      reorder_exp [a, b] (\[a', b'] -> T.BINOP p a' b') temp
+                            
+    do_exp (T.MEM a) temp =
+      reorder_exp [a] (\[a'] -> T.MEM a') temp
+      
+    do_exp (T.ARR v i) temp =
+      reorder_exp [v, i] (\[v', i'] -> T.ARR v' i') temp
+      
+    do_exp (T.RCD e n) temp =
+      reorder_exp [e] (\[e'] -> T.RCD e' n) temp
+      
+    do_exp (T.ESEQ s e) temp =
+      let
+        (stms, temp') = do_stm s temp
+        (stms', e', temp'') = do_exp e temp'
+      in
+       (stms % stms', e', temp'')
+                         
+    do_exp (T.CALL e el) temp =
+      reorder_exp (e:el) (\(e':el') -> T.CALL e' el') temp
+      
+    do_exp e temp = reorder_exp [] (\_ -> e) temp
+    
+    {- linear gets rid of the top-level SEQ's, producing a list -}
+    linear (T.SEQ a b) l = linear a (linear b l)
+    linear s l = s:l
+    
+    (ss, tret) = do_stm stm0 temp0
+  in {- body of linearize -}
+   (linear ss [], tret)
