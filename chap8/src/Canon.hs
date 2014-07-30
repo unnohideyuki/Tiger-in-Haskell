@@ -158,3 +158,38 @@ splitlast (h:t) =
    (h:t', last')
 splitlast [] = error "splitlast []"
 
+trace :: Symbol.Table Block -> Block -> [Block] -> Temp.Temp -> (Block, Temp.Temp)
+trace table b@(T.LABEL lab:_) rest temp =
+  let table' = Symbol.insert table lab []
+  in case splitlast b of
+    (most, T.JUMP (T.NAME lab') _) -> 
+      case Symbol.lookup table' lab' of
+        Just b'@(_:_) -> let (b'', temp') = trace table' b' rest temp
+                         in (most ++ b'', temp')
+        _ -> let (b', temp') = getnext table' rest temp
+             in (b ++ b', temp')
+    (most, T.CJUMP opr x y t f) ->
+      case (Symbol.lookup table' t, Symbol.lookup table' f) of
+        (_, Just b'@(_:_)) -> let (b'', temp') = trace table' b' rest temp
+                              in (b ++ b'', temp')
+        (Just b'@(_:_), _) -> 
+          let (b'', temp') = trace table' b' rest temp
+          in (most ++ [T.CJUMP (T.notRel opr) x y f t] ++ b'', temp')
+        _ -> let (f', temp') = Temp.newLabel temp
+                 (b', temp'') = getnext table' rest temp'
+             in (most ++ [T.CJUMP opr x y t f'
+                         , T.LABEL f'
+                         , T.JUMP (T.NAME f) [f]] ++ b',
+                 temp'')
+    (_, T.JUMP _ _) -> let (b', temp') = getnext table' rest temp
+                       in (b ++ b', temp')
+    _ -> error "fatal:illegal pattern for split last b"
+trace _ _ _ _ = error "fatal:illegal pattern for trace"
+
+getnext :: Symbol.Table Block -> [Block] -> Temp.Temp -> (Block, Temp.Temp)
+getnext table (b@(T.LABEL lab:_):rest) temp =
+  case Symbol.lookup table lab of
+    Just (_:_) -> trace table b rest temp
+    _ -> getnext table rest temp
+getnext _ [] temp = ([], temp)
+getnext _ _ _ = error "fatal: illegal pattern for getnext"

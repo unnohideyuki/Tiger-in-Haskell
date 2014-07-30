@@ -1,6 +1,8 @@
 module Tree where
 
+import Prelude hiding (EQ, LT, GT)
 import qualified Temp
+
 
 data Exp = CONST Int
          | NAME Temp.Label
@@ -28,3 +30,15 @@ data Binop = PLUS | MINUS | MUL | DIV
 data Relop = EQ | NE | LT | LE | GT | GE
            | ULT | ULE | UGT | UGE
            deriving(Eq, Show)
+                   
+notRel :: Relop -> Relop
+notRel EQ = NE
+notRel NE = EQ
+notRel LT = GE
+notRel LE = GT
+notRel GT = LE
+notRel GE = LT
+notRel ULT = UGE
+notRel ULE = UGT
+notRel UGT = ULE
+notRel UGE = ULT
