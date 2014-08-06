@@ -1,7 +1,5 @@
 module Semant where
 
-import Debug.Trace
-
 import qualified Data.List as List
 
 import qualified Absyn as A
@@ -20,17 +18,20 @@ data ExpTy = ExpTy {expr::TL.Exp, ty::T.Ty}
   
 data Optype = Arith | Comp | Eq
 
-actual_ty ty pos =
-  case ty of
+actual_ty :: Show pos => T.Ty -> pos -> T.Ty
+actual_ty typ pos =
+  case typ of
     T.NAME s t -> case t of
       Just ty' -> actual_ty ty' pos
       Nothing -> error $ show pos ++ "type not found (in actual_ty): " ++ s
     T.ARRAY ty' u -> T.ARRAY (actual_ty ty' pos) u
-    _ -> ty
+    _ -> typ
 
+type_mismatch :: (Show a, Show b, Show c) => a -> b -> c -> t
 type_mismatch e a pos =
   error $ show pos ++ "type mismatch: expected " ++ show e ++ ", actual " ++ show a
 
+check_type :: Show pos => T.Ty -> T.Ty -> pos -> Bool
 check_type t1 t2 pos =
   let
     t1' = actual_ty t1 pos
@@ -44,6 +45,7 @@ check_type t1 t2 pos =
        _ -> type_mismatch t1' t2' pos
    else True
        
+must_not_reach :: t
 must_not_reach =
   error "fatal: must not reach here"
 
@@ -104,10 +106,10 @@ transExp venv tenv brkdest =
             A.EqOp -> Eq
             A.NeqOp -> Eq
         
-        check_int ty pos = 
-          case ty of
+        check_int typ pos' = 
+          case typ of
             T.INT -> True
-            _     -> error $ show pos ++ ": integer required."
+            _     -> error $ show pos' ++ ": integer required."
             
         check_arith = check_int lty pos && check_int rty pos
         
@@ -132,8 +134,8 @@ transExp venv tenv brkdest =
             Comp -> check_comp
             Eq -> check_eq
             
-        trop oper = 
-          case oper of
+        trop oper' = 
+          case oper' of
             A.PlusOp -> TL.plusOp
             A.MinusOp -> TL.minusOp
             A.TimesOp -> TL.timesOp
@@ -169,23 +171,24 @@ transExp venv tenv brkdest =
     trexp level frgs temp A.RecordExp{A.fields=fields, A.typ=typ, A.pos=pos} = 
       case S.lookup tenv typ of
         Nothing -> error $ show pos ++ "record type not found: " ++ typ
-        Just ty -> case actual_ty ty pos of
+        Just ty' -> case actual_ty ty' pos of
           T.RECORD ftys_ty u -> 
             let 
               (level', frgs', temp', ftys_exp) = 
                 foldr
-                (\(sym,e,pos) (l, f, t, xs) -> case trexp l f t e of
-                    (expty, l', f', t') -> (l', f', t', (sym, expty, pos):xs)
+                (\(sym,e',pos') (l, f, t, xs) -> case trexp l f t e' of
+                    (expty, l', f', t') -> (l', f', t', (sym, expty, pos'):xs)
                 ) 
                 (level, frgs, temp, [])
                 fields
                 
-              (cs, level'', frgs'', temp'') =
+              (cs, {- level'' -} _, frgs'', temp'') =
                 foldr
-                (\(sym,_) (cs, level, frgs, temp) ->
-                  case lookup sym [(s,e)|(s,e,_)<-fields] of
-                    Just e -> case trexp level frgs temp e of
-                      (ExpTy{expr=expr}, l', f', t') -> (expr:cs, l', f', t')
+                (\(sym,_) (cs', lv, fs, tmp) ->
+                  case lookup sym [(s,e')|(s,e',_)<-fields] of
+                    Just e'' -> case trexp lv fs tmp e'' of
+                      (ExpTy{expr=expr'}, l', f', t') -> (expr':cs', l', f', t')
+                    _ -> must_not_reach
                 )
                 ([], level', frgs', temp')
                 ftys_ty
@@ -194,16 +197,18 @@ transExp venv tenv brkdest =
             in
              if checkrecord ftys_ty ftys_exp pos
              then
+               {- TODO: check level''? -}
                (ExpTy {expr=e, ty=T.RECORD ftys_ty u}, level', frgs'', temp3)
              else
                must_not_reach
+          _ -> must_not_reach
       where
-        checkrecord ftys_ty ftys_exp pos = 
+        checkrecord ftys_ty ftys_exp pos0 = 
           let
             checker (sym, ExpTy{ty=t2}, pos') = 
               case lookup sym ftys_ty of
                 Just t1 -> check_type t1 t2 pos'
-                Nothing -> error $ show pos ++ "field not found: " ++ sym
+                Nothing -> error $ show pos0 ++ "field not found: " ++ sym
           in
             (length ftys_ty == length ftys_exp) && (and $ fmap checker ftys_exp)
         
@@ -211,22 +216,22 @@ transExp venv tenv brkdest =
       let 
         (lv', frgs', temp', es) = 
           foldr
-          (\exp (l, f, t, xs) -> case trexp l f t exp of
-              (e, l', f', t') -> (l', f', t', e:xs)
+          (\exp' (l, f, t, xs) -> case trexp l f t exp' of
+              (e', l', f', t') -> (l', f', t', e':xs)
           )
           (level, frgs, temp, [])
           exps
         ty' = if null exps
               then T.UNIT
-              else case last es of ExpTy{ty=ty} -> ty
-        (e, temp'') = TL.seqExp [e | ExpTy{expr=e} <- es] temp'
+              else case last es of ExpTy{ty=typ} -> typ
+        (e, temp'') = TL.seqExp [e' | ExpTy{expr=e'} <- es] temp'
       in
        (ExpTy{expr=e, ty=ty'}, lv', frgs', temp'')
                
-    trexp level frgs temp A.AssignExp{A.vvar=var, A.exp=exp, A.pos=pos} = 
+    trexp level frgs temp A.AssignExp{A.vvar=var, A.exp=exp0, A.pos=pos} = 
       let 
         (ExpTy {expr=lhs, ty=vty }, lv', frgs', temp') = trvar level frgs temp var
-        (ExpTy {expr=rhs, ty=ety }, lv'', frgs'', temp'') = trexp lv' frgs' temp' exp
+        (ExpTy {expr=rhs, ty=ety }, lv'', frgs'', temp'') = trexp lv' frgs' temp' exp0
         (e, temp3) = TL.assignExp lhs rhs temp''
       in
        if check_type vty ety pos
@@ -278,10 +283,10 @@ transExp venv tenv brkdest =
     trexp level frgs temp (A.BreakExp _) = 
       (ExpTy {expr=TL.breakExp brkdest, ty=T.UNIT}, level, frgs, temp)
     
-    trexp level frgs temp A.LetExp{A.decs=decs, A.body=body, A.pos=pos} =
+    trexp level frgs temp A.LetExp{A.decs=decs, A.body=body {-, A.pos=pos -}} =
       let
-        transdecs (venv, tenv, lv, tmp, es, fs) dec = transDec venv tenv brkdest lv fs tmp dec
-        (venv', tenv', lv', temp', es, frgs') = 
+        transdecs (ve, te, lv, tmp, _, fs) dec = transDec ve te brkdest lv fs tmp dec
+        (venv', tenv', {- lv' -} _, temp', es, frgs') = 
           foldl transdecs (venv, tenv, level, temp, [], frgs) decs
         (ExpTy {expr=ebody, ty=bodyty }, lv'', frgs'', temp'') = 
           transExp venv' tenv' brkdest level frgs' temp' body 
@@ -289,26 +294,27 @@ transExp venv tenv brkdest =
       in
        (ExpTy{expr=e, ty=bodyty}, lv'', frgs'', temp3)
 
-    trexp level frgs temp A.ArrayExp {A.typ=typ, A.size=size, A.init=init,
+    trexp level frgs temp A.ArrayExp {A.typ=typ, A.size=size, A.init=init0,
                                       A.pos=pos} =
       case S.lookup tenv typ of
         Nothing -> error $ show pos ++ "type not found: " ++ typ
         Just t -> 
           let 
-            ty = actual_ty t pos 
+            ty1 = actual_ty t pos 
           in
-           case ty of
-             T.ARRAY ty' u ->
+           case ty1 of
+             T.ARRAY ty' _ ->
                let 
                  (ExpTy{expr=siz, ty=sizety}, lv', frgs', temp') = trexp level frgs temp size
-                 (ExpTy{expr=ini, ty=initty}, lv'', frgs'', temp'') = trexp lv' frgs' temp' init
+                 (ExpTy{expr=ini, ty=initty}, lv'', frgs'', temp'') = trexp lv' frgs' temp' init0
                  (e, temp3) = TL.arrayExp siz ini temp''
                in
                 if check_type T.INT sizety pos && check_type ty' initty pos
                 then
-                  (ExpTy {expr=e, ty=ty}, lv'', frgs'', temp3)
+                  (ExpTy {expr=e, ty=ty1}, lv'', frgs'', temp3)
                 else
                   undefined
+             _ -> must_not_reach
                   
     trexp level frgs temp A.ForExp{A.svar=svar, A.lo=lo, A.hi=hi, A.body=body,
                                    A.pos=pos } =
@@ -355,17 +361,17 @@ transExp venv tenv brkdest =
           let
             (lv', frgs', temp', argtys) =  
               foldr
-              (\exp (l, f, t, xs) -> case trexp l f t exp of
-                  (e, l', f', t') -> (l', f', t', e:xs))
+              (\exp' (l, f, t, xs) -> case trexp l f t exp' of
+                  (e', l', f', t') -> (l', f', t', e':xs))
               (level, frgs, temp, [])
               args
               
-            checkformals formals argtys =
+            checkformals fmls argtys' =
               let
                 checker (t1, ExpTy {ty=t2}) = check_type t1 t2 pos
-                ts = zip formals argtys
+                ts = zip fmls argtys'
                 szcheck = 
-                  if (length formals == length argtys) then
+                  if (length fmls == length argtys') then
                     True
                   else
                     error $ show pos ++ "wrong number of arguments."
@@ -385,34 +391,34 @@ transExp venv tenv brkdest =
 
     trvar level frgs temp (A.SimpleVar sym pos) = 
       case S.lookup venv sym of
-        Just E.VarEntry {E.access=acc, E.ty=ty} 
-          -> (ExpTy {expr=TL.simpleVar acc level, ty=ty}, level, frgs, temp)
+        Just E.VarEntry {E.access=acc, E.ty=ty1} 
+          -> (ExpTy {expr=TL.simpleVar acc level, ty=ty1}, level, frgs, temp)
         Just _ -> error $ show pos ++ "not a variable: " ++ sym
         _ -> error $ show pos ++ "undefined variable: " ++ sym
     
-    trvar level frgs temp (A.FieldVar var id pos) = 
+    trvar level frgs temp (A.FieldVar var id' pos) = 
       let
-        (ExpTy{expr=e1, ty=ty}, lv', frgs', temp') = trvar level frgs temp var
+        (ExpTy{expr=e1, ty=ty1}, lv', frgs', temp') = trvar level frgs temp var
       in
-       case ty of
+       case ty1 of
          T.RECORD fs _ ->
-           case lookup id [(s, (i, ty))| (i, (s, ty)) <- zip [0..] fs] of
-             Nothing -> error $ show pos ++ "field not found: " ++ id
+           case lookup id' [(s, (i, t))| (i, (s, t)) <- zip [0..] fs] of
+             Nothing -> error $ show pos ++ "field not found: " ++ id'
              Just (i, ty') ->
                let
                  (e, temp'') = TL.fieldVar e1 i temp'
                in
                 (ExpTy{expr=e, ty=actual_ty ty' pos}, lv', frgs', temp'')
-         _ -> error $ show pos ++ "not a record: " ++ show ty
+         _ -> error $ show pos ++ "not a record: " ++ show ty1
          
-    trvar level frgs temp (A.SubscriptVar var exp pos) = 
+    trvar level frgs temp (A.SubscriptVar var exp0 pos) = 
       let
-        (ExpTy{expr=e1, ty=ty}, lv', frgs', temp') = trvar level frgs temp var
+        (ExpTy{expr=e1, ty=ty1}, lv', frgs', temp') = trvar level frgs temp var
       in
-       case actual_ty ty pos of
+       case actual_ty ty1 pos of
          T.ARRAY ty' _ -> 
            let 
-             (ExpTy{expr=e2, ty=ty''}, lv'', frgs'', temp'') = trexp lv' frgs' temp' exp
+             (ExpTy{expr=e2, ty=ty''}, lv'', frgs'', temp'') = trexp lv' frgs' temp' exp0
              (e, temp3) = TL.subscriptVar e1 e2 temp''
            in
             case ty'' of
@@ -428,43 +434,44 @@ transTy tenv =
     -- dirty hack: generate a unique number from the position.
     pos2u (A.Pos l c) = fromIntegral $ l * 10000 + c
     
-    transty (A.NameTy sym pos) False =
+    transty (A.NameTy sym _) False =
       case S.lookup tenv sym of
-        Just ty -> ty
+        Just typ -> typ
         _ -> error "must not reach here, transy A.NameTy."
         
     transty (A.NameTy sym pos) True =
       let
-        follow_ty seen sym =
-          if List.all (/= sym) seen then
-            case S.lookup tenv sym of
-              Just ty -> 
-                case ty of
+        follow_ty seen sym0 =
+          if List.all (/= sym0) seen then
+            case S.lookup tenv sym0 of
+              Just ty' -> 
+                case ty' of
                   T.NAME s (Just (T.NAME s' _)) -> 
                     T.NAME s (Just $ follow_ty (s:seen) s')
-                  _ -> ty
+                  _ -> ty'
               _ -> error "must not reach here, update A.NameTy. (2)"
           else
             {- must not reach here? -}
-            error $ show pos ++ "cyclic dependency': " ++ sym
+            error $ show pos ++ "cyclic dependency': " ++ sym0
 
       in
        case S.lookup tenv sym of
-         Just ty -> 
-           case ty of
+         Just ty' -> 
+           case ty' of
              T.NAME s _ -> 
                case S.lookup tenv s of
                  Just (T.NAME s' (Just (T.NAME s'' _))) -> 
                    T.NAME s' (Just $ follow_ty [sym] s'')
-                 Just ty -> ty
-             _ -> ty
+                 Just ty1 -> ty1
+                 Nothing -> must_not_reach
+             _ -> ty'
          _ -> error "must not reach here, update A.NameTy."
     
     transty (A.RecordTy fs pos) _ =
       let
         f A.Field { A.field_name = name, A.field_typ = typ } = 
           case S.lookup tenv typ of
-            Just ty -> (name, ty) 
+            Just ty' -> (name, ty') 
             Nothing -> error $ show pos ++ "type not defined (field): " ++ typ
       in
        if checkdup (fmap A.field_name fs) (fmap A.field_pos fs) then
@@ -474,7 +481,7 @@ transTy tenv =
        
     transty (A.ArrayTy sym pos) _ =
       case S.lookup tenv sym of
-        Just ty -> T.ARRAY ty $ pos2u pos
+        Just ty' -> T.ARRAY ty' $ pos2u pos
         Nothing -> error $ show pos ++ "type not defined (array): " ++ sym
   in
    transty
@@ -500,11 +507,11 @@ transDec venv tenv brkdest =
                 , [Frame.Frag]
                 )
     
-    trdec level frgs temp A.VarDec{A.name'=name, A.typ'=typ, A.init'=init, 
+    trdec level frgs temp A.VarDec{A.name'=name, A.typ'=typ, A.init'=init0, 
                                    A.escape'=esc, A.pos'=pos} = 
       let                                     
-        (ExpTy{expr=rhs, ty=ty}, lv', frgs', temp') =
-          transExp venv tenv brkdest level frgs temp init
+        (ExpTy{expr=rhs, ty=ty0}, lv', frgs', temp') =
+          transExp venv tenv brkdest level frgs temp init0
 
         (access, lv'', temp'') = TL.allocLocal lv' esc temp'
         
@@ -512,23 +519,23 @@ transDec venv tenv brkdest =
         
         (e, temp3) = TL.assignExp lhs rhs temp''
 
-        ret name ty = 
-          (S.insert venv name E.VarEntry {E.access=access, E.ty=ty}, 
+        ret n ty1 = 
+          (S.insert venv n E.VarEntry {E.access=access, E.ty=ty1}, 
            tenv, lv'', temp3, [e], frgs')
       in
        case typ of
-         Nothing -> if ty == T.NIL
+         Nothing -> if ty0 == T.NIL
                     then
                       error $ 
                       show pos ++ "nil can be used only in the long form."
                     else
-                      ret name ty
+                      ret name ty0
          Just sym -> 
            case S.lookup tenv sym of
              Nothing -> error $ show pos ++ "type not found: " ++ sym
-             Just ty' -> if check_type ty' ty pos
+             Just ty' -> if check_type ty' ty0 pos
                          then
-                           ret name ty
+                           ret name ty0
                          else
                            undefined
 
@@ -544,20 +551,24 @@ transDec venv tenv brkdest =
         {- transTy 1st pass-}
         tenv'' = 
           foldl
-          (\acc (name, ty, _) -> 
+          (\acc (name, typ, _) -> 
             case S.lookup acc name of
               Just (T.NAME n _) -> 
-                S.insert acc n $ T.NAME n (Just $ transTy acc ty False))
+                S.insert acc n $ T.NAME n (Just $ transTy acc typ False)
+              _ -> error "must not reach here"
+          )
           tenv'
           tdecs
         
         {- transTy 2nd pass: updating -}
         tenv''' = 
           foldl
-          (\acc (name, ty, _) -> 
+          (\acc (name, typ, _) -> 
             case S.lookup acc name of
               Just (T.NAME n _) -> 
-                S.insert acc n $ T.NAME n (Just $ transTy acc ty True))
+                S.insert acc n $ T.NAME n (Just $ transTy acc typ True)
+              _ -> error "must not reach here."
+          )
           tenv''
           tdecs
 
@@ -565,26 +576,27 @@ transDec venv tenv brkdest =
         poss = fmap (\(_,_,pos) -> pos) tdecs
         
         check_cyclic_dep [] = True
-        check_cyclic_dep ((name, ty, pos):xs) = 
+        check_cyclic_dep ((name, ty0, p):xs) = 
           let
-            chkcyc seen ty pos =
-              case ty of
-                Nothing -> error $ show pos ++ "type not found: " ++ show ty
+            chkcyc seen typ pos' =
+              case typ of
+                Nothing -> error $ show pos' ++ "type not found: " ++ show ty0
                 Just ty' ->
                   case ty' of
                     T.NAME sym ty'' ->
                       if (List.all (/= sym) seen) then
-                        chkcyc (sym:seen) ty'' pos
+                        chkcyc (sym:seen) ty'' pos'
                       else
                         False
                     _ -> True
           in
            case S.lookup tenv''' name of
-             Just (T.NAME _ ty) ->
-               if chkcyc [name] ty pos then
+             Just (T.NAME _ typ) ->
+               if chkcyc [name] typ p then
                  check_cyclic_dep xs
                else
-                 error $ show pos ++ "cyclic dependency: " ++ name
+                 error $ show p ++ "cyclic dependency: " ++ name
+             _ -> error "must not reach here."
           
       in
         if check_cyclic_dep tdecs && checkdup names poss
@@ -596,8 +608,8 @@ transDec venv tenv brkdest =
     trdec level frgs temp (A.FunctionDec fundecs) = 
       let
         {- 1st pass -}
-        transfun (venv, temp) A.FuncDec{A.name=name, A.params=params, 
-                                        A.result=result, A.func_body=body, 
+        transfun (ve, tt) A.FuncDec{A.name=name, A.params=params, 
+                                        A.result=result, {- A.func_body=body,-}
                                         A.func_pos=pos } = 
           let
             rty = 
@@ -606,32 +618,32 @@ transDec venv tenv brkdest =
                 Just typ -> 
                   case S.lookup tenv typ of
                     Nothing -> error $ show pos ++ "result type not found: " ++ show typ
-                    Just ty -> ty
+                    Just t -> t
                     
             ftys = 
               fmap
-              (\A.Field { A.field_typ = typ, A.field_pos = pos } ->
+              (\A.Field { A.field_typ = typ, A.field_pos = p } ->
                 case S.lookup tenv typ of
                   Just t -> t
-                  Nothing -> error $ show pos ++ "type not found: " ++ typ)
+                  Nothing -> error $ show p ++ "type not found: " ++ typ)
               params
             
-            (tlabel, temp') = Temp.newLabel temp
+            (tlabel, t') = Temp.newLabel tt
             label = tlabel ++ "_" ++ name
 
             formals = fmap A.field_esc params
 
             -- (True:formals) corresponds to (sl:args)
-            (lev, temp'') = TL.newLevel level label (True:formals) temp'
+            (lev, t'') = TL.newLevel level label (True:formals) t'
      
           in
            if checkdup (fmap A.field_name params) (fmap A.field_pos params) then
-             (S.insert venv name E.FunEntry { E.level = lev
+             (S.insert ve name E.FunEntry { E.level = lev
                                             , E.label = label
                                             , E.formals = ftys
                                             , E.result = rty
                                             },
-              temp'')
+              t'')
            else
              undefined
 
@@ -639,9 +651,9 @@ transDec venv tenv brkdest =
         
         {- 2nd pass -}
         transbody
-          (acc, level, temp, frgs)
+          (acc, {- level -} _, tmp, fs) -- level not used?
           A.FuncDec { A.name = name, A.params = params, 
-                      A.result = result, A.func_body = body, 
+                      {- A.result = result, -} A.func_body = body, 
                       A.func_pos = pos } = 
           let
             Just E.FunEntry { E.level = lev
@@ -649,8 +661,8 @@ transDec venv tenv brkdest =
                             , E.formals = formals } = 
               S.lookup venv' name
             
-            transparam ve (A.Field{A.field_name=name}, ty, a) =
-              S.insert ve name $ E.VarEntry {E.access=a, E.ty=ty}
+            transparam ve (A.Field{A.field_name=n}, t, a) =
+              S.insert ve n $ E.VarEntry {E.access=a, E.ty=t}
             
             -- drop the access for the static_link.
             (_:as) = TL.acc_formals lev
@@ -658,16 +670,16 @@ transDec venv tenv brkdest =
             venv_loc = 
               foldl transparam venv' $ zip3 params formals as
             
-            (ExpTy{expr=ebody, ty=bdty}, lv', frgs', temp') = 
-              transExp venv_loc tenv brkdest lev frgs temp body
+            (ExpTy{expr=ebody, ty=bdty}, lv', fs', t') = 
+              transExp venv_loc tenv brkdest lev fs tmp body
               
             -- TODO: unNx should not be public.
-            (stm, temp'') = TL.unNx temp' ebody
+            (stm, t'') = TL.unNx t' ebody
               
             frag = Frame.Proc { Frame.get_body=stm
                               , Frame.get_frame=TL.frame lv'}
           in
-           (check_type rty bdty pos && acc, lv', temp'', frag:frgs')
+           (check_type rty bdty pos && acc, lv', t'', frag:fs')
         
         (check_bodies, level', temp'', frgs') = 
           foldl transbody (True, level, temp', frgs) fundecs
@@ -678,13 +690,14 @@ transDec venv tenv brkdest =
          (venv', tenv, level', temp'', [], frgs')
        else
          undefined
-       
   in
    trdec
 
+checkdup :: Show pos => [String] -> [pos] -> Bool
 checkdup [] _ = True
 checkdup (name:ns) (pos:ps) = 
   if List.all (/= name) ns then 
     checkdup ns ps
   else
     error $ show pos ++ "duplicated defintion: " ++ name
+checkdup (_:_) [] = error "fatal: checkdup (_:_) []"
