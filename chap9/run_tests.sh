@@ -3,6 +3,8 @@
 cd src/
 alex Lexer.x
 happy Parser.y
+ghc Lexer.hs
+ghc Parser.hs
 cd ..
 ghc -Wall -isrc driver.hs
 
