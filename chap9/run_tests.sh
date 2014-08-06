@@ -1,5 +1,5 @@
 #! /bin/bash
-
+rm src/*.o src/*.hi
 cd src/
 alex Lexer.x
 happy Parser.y

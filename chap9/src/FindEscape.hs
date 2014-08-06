@@ -16,38 +16,38 @@ findEscape :: A.Exp -> (A.Exp, [S.Symbol], [S.Symbol])
 
 findEscape =
   let
-    findesc exp@A.NilExp = (exp, [], [])
+    findesc exp'@A.NilExp = (exp', [], [])
     
-    findesc exp@(A.IntExp _ _) = (exp, [], [])
+    findesc exp'@(A.IntExp _ _) = (exp', [], [])
     
-    findesc exp@(A.StringExp _ _) = (exp, [], [])
+    findesc exp'@(A.StringExp _ _) = (exp', [], [])
     
-    findesc exp@A.OpExp {A.lhs=lhs, A.rhs=rhs} =
+    findesc exp'@A.OpExp {A.lhs=lhs, A.rhs=rhs} =
       let
         (lhs', fs1, fs2) = findesc lhs
         (rhs', fs1', fs2') = findesc rhs
       in
-       (exp{A.lhs=lhs', A.rhs=rhs'}, nub$fs1++fs1', nub$fs2++fs2')
+       (exp'{A.lhs=lhs', A.rhs=rhs'}, nub$fs1++fs1', nub$fs2++fs2')
        
-    findesc exp@(A.VarExp var) = 
+    findesc (A.VarExp var) = 
       let
         (var', fs1, fs2) = findescv var
       in
        (A.VarExp var', fs1, fs2)
     
-    findesc exp@A.RecordExp{A.fields=fields} =
+    findesc exp0@A.RecordExp{A.fields=fields} =
       let
         (fields', fs1, fs2) = foldr'
-                              (\(sym, exp, pos) (fields, fs1, fs2) ->
+                              (\(sym, exp1, pos) (fields1, fs01, fs02) ->
                                 let
-                                  (exp', fs1', fs2') = findesc exp
+                                  (exp', fs1', fs2') = findesc exp1
                                 in
-                                 ((sym, exp', pos):fields, 
-                                  nub $ fs1'++ fs1, nub $ fs2' ++ fs2))
+                                 ((sym, exp', pos):fields1, 
+                                  nub $ fs1'++ fs01, nub $ fs2' ++ fs02))
                               ([], [], [])
                               fields
       in
-       (exp{A.fields=fields'}, fs1, fs2)
+       (exp0{A.fields=fields'}, fs1, fs2)
        
     findesc (A.SeqExp exps) =
       let

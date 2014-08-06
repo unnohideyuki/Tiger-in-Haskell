@@ -14,11 +14,11 @@ data Ty = INT
           deriving (Show)
                    
 instance Eq Ty where
-  x@INT          == y@INT           = True
-  x@STRING       == y@STRING        = True
-  x@(RECORD _ u) == y@(RECORD _ u') = u == u'
-  x@(ARRAY _ u)  == y@(ARRAY _ u')  = u == u'
-  x@NIL          == y@NIL           = True
-  x@UNIT         == y@UNIT          = True
-  x@(NAME s t)   == y@(NAME s' t')  = (s == s') && (t == t')
+  INT          == INT           = True
+  STRING       == STRING        = True
+  (RECORD _ u) == (RECORD _ u') = u == u'
+  (ARRAY _ u)  == (ARRAY _ u')  = u == u'
+  NIL          == NIL           = True
+  UNIT         == UNIT          = True
+  (NAME s t)   == (NAME s' t')  = (s == s') && (t == t')
   _              == _               = False
