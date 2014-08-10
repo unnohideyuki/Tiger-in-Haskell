@@ -49,7 +49,7 @@ must_not_reach :: t
 must_not_reach =
   error "fatal: must not reach here"
 
-transProg :: VEnv-> TEnv -> A.Exp -> (T.Ty, [Frame.Frag])
+transProg :: VEnv-> TEnv -> A.Exp -> (T.Ty, [Frame.Frag], Temp.Temp)
             
 transProg venv tenv prog = 
   let
@@ -61,11 +61,11 @@ transProg venv tenv prog =
     (expty, _, frgs, temp'') = transExp venv tenv errdest mainlevel [] temp' prog
     
     -- TODO: unNx should not be public.
-    (stm, _) = TL.unNx temp'' (expr expty)
+    (stm, temp3) = TL.unNx temp'' (expr expty)
     frag = Frame.Proc { Frame.get_body=stm
                       , Frame.get_frame=TL.frame mainlevel}
   in
-   (ty expty, frag:frgs)
+   (ty expty, frag:frgs, temp3)
 
 transExp :: VEnv-> TEnv -> Temp.Label -> TL.Level -> [Frame.Frag]
             -> Temp.Temp

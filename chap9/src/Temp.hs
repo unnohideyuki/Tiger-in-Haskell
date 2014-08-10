@@ -4,6 +4,7 @@ import qualified Symbol
 
 type Label = Symbol.Symbol
 data Temp = Temp { temps :: Int, labs :: Int, num :: Int}
+            deriving Show
 
 create :: Temp
 create = Temp {temps=0, labs=0, num=0}
