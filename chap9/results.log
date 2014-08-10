@@ -50,7 +50,8 @@
 ../testcases/test8.tig : (INT,[Proc {get_body = EXP (ESEQ (SEQ (CJUMP NE (ESEQ (SEQ (MOVE (TEMP 1) (CONST 1)) (SEQ (CJUMP GT (CONST 10) (CONST 20) "L0" "L1") (SEQ (LABEL "L1") (SEQ (MOVE (TEMP 1) (CONST 0)) (LABEL "L0"))))) (TEMP 1)) (CONST 0) "L2" "L3") (SEQ (LABEL "L2") (SEQ (MOVE (TEMP 2) (CONST 30)) (SEQ (JUMP (NAME "L4") ["L4"]) (SEQ (LABEL "L3") (SEQ (MOVE (TEMP 2) (CONST 40)) (LABEL "L4"))))))) (TEMP 2)), get_frame = Frame {name = "main", formals' = [InFrame (-3)], locals = [], fp = 0}}],Temp {temps = 3, labs = 5, num = 1})
 ../testcases/test9.tig : driver.exe: 3:1: type mismatch: expected INT, actual STRING
 ../additonalcases/reccmp.tig : (INT,[Proc {get_body = EXP (ESEQ (SEQ (MOVE (TEMP 3) (CALL (NAME "_initRecord") [CONST 2,CONST 0,CONST 0])) (EXP (CONST 0))) (ESEQ (SEQ (MOVE (TEMP 4) (CONST 1)) (SEQ (CJUMP EQ (TEMP 1) (RCD (TEMP 2) 1) "L0" "L1") (SEQ (LABEL "L1") (SEQ (MOVE (TEMP 4) (CONST 0)) (LABEL "L0"))))) (TEMP 4))), get_frame = Frame {name = "main", formals' = [InFrame (-3)], locals = [], fp = 0}}],Temp {temps = 5, labs = 2, num = 1})
-../additonalcases/test16b.tig : ../additonalcases/test17b.tig : driver.exe: 4:12: type not defined (field): treelist
+../additonalcases/test16b.tig : driver.exe: 4:1: cyclic dependency: a
+../additonalcases/test17b.tig : driver.exe: 4:12: type not defined (field): treelist
 ../additonalcases/test19b.tig : driver.exe: 8:29: undefined variable: a
 ../additonalcases/test32b.tig : driver.exe: 6:18: type mismatch: expected INT, actual STRING
 ../additonalcases/test33b.tig : driver.exe: 3:17: record type not found: rectype
