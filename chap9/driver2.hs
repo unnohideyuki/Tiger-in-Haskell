@@ -15,6 +15,8 @@ main = do
   let (stm:stms) = fmap Frame.get_body frgs
   -- TODO: not only stm but (stm:stms) should be linearized.
   let (stms1, t1) = C.linearize stm t
+  let (stms2, t2, lab) = C.basicBlocks stms1 t1
   print frgs
   print stms1
+  print (stms2, lab)
   
