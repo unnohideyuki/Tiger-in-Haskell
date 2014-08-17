@@ -32,6 +32,7 @@ instance Show Instr where
      ++ ", oper_jump=" ++ (show jmp)
      ++ "}"
 
+format :: (Int -> String) -> Instr -> String
 format saytemp =
   let
     format' OPER{oper_assem=assem, oper_dst=ds, oper_src=ss, oper_jump=jmp} =
@@ -46,11 +47,11 @@ format saytemp =
   in
    format'
 
-addInstr :: [Int] -> [Int] -> Instr
-addInstr dst src =
+binOper :: String -> [Int] -> [Int] -> Instr
+binOper binop dst src =
   let
     assem ds ss _ =
-      "add-int " ++ (ds!!0) ++ ", " ++ (ss!!0) ++ ", " ++ (ss!!1)
+      binop ++ " " ++ (ds!!0) ++ ", " ++ (ss!!0) ++ ", " ++ (ss!!1)
   in
    OPER { oper_assem = assem
         , oper_dst = dst
@@ -58,4 +59,29 @@ addInstr dst src =
         , oper_jump = Nothing
         }
 
-                    
+addInstr :: [Int] -> [Int] -> Instr
+addInstr = binOper "add-int"
+
+subInstr :: [Int] -> [Int] -> Instr
+subInstr = binOper "sub-int"
+
+mulInstr :: [Int] -> [Int] -> Instr
+mulInstr = binOper "mul-int"
+
+divInstr :: [Int] -> [Int] -> Instr
+divInstr = binOper "div-int"
+
+constInstr :: Int -> Int -> Instr
+constInstr c dst =
+  let
+    assem ds _ _ =
+      "const " ++ (ds!!0) ++ ", #+" ++ (show c)
+      -- TODO: the immediate value should be hex?
+  in
+   OPER { oper_assem = assem
+        , oper_dst = [dst]
+        , oper_src = []
+        , oper_jump = Nothing
+        }
+
+    
