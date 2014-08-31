@@ -69,4 +69,4 @@ exp (InReg t) _ =
   T.TEMP t
 
 static_link :: T.Exp -> T.Exp
-static_link fpexp = T.MEM $ T.BINOP T.PLUS (T.CONST (-3)) fpexp
+static_link fpexp = T.MEM $ T.BINOP T.PLUS (T.CONST (-2)) fpexp
