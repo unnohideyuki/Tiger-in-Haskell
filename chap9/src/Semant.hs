@@ -83,10 +83,7 @@ transExp venv tenv brkdest =
     trexp level frgs temp (A.IntExp i _) = (ExpTy (TL.intExp i) T.INT, level, frgs, temp)
     
     trexp level frgs temp (A.StringExp s _) = 
-      let
-        (e, frag, temp') = TL.stringExp s temp
-      in
-       (ExpTy{expr=e, ty=T.STRING}, level, frag:frgs, temp')
+       (ExpTy{expr=TL.stringExp s, ty=T.STRING}, level, frag:frgs, temp')
     
     trexp level frgs temp A.OpExp{A.oper=oper, A.lhs=lhs, A.rhs=rhs, A.pos=pos} = 
       let

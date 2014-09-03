@@ -318,14 +318,8 @@ callExp f exprs temp =
   in
    (Ex $ T.CALL (T.NAME f) args, temp')
 
-stringExp :: String -> Temp.Temp -> (Exp, Frame.Frag, Temp.Temp)
-stringExp s temp =
-  let
-    (label, temp') = Temp.newLabel temp
-    frag = Frame.Str label s
-    expr = Ex $ T.NAME label
-  in
-   (expr, frag, temp')
+stringExp :: String -> Exp
+stringExp s = Ex $ T.STR s
    
 acc_formals :: Level -> [Access]
 acc_formals lv =

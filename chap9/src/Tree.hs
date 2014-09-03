@@ -5,6 +5,7 @@ import qualified Temp
 
 
 data Exp = CONST Int
+         | STR String
          | NAME Temp.Label
          | TEMP Int
          | BINOP Binop Exp Exp

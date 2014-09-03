@@ -1,7 +1,6 @@
 import Test.Hspec
 import Test.QuickCheck
 
-import qualified Frame as F
 import qualified DalvikFrame as F
 import qualified Translate as TL
 import qualified Tree as T
