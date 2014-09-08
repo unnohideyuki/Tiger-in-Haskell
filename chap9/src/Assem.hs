@@ -47,22 +47,33 @@ format saytemp =
   in
    format'
 
+check_cast :: String -> String -> String
+check_cast r s =
+  "check-cast " ++ r ++ ", " ++ s ++ "\n"
+
+integer2int :: String -> String -> String
+integer2int s d =
+  "invoke-virtual {" ++ s ++ "}, Ljava/lang/Integer;.intValue:()I\n"
+  ++ "move-result " ++ d ++ "\n"
+  
+int2integer :: String -> String -> String
+int2integer s d =  
+  "new-instance " ++ d ++ ", Ljava/lang/Integer;\n"
+  ++ "invoke-direct {" ++ d ++ ", " ++ s ++ ", Ljava/lang/Integer;.<init>:(I)V"
+
 binOper :: String -> [Int] -> [Int] -> Instr
 binOper binop dst src =
   let
     assem ds ss _ =
       let
-        s1 = "check-cast " ++ (ss!!0) ++ ", Ljava/lang/Integer;\n"
-        s2 = "check-cast " ++ (ss!!1) ++ ", Ljava/lang/Integer;\n"
-        s3 = "invoke-virtual {" ++ (ss!!0) ++ "}, Ljava/lang/Integer;.intValue:()I\n"
-        s4 = "move-result " ++ (ds!!1) ++ "\n"
-        s5 = "invoke-virtual {" ++ (ss!!1) ++ "}, Ljava/lang/Integer;.intValue:()I\n"
-        s6 = "move-result " ++ (ds!!2) ++ "\n"
-        s7 = binop ++ " " ++ (ds!!1) ++ ", " ++ (ds!!1) ++ ", " ++ (ds!!2) ++ "\n"
-        s8 = "new-instance " ++ (ds!!0) ++ ", Ljava/lang/Integer;\n"
-        s9 = "invoke-direct {" ++ (ds!!0) ++ ", " ++ (ds!!1) ++ ", Ljava/lang/Integer;.<init>:(I)V"
+        s1 = check_cast (ss!!0) "Ljava/lang/Integer;"
+        s2 = check_cast (ss!!1) "Ljava/lang/Integer;"
+        s3 = integer2int (ss!!0) (ds!!1)
+        s4 = integer2int (ss!!1) (ds!!2)
+        s5 = binop ++ " " ++ (ds!!1) ++ ", " ++ (ds!!1) ++ ", " ++ (ds!!2) ++ "\n"
+        s6 = int2integer (ds!!1) (ds!!0)
       in
-       concat [s1, s2, s3, s4, s5, s6, s7, s8, s9]
+       concat [s1, s2, s3, s4, s5, s6]
   in
    OPER { oper_assem = assem
         , oper_dst = dst
@@ -100,4 +111,50 @@ constInstr c dst =
         , oper_jump = Nothing
         }
 
-    
+memInstr :: [Int] -> [Int] -> Instr
+memInstr dst src =
+  let 
+    assem ds ss _ =
+      let
+        s1 = check_cast (ss!!1) "Ljava/lang/Integer;"
+        s2 = integer2int (ss!!1) (ds!!1)
+        s3 = check_cast (ss!!0) "[Ljava/lang/Object;"
+        s4 = "aget-object " ++ (ds!!0) ++ ", " ++ (ss!!0) ++ ", " ++ (ds!!1) ++ "\n"
+      in
+       concat [s1, s2, s3, s4]
+  in
+   OPER { oper_assem = assem
+        , oper_dst = dst
+        , oper_src = src
+        , oper_jump = Nothing
+        }
+
+strInstr :: String -> [Int] -> Instr
+strInstr s dst =
+  let
+    assem ds _ _ =
+      "const-string " ++ (ds!!0) ++ (show s)
+  in
+   OPER { oper_assem = assem
+        , oper_dst = dst
+        , oper_src = []
+        , oper_jump = Nothing
+        }
+
+moveInstr :: [Int] -> [Int] -> Instr
+moveInstr dst src =
+  let
+    assem ds ss _ =
+      let
+        s1 = check_cast (ss!!0) "L/java/lang/Integer;"
+        s2 = integer2int (ss!!0) (ds!!1)
+        s3 = "aput-object " ++ (ss!!1) ++ ", " ++ (ds!!0) ++ ", " ++ (ds!!1) ++ "\n"
+      in
+       concat [s1, s2, s3]
+  in
+   OPER { oper_assem = assem
+        , oper_dst = dst
+        , oper_src = src
+        , oper_jump = Nothing
+        }
+
