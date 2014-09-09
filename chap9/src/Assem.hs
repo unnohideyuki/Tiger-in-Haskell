@@ -177,3 +177,14 @@ cjumpInstr cond dst src label =
         , oper_jump = Just [label]
         }
 
+jumpInstr :: Label -> Instr
+jumpInstr label =
+  let
+    assem _ _ _ = "goto :" ++ label ++ "\n"
+  in
+   OPER { oper_assem = assem
+        , oper_dst = []
+        , oper_src = []
+        , oper_jump = Just [label]
+        }
+
