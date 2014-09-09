@@ -9,6 +9,7 @@ data Frame = Frame { name :: Temp.Label
                    , formals' :: [Access] 
                    , locals :: [Access]
                    , fp :: Int
+                   , arcd :: Int
                    }
              deriving (Eq, Show)
 

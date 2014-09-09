@@ -158,3 +158,22 @@ moveInstr dst src =
         , oper_jump = Nothing
         }
 
+cjumpInstr :: String -> [Int] -> [Int] -> Label -> Instr
+cjumpInstr cond dst src label =
+  let
+    assem ds ss _ =
+      let
+        s1 = check_cast (ss!!0) "L/java/lang/Integer;"
+        s2 = integer2int (ss!!0) (ds!!0)
+        s3 = check_cast (ss!!1) "L/java/lang/Integer;"
+        s4 = integer2int (ss!!1) (ds!!1)
+        s5 = "if-" ++ cond ++ " " ++ (ds!!0) ++ ", " ++ (ds!!1) ++ ", :" ++ label ++ "\n"
+      in
+       concat [s1, s2, s3, s4, s5]
+  in
+   OPER { oper_assem = assem
+        , oper_dst = dst
+        , oper_src = src
+        , oper_jump = Just [label]
+        }
+
