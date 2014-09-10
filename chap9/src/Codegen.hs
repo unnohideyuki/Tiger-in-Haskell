@@ -82,3 +82,40 @@ munchExp (T.ARR e1 e2) =
     return d0
   
 munchExp (T.RCD e i) = munchExp (T.ARR e (T.CONST i))
+
+
+munchStm :: T.Stm -> State CgenState ()
+
+munchStm (T.MOVE (T.MEM i) v) =
+  do
+    d0 <- get_arcd
+    d1 <- newTemp
+    s0 <- munchExp i
+    s1 <- munchExp v
+    emit $ A.moveInstr [d0, d1] [s0, s1]
+
+munchStm (T.MOVE (T.ARR a i) v) =
+  do
+    d0 <- munchExp a
+    d1 <- newTemp
+    s0 <- munchExp i
+    s1 <- munchExp v
+    emit $ A.moveInstr [d0, d1] [s0, s1]
+    
+munchStm (T.MOVE (T.RCD r i) v) =
+  do
+    d0 <- munchExp r
+    d1 <- newTemp
+    s0 <- munchExp (T.CONST i)
+    s1 <- munchExp v
+    emit $ A.moveInstr [d0, d1] [s0, s1]
+    
+munchStm (T.MOVE (T.TEMP _) _) = undefined
+
+munchStm (T.EXP e) =
+  do
+    _ <- munchExp e
+    return ()
+
+
+
