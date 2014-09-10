@@ -9,6 +9,7 @@ data Frame = Frame { name :: Temp.Label
                    , formals' :: [Access] 
                    , locals :: [Access]
                    , fp :: Int
+                   , sp :: Int
                    , arcd :: Int
                    }
              deriving (Eq, Show)
@@ -36,15 +37,19 @@ newFrame' label fs temp =
          
     (fmls, temp') = foldr' calc_formals ([], temp) $ zip fs [0..]
     
-    (tfp, temp'') = Temp.newTemp temp'
+    (t1, temp'') = Temp.newTemp temp'
+    (t2, temp3) = Temp.newTemp temp''
+    (t3, temp4) = Temp.newTemp temp3
     
     frame = Frame { name = label
                   , formals' = fmls
                   , locals = []
-                  , fp = tfp
+                  , fp = t1
+                  , sp = t2
+                  , arcd = t3
                   }
   in
-   (frame, temp'')
+   (frame, temp4)
    
 allocLocal' :: Frame -> Bool -> Temp.Temp -> (Access, Frame, Temp.Temp)
 allocLocal' f@Frame{locals=ls} escapes temp =
