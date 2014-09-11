@@ -7,7 +7,7 @@ data Temp = Temp { temps :: Int, labs :: Int, num :: Int}
             deriving Show
 
 create :: Temp
-create = Temp {temps=1, labs=1, num=1}
+create = Temp {temps=1, labs=0, num=0}
 
 newTemp :: Temp -> (Int, Temp)
 newTemp t@Temp{temps=n}  = (n, t{temps = n + 1})

@@ -169,12 +169,12 @@ if_test =
     expected1 =  Tree.ESEQ 
                  (Tree.SEQ (Tree.JUMP (Tree.NAME "L0") ["L0"]) 
                   (Tree.SEQ (Tree.LABEL "L0")
-                   (Tree.SEQ (Tree.MOVE (Tree.TEMP 1) (Tree.CONST 2)) 
+                   (Tree.SEQ (Tree.MOVE (Tree.TEMP 4) (Tree.CONST 2)) 
                     (Tree.SEQ (Tree.JUMP (Tree.NAME "L2") ["L2"]) 
                      (Tree.SEQ (Tree.LABEL "L1") 
-                      (Tree.SEQ (Tree.MOVE (Tree.TEMP 1) (Tree.CONST 3)) 
+                      (Tree.SEQ (Tree.MOVE (Tree.TEMP 4) (Tree.CONST 3)) 
                        (Tree.LABEL "L2"))))))) 
-                 (Tree.TEMP 1)
+                 (Tree.TEMP 4)
 
     expty2 = trprog' venv tenv A.IfExp { A.test=A.IntExp 0 pos
                                          , A.thene=A.IntExp 4 pos
@@ -184,12 +184,12 @@ if_test =
     expected2 =  Tree.ESEQ 
                  (Tree.SEQ (Tree.JUMP (Tree.NAME "L1") ["L1"]) 
                   (Tree.SEQ (Tree.LABEL "L0")
-                   (Tree.SEQ (Tree.MOVE (Tree.TEMP 1) (Tree.CONST 4)) 
+                   (Tree.SEQ (Tree.MOVE (Tree.TEMP 4) (Tree.CONST 4)) 
                     (Tree.SEQ (Tree.JUMP (Tree.NAME "L2") ["L2"]) 
                      (Tree.SEQ (Tree.LABEL "L1") 
-                      (Tree.SEQ (Tree.MOVE (Tree.TEMP 1) (Tree.CONST 5)) 
+                      (Tree.SEQ (Tree.MOVE (Tree.TEMP 4) (Tree.CONST 5)) 
                        (Tree.LABEL "L2"))))))) 
-                 (Tree.TEMP 1)
+                 (Tree.TEMP 4)
                  
     expty3 = trprog' venv tenv A.IfExp { A.test=A.OpExp{A.oper=A.EqOp
                                                          ,A.lhs=A.IntExp 6 pos
@@ -202,12 +202,12 @@ if_test =
                  (Tree.SEQ (Tree.CJUMP 
                             Tree.EQ (Tree.CONST 6)(Tree.CONST 7) "L0" "L1") 
                   (Tree.SEQ (Tree.LABEL "L0") 
-                   (Tree.SEQ (Tree.MOVE (Tree.TEMP 1) (Tree.CONST 8)) 
+                   (Tree.SEQ (Tree.MOVE (Tree.TEMP 4) (Tree.CONST 8)) 
                     (Tree.SEQ (Tree.JUMP (Tree.NAME "L2") ["L2"]) 
                      (Tree.SEQ (Tree.LABEL "L1") 
-                      (Tree.SEQ (Tree.MOVE (Tree.TEMP 1) (Tree.CONST 9)) 
+                      (Tree.SEQ (Tree.MOVE (Tree.TEMP 4) (Tree.CONST 9)) 
                        (Tree.LABEL "L2")))))))
-                 (Tree.TEMP 1)
+                 (Tree.TEMP 4)
     
     expty4 = trprog' venv tenv A.IfExp { A.test=A.OpExp{A.oper=A.EqOp
                                                          ,A.lhs=A.IntExp 10 pos
