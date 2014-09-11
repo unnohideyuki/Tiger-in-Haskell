@@ -3,6 +3,7 @@ module Translate where
 import qualified Temp
 import qualified DalvikFrame as Frame
 import qualified Tree as T
+import qualified Types
 
 data Level = Level { parent :: Level
                    , name :: Temp.Label
@@ -338,3 +339,24 @@ strcmpExp lhs rhs bcon temp =
     (call, temp') = callExp (Temp.namedLabel "_strcmp") [lhs, rhs] temp
   in
    bcon call (Ex $ T.CONST 0) temp'
+   
+bodyStm :: Exp -> Types.Ty -> Temp.Temp -> (T.Stm, Temp.Temp)
+
+bodyStm e Types.UNIT temp =
+  let
+    (bdstm, temp') = unNx temp e
+    mv = T.MOVE (T.TEMP 0) (T.CONST 0)
+    stm = T.SEQ bdstm mv
+  in
+   (stm, temp')
+
+bodyStm e _ temp =
+  let
+    (bdexp, temp') = unEx temp e
+    mv = T.MOVE (T.TEMP 0) bdexp
+  in
+   (mv, temp')
+
+   
+
+    

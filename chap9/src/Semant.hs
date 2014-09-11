@@ -61,7 +61,7 @@ transProg venv tenv prog =
     (expty, _, frgs, temp'') = transExp venv tenv errdest mainlevel [] temp' prog
     
     -- TODO: unNx should not be public.
-    (stm, temp3) = TL.unNx temp'' (expr expty)
+    (stm, temp3) = TL.bodyStm (expr expty) (ty expty) temp''
     frag = Frame.Proc { Frame.get_body=stm
                       , Frame.get_frame=TL.frame mainlevel}
   in
@@ -83,7 +83,7 @@ transExp venv tenv brkdest =
     trexp level frgs temp (A.IntExp i _) = (ExpTy (TL.intExp i) T.INT, level, frgs, temp)
     
     trexp level frgs temp (A.StringExp s _) = 
-       (ExpTy{expr=TL.stringExp s, ty=T.STRING}, level, frag:frgs, temp')
+       (ExpTy{expr=TL.stringExp s, ty=T.STRING}, level, frgs, temp)
     
     trexp level frgs temp A.OpExp{A.oper=oper, A.lhs=lhs, A.rhs=rhs, A.pos=pos} = 
       let
@@ -670,8 +670,7 @@ transDec venv tenv brkdest =
             (ExpTy{expr=ebody, ty=bdty}, lv', fs', t') = 
               transExp venv_loc tenv brkdest lev fs tmp body
               
-            -- TODO: unNx should not be public.
-            (stm, t'') = TL.unNx t' ebody
+            (stm, t'') = TL.bodyStm ebody bdty t'
               
             frag = Frame.Proc { Frame.get_body=stm
                               , Frame.get_frame=TL.frame lv'}
