@@ -86,6 +86,11 @@ munchExp (T.RCD e i) = munchExp (T.ARR e (T.CONST i))
 
 munchStm :: T.Stm -> State CgenState ()
 
+munchStm (T.MOVE (T.TEMP 0) v) =
+  do
+    s0 <- munchExp v
+    emit $ A.returnInstr s0
+
 munchStm (T.MOVE (T.MEM i) v) =
   do
     d0 <- get_arcd

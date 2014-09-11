@@ -188,3 +188,13 @@ jumpInstr label =
         , oper_jump = Just [label]
         }
 
+returnInstr :: Int -> Instr
+returnInstr s0 =
+  let
+    assem _ ss _ = "return-object " ++ (ss!!0) ++ "\n"
+  in
+   OPER { oper_assem = assem
+        , oper_dst = []
+        , oper_src = [s0]
+        , oper_jump = Nothing
+        }
