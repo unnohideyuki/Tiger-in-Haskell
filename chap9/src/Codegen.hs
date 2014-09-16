@@ -84,43 +84,49 @@ munchExp (T.ARR e1 e2) =
 munchExp (T.RCD e i) = munchExp (T.ARR e (T.CONST i))
 
 
-munchStm :: T.Stm -> State CgenState ()
+munchStm :: [T.Stm] -> State CgenState ()
 
-munchStm (T.MOVE (T.TEMP 0) v) =
+munchStm [] = return ()
+
+munchStm ((T.MOVE (T.TEMP 0) v):ss) =
   do
     s0 <- munchExp v
     emit $ A.returnInstr s0
+    munchStm ss
 
-munchStm (T.MOVE (T.MEM i) v) =
+munchStm ((T.MOVE (T.MEM i) v):ss) =
   do
     d0 <- get_arcd
     d1 <- newTemp
     s0 <- munchExp i
     s1 <- munchExp v
     emit $ A.moveInstr [d0, d1] [s0, s1]
+    munchStm ss
 
-munchStm (T.MOVE (T.ARR a i) v) =
+munchStm ((T.MOVE (T.ARR a i) v):ss) =
   do
     d0 <- munchExp a
     d1 <- newTemp
     s0 <- munchExp i
     s1 <- munchExp v
     emit $ A.moveInstr [d0, d1] [s0, s1]
+    munchStm ss
     
-munchStm (T.MOVE (T.RCD r i) v) =
+munchStm ((T.MOVE (T.RCD r i) v):ss) =
   do
     d0 <- munchExp r
     d1 <- newTemp
     s0 <- munchExp (T.CONST i)
     s1 <- munchExp v
     emit $ A.moveInstr [d0, d1] [s0, s1]
+    munchStm ss
     
-munchStm (T.MOVE (T.TEMP _) _) = undefined
+munchStm ((T.MOVE (T.TEMP _) _):ss) = undefined
 
-munchStm (T.EXP e) =
+munchStm ((T.EXP e):ss) =
   do
     _ <- munchExp e
-    return ()
+    munchStm ss
 
 
 
