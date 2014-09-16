@@ -282,7 +282,12 @@ transExp venv tenv brkdest =
     
     trexp level frgs temp A.LetExp{A.decs=decs, A.body=body {-, A.pos=pos -}} =
       let
-        transdecs (ve, te, lv, tmp, _, fs) dec = transDec ve te brkdest lv fs tmp dec
+        transdecs (ve, te, lv, tmp, exps, fs) dec = 
+          let
+            (ve', te', lv', t', exps', fs') = transDec ve te brkdest lv fs tmp dec
+          in
+           (ve', te', lv', t', exps++exps', fs')
+           
         (venv', tenv', {- lv' -} _, temp', es, frgs') = 
           foldl transdecs (venv, tenv, level, temp, [], frgs) decs
         (ExpTy {expr=ebody, ty=bodyty }, lv'', frgs'', temp'') = 
