@@ -31,6 +31,12 @@ emit inst = state $ \st ->
 get_arcd :: State CgenState Int
 get_arcd = state $ \st -> (F.arcd $ get_frame st, st)
 
+get_sp :: State CgenState Int
+get_sp = state $ \st -> (F.sp $ get_frame st, st)
+
+get_fp :: State CgenState Int
+get_fp = state $ \st -> (F.fp $ get_frame st, st)
+
 -- munchExp
 
 munchExp :: T.Exp -> State CgenState Int
@@ -83,6 +89,18 @@ munchExp (T.ARR e1 e2) =
   
 munchExp (T.RCD e i) = munchExp (T.ARR e (T.CONST i))
 
+munchExp (T.CALL (T.NAME n) es) =
+  let
+    nargs = length es
+  in
+   do
+     sp <- get_sp
+     nsp <- munchExp $ T.BINOP T.PLUS (T.TEMP sp) (T.CONST $ nargs+3)
+     -- TODO: ‚©‚«‚©‚¯
+     return nsp -- dummy
+
+munchExp (T.NAME _) = fail "NAME is not expected to be munchExped."
+munchExp (T.ESEQ _ _) = fail "ESEQ must not appear in this phase."                       
 
 munchStm :: [T.Stm] -> State CgenState ()
 
@@ -92,6 +110,12 @@ munchStm ((T.MOVE (T.TEMP 0) v):ss) =
   do
     s0 <- munchExp v
     emit $ A.returnInstr s0
+    munchStm ss
+
+munchStm ((T.MOVE (T.TEMP d) v):ss) =
+  do
+    s <- munchExp v
+    emit $ A.regMoveInstr d s
     munchStm ss
 
 munchStm ((T.MOVE (T.MEM i) v):ss) =

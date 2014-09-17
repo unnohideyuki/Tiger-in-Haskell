@@ -158,6 +158,18 @@ moveInstr dst src =
         , oper_jump = Nothing
         }
 
+regMoveInstr :: Int -> Int -> Instr
+regMoveInstr d s =
+  let
+    assem ds ss _ =
+      "move-object " ++ (ds!!0) ++ ", " ++ (ss!!0) ++ "\n"
+  in
+   OPER { oper_assem = assem
+        , oper_dst = [d]
+        , oper_src = [s]
+        , oper_jump = Nothing
+        }
+
 cjumpInstr :: String -> [Int] -> [Int] -> Label -> Instr
 cjumpInstr cond dst src label =
   let
