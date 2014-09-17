@@ -381,9 +381,7 @@ transExp venv tenv brkdest =
                szcheck && (and $ fmap checker ts)
                
             es = fmap expr argtys
-            sl = TL.fpExp lv'
-            
-            (e, temp'') = TL.callExp label (sl:es) temp'
+            (e, temp'') = TL.callExp label es temp'
           in
            if checkformals formals argtys
            then 
@@ -635,8 +633,7 @@ transDec venv tenv brkdest =
 
             formals = fmap A.field_esc params
 
-            -- (True:formals) corresponds to (sl:args)
-            (lev, t'') = TL.newLevel level label (True:formals) t'
+            (lev, t'') = TL.newLevel level label formals t'
      
           in
            if checkdup (fmap A.field_name params) (fmap A.field_pos params) then
@@ -666,8 +663,7 @@ transDec venv tenv brkdest =
             transparam ve (A.Field{A.field_name=n}, t, a) =
               S.insert ve n $ E.VarEntry {E.access=a, E.ty=t}
             
-            -- drop the access for the static_link.
-            (_:as) = TL.acc_formals lev
+            as = TL.acc_formals lev
 
             venv_loc = 
               foldl transparam venv' $ zip3 params formals as
