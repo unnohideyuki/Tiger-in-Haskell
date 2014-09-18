@@ -684,7 +684,8 @@ transDec venv tenv brkdest =
        if checkdup (fmap A.name fundecs) (fmap A.func_pos fundecs)
           && check_bodies 
        then
-         (venv', tenv, level', temp'', [], frgs')
+         -- level (not level') should be returned here.
+         (venv', tenv, level, temp'', [], frgs')
        else
          undefined
   in
