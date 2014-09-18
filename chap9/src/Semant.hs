@@ -56,7 +56,7 @@ transProg venv tenv prog =
     temp = Temp.create
     (mainlevel, temp') = 
       TL.newLevel 
-      TL.outermost (Temp.namedLabel "main") [True] temp
+      TL.outermost (Temp.namedLabel "main") [] temp
     errdest = Temp.namedLabel "_CanNotBreak_"
     (expty, _, frgs, temp'') = transExp venv tenv errdest mainlevel [] temp' prog
     
