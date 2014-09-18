@@ -1,5 +1,6 @@
 module Semant where
 
+import Debug.Trace
 import qualified Data.List as List
 
 import qualified Absyn as A
@@ -58,12 +59,11 @@ transProg venv tenv prog =
       TL.newLevel 
       TL.outermost (Temp.namedLabel "prog") [] temp
     errdest = Temp.namedLabel "_CanNotBreak_"
-    (expty, _, frgs, temp'') = transExp venv tenv errdest mainlevel [] temp' prog
+    (expty, level', frgs, temp'') = transExp venv tenv errdest mainlevel [] temp' prog
     
-    -- TODO: unNx should not be public.
     (stm, temp3) = TL.bodyStm (expr expty) (ty expty) temp''
     frag = Frame.Proc { Frame.get_body=stm
-                      , Frame.get_frame=TL.frame mainlevel}
+                      , Frame.get_frame=TL.frame level'}
   in
    (ty expty, frag:frgs, temp3)
 
@@ -288,10 +288,10 @@ transExp venv tenv brkdest =
           in
            (ve', te', lv', t', exps++exps', fs')
            
-        (venv', tenv', {- lv' -} _, temp', es, frgs') = 
+        (venv', tenv', level', temp', es, frgs') = 
           foldl transdecs (venv, tenv, level, temp, [], frgs) decs
         (ExpTy {expr=ebody, ty=bodyty }, lv'', frgs'', temp'') = 
-          transExp venv' tenv' brkdest level frgs' temp' body 
+          transExp venv' tenv' brkdest level' frgs' temp' body 
         (e, temp3) = TL.letExp es ebody temp''
       in
        (ExpTy{expr=e, ty=bodyty}, lv'', frgs'', temp3)
