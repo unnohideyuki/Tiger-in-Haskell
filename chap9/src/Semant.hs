@@ -110,14 +110,14 @@ transExp venv tenv brkdest =
             
         check_arith = check_int lty pos && check_int rty pos
         
-        check_eq = 
-          case lty of
+        check_eq =
+          case actual_ty lty pos of
             T.INT -> check_type lty rty pos
             T.STRING -> check_type lty rty pos
             T.ARRAY _ _ -> check_type lty rty pos
             T.RECORD _ _ -> check_type lty rty pos
             T.NIL -> check_type lty rty pos
-            _ -> error $ show pos ++ "type error for equality operator: " ++ show lty
+            _ -> error $ show pos ++ "type error for equality operator: " ++ show (lty, rty)
             
         check_comp =
           case lty of
@@ -400,7 +400,7 @@ transExp venv tenv brkdest =
       let
         (ExpTy{expr=e1, ty=ty1}, lv', frgs', temp') = trvar level frgs temp var
       in
-       case ty1 of
+       case actual_ty ty1 pos of
          T.RECORD fs _ ->
            case lookup id' [(s, (i, t))| (i, (s, t)) <- zip [0..] fs] of
              Nothing -> error $ show pos ++ "field not found: " ++ id'
