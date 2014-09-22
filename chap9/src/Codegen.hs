@@ -151,7 +151,11 @@ munchStm ((T.MOVE (T.TEMP 0) v):ss) = -- Move to (TEMP 0) is special
     emit $ A.returnInstr s0
     munchStm ss
     
-munchStm ((T.MOVE (T.TEMP d0) v):ss) = undefined -- move-object
+munchStm ((T.MOVE (T.TEMP d0) v):ss) = -- move-object
+  do
+    s0 <- munchExp v
+    emit $ A.regMoveInstr d0 s0
+    munchStm ss
 
 munchStm ((T.JUMP (T.NAME label) _):ss) =
   do
