@@ -210,3 +210,24 @@ returnInstr s0 =
         , oper_src = [s0]
         , oper_jump = Nothing
         }
+
+callInstr :: String -> Int -> Int -> Instr
+callInstr f d nargs =
+  let
+    vx = case nargs of 
+      0 -> "{v0, v1}"
+      1 -> "{v0, v1, v2}"
+      2 -> "{v0, v1, v2, v3}"
+      _ -> "{v0, v1, v2, v3, v4}"
+      
+    c = "invoke-static " ++ vx ++ ", " ++ f ++ "\n"
+
+    assem ds _ _ = c ++ "move-result-object " ++ (ds!!0) ++ "\n"
+  in
+   OPER { oper_assem = assem
+        , oper_dst = [d]
+        , oper_src = []
+        , oper_jump = Nothing
+        }
+   
+   

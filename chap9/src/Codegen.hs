@@ -89,15 +89,41 @@ munchExp (T.ARR e1 e2) =
   
 munchExp (T.RCD e i) = munchExp (T.ARR e (T.CONST i))
 
-munchExp (T.CALL (T.NAME n) es) =
+munchExp (T.CALL (T.NAME f) es) =
   let
     nargs = length es
+    
+    v0 = -1
+    v1 = -2
+    
+    vn n = -(n+3)
+
+    setargs [] _ _ = return ()
+    setargs (e:es') n sp =
+      if n < 3
+      then do
+        t <- munchExp e
+        emit $ A.regMoveInstr (vn n) t
+        setargs es' (n+1) sp
+      else do
+        t <- munchExp e
+        i <- munchExp $ T.BINOP T.MINUS (T.TEMP sp) (T.CONST $ 3 + n)
+        munchStm [T.MOVE (T.MEM $ T.TEMP i) (T.TEMP t)]
+        setargs es' (n+1) sp
   in
    do
+     arcd <- get_arcd
+     fp <- get_fp
      sp <- get_sp
      nsp <- munchExp $ T.BINOP T.PLUS (T.TEMP sp) (T.CONST $ nargs+3)
-     -- TODO: ‚©‚«‚©‚¯
-     return nsp -- dummy
+     emit $ A.regMoveInstr v0 arcd
+     emit $ A.regMoveInstr v1 fp
+     i <- munchExp $ T.BINOP T.MINUS (T.TEMP nsp) (T.CONST 2)
+     munchStm [T.MOVE (T.MEM $ T.TEMP i) (T.TEMP fp)]
+     setargs es 0 nsp
+     t <- newTemp
+     emit $ A.callInstr f t nargs
+     return t
 
 munchExp (T.NAME _) = fail "NAME is not expected to be munchExped."
 munchExp (T.ESEQ _ _) = fail "ESEQ must not appear in this phase."                       
@@ -105,18 +131,6 @@ munchExp (T.ESEQ _ _) = fail "ESEQ must not appear in this phase."
 munchStm :: [T.Stm] -> State CgenState ()
 
 munchStm [] = return ()
-
-munchStm ((T.MOVE (T.TEMP 0) v):ss) =
-  do
-    s0 <- munchExp v
-    emit $ A.returnInstr s0
-    munchStm ss
-
-munchStm ((T.MOVE (T.TEMP d) v):ss) =
-  do
-    s <- munchExp v
-    emit $ A.regMoveInstr d s
-    munchStm ss
 
 munchStm ((T.MOVE (T.MEM i) v):ss) =
   do
