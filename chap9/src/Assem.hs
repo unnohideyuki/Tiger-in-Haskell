@@ -230,4 +230,13 @@ callInstr f d nargs =
         , oper_jump = Nothing
         }
    
-   
+labelDef :: String -> Instr
+labelDef l =
+  let
+    assem _ _ _ = ":" ++ l ++ "\n"
+  in
+   OPER { oper_assem = assem
+        , oper_dst = []
+        , oper_src = []
+        , oper_jump = Nothing
+        }

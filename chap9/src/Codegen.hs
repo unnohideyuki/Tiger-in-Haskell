@@ -95,15 +95,13 @@ munchExp (T.CALL (T.NAME f) es) =
     
     v0 = -1
     v1 = -2
-    
-    vn n = -(n+3)
 
     setargs [] _ _ = return ()
     setargs (e:es') n sp =
       if n < 3
       then do
         t <- munchExp e
-        emit $ A.regMoveInstr (vn n) t
+        emit $ A.regMoveInstr (-3-n) t
         setargs es' (n+1) sp
       else do
         t <- munchExp e
@@ -125,7 +123,8 @@ munchExp (T.CALL (T.NAME f) es) =
      emit $ A.callInstr f t nargs
      return t
 
-munchExp (T.NAME _) = fail "NAME is not expected to be munchExped."
+munchExp (T.CALL f _) = fail $ "not a function name" ++ show f
+munchExp (T.NAME _) = fail "NAME alone is not expected to be munchExped."
 munchExp (T.ESEQ _ _) = fail "ESEQ must not appear in this phase."                       
 
 munchStm :: [T.Stm] -> State CgenState ()
@@ -171,12 +170,47 @@ munchStm ((T.MOVE (T.TEMP d0) v):ss) = -- move-object
     emit $ A.regMoveInstr d0 s0
     munchStm ss
 
+munchStm ((T.MOVE e _):_) = fail $ "not a left-value: " ++ (show e)
+
+munchStm ((T.EXP e):ss) =
+  do
+    _ <- munchExp e
+    munchStm ss
+
 munchStm ((T.JUMP (T.NAME label) _):ss) =
   do
     emit $ A.jumpInstr label
     munchStm ss
 
-munchStm ((T.EXP e):ss) =
+munchStm ((T.JUMP l _):_) = fail $ "not a jump destination: " ++ show l
+
+munchStm ((T.CJUMP rel e0 e1 lt lf):(T.LABEL l):ss) =
+  let
+    cond = case rel of
+               T.EQ -> "eq"
+               T.NE -> "ne"
+               T.LT -> "lt"
+               T.LE -> "le"
+               T.GT -> "gt"
+               T.GE -> "ge"
+               _ -> fail $ "unsupported relop" ++ (show rel)
+  in
+   do
+     if lf /= l
+       then fail $ "unmatched label: " ++ lf ++ ", " ++ l
+       else return ()
+     s0 <- munchExp e0
+     s1 <- munchExp e1
+     t0 <- newTemp
+     t1 <- newTemp
+     emit $ A.cjumpInstr cond [t0, t1] [s0, s1] lt
+     munchStm ss
+     
+munchStm ((T.CJUMP _ _ _ _ _):_) = fail "CJUMP must be followed by LABEL."
+
+munchStm ((T.SEQ _ _):_) = fail "T.SEQ must not appear in this phase."
+
+munchStm ((T.LABEL l):ss) =
   do
-    _ <- munchExp e
+    emit $ A.labelDef l
     munchStm ss
