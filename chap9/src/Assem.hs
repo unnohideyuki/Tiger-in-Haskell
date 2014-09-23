@@ -12,7 +12,7 @@ data Instr = OPER { oper_assem :: [String] -> [String] -> [String] -> String
            | LABEL { lab_assem :: Label -> String
                    , lab_lab :: Label
                    }
-           | MOVE { move_assem :: [String] -> [String] -> [String] -> String
+           | MOVE { move_assem :: String -> String -> String
                   , move_dst :: Int
                   , move_src :: Int
                   }
@@ -31,6 +31,14 @@ instance Show Instr where
      ++ ", oper_src=" ++ (show ss)
      ++ ", oper_jump=" ++ (show jmp)
      ++ "}"
+  
+  show LABEL{lab_lab=lab} =
+    "LABEL{" ++ lab ++ "}"
+     
+  show MOVE{move_assem=assem, move_dst=dst, move_src=src} =
+    "MOVE{move_assem=\"" ++ assem "`d0" "`s0" ++ "\""
+    ++ ", move_dst=" ++ (show dst) ++ ", move_src=" ++ (show src)
+    ++ "}"
 
 format :: (Int -> String) -> Instr -> String
 format saytemp =
@@ -44,6 +52,16 @@ format saytemp =
           _ -> [Temp.namedLabel "(no label)"]
       in
        assem ds' ss' j'
+       
+    format' LABEL{lab_assem=assem, lab_lab=lab} =
+      assem lab
+      
+    format' MOVE{move_assem=assem, move_dst=dst, move_src=src} =
+      let
+        d = saytemp dst
+        s = saytemp src
+      in
+       assem d s
   in
    format'
 
@@ -161,13 +179,12 @@ moveInstr dst src =
 regMoveInstr :: Int -> Int -> Instr
 regMoveInstr d s =
   let
-    assem ds ss _ =
-      "move-object " ++ (ds!!0) ++ ", " ++ (ss!!0) ++ "\n"
+    assem dst src =
+      "move-object " ++ dst ++ ", " ++ src ++ "\n"
   in
-   OPER { oper_assem = assem
-        , oper_dst = [d]
-        , oper_src = [s]
-        , oper_jump = Nothing
+   MOVE { move_assem = assem
+        , move_dst = d
+        , move_src = s
         }
 
 cjumpInstr :: String -> [Int] -> [Int] -> Label -> Instr
@@ -233,10 +250,8 @@ callInstr f d nargs =
 labelDef :: String -> Instr
 labelDef l =
   let
-    assem _ _ _ = ":" ++ l ++ "\n"
+    assem lab = ":" ++ lab ++ "\n"
   in
-   OPER { oper_assem = assem
-        , oper_dst = []
-        , oper_src = []
-        , oper_jump = Nothing
-        }
+   LABEL { lab_assem = assem
+         , lab_lab = l
+         }
