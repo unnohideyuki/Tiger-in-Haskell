@@ -35,7 +35,8 @@ const t25, #int 0
 new-instance t24, Ljava/lang/Integer;
 invoke-direct {t24, t25}, Ljava/lang/Integer;.<init>:(I)V
 move-object v2, t24
-const-string t26"str2"move-object v3, t26
+const-string t26, "str2"
+move-object v3, t26
 invoke-static {v0, v1, v2, v3}, L0_do_nothing1
 move-result-object t27
 return-object t27
@@ -75,10 +76,12 @@ invoke-virtual {t35}, Ljava/lang/Integer;.intValue:()I
 move-result t38
 aput-object t10, t12, t38
 move-object v2, t9
-const-string t39"str"move-object v3, t39
+const-string t39, "str"
+move-object v3, t39
 invoke-static {v0, v1, v2, v3}, L0_do_nothing1
 move-result-object t40
-const-string t41" "return-object t41
+const-string t41, " "
+return-object t41
 goto :L4
 :L4
 

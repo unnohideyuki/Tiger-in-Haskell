@@ -80,7 +80,8 @@ const t38, #int 2
 new-instance t37, Ljava/lang/Integer;
 invoke-direct {t37, t38}, Ljava/lang/Integer;.<init>:(I)V
 move-object v2, t37
-const-string t39"a"move-object v3, t39
+const-string t39, "a"
+move-object v3, t39
 const t41, #int 0
 new-instance t40, Ljava/lang/Integer;
 invoke-direct {t40, t41}, Ljava/lang/Integer;.<init>:(I)V

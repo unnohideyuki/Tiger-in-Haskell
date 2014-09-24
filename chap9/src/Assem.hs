@@ -151,7 +151,7 @@ strInstr :: String -> [Int] -> Instr
 strInstr s dst =
   let
     assem ds _ _ =
-      "const-string " ++ (ds!!0) ++ (show s)
+      "const-string " ++ (ds!!0) ++ ", " ++ (show s) ++ "\n"
   in
    OPER { oper_assem = assem
         , oper_dst = dst

@@ -22,7 +22,8 @@ move-result t30
 add-int t29, t29, t30
 new-instance t28, Ljava/lang/Integer;
 invoke-direct {t28, t29, Ljava/lang/Integer;.<init>:(I)V
-const-string t31""check-cast t28, L/java/lang/Integer;
+const-string t31, ""
+check-cast t28, L/java/lang/Integer;
 invoke-virtual {t28}, Ljava/lang/Integer;.intValue:()I
 move-result t25
 aput-object t31, t7, t25
@@ -317,7 +318,8 @@ check-cast t138, L/java/lang/Integer;
 invoke-virtual {t138}, Ljava/lang/Integer;.intValue:()I
 move-result t141
 aput-object t13, t15, t141
-const-string t142"."move-object v2, t142
+const-string t142, "."
+move-object v2, t142
 invoke-static {v0, v1, v2}, L3_indent
 move-result-object t143
 move-object t22, t143
@@ -540,7 +542,8 @@ check-cast t224, L/java/lang/Integer;
 invoke-virtual {t224}, Ljava/lang/Integer;.intValue:()I
 move-result t227
 aput-object t17, t19, t227
-const-string t228"\\n"move-object v2, t228
+const-string t228, "\\n"
+move-object v2, t228
 invoke-static {v0, v1, v2}, L1_write
 move-result-object t229
 const t231, #int 0
@@ -579,7 +582,8 @@ check-cast t239, L/java/lang/Integer;
 invoke-virtual {t239}, Ljava/lang/Integer;.intValue:()I
 move-result t242
 aput-object t17, t19, t242
-const-string t243" "move-object v2, t243
+const-string t243, " "
+move-object v2, t243
 invoke-static {v0, v1, v2}, L1_write
 move-result-object t244
 const t246, #int 1

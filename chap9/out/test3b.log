@@ -35,7 +35,8 @@ const t17, #int 2
 new-instance t16, Ljava/lang/Integer;
 invoke-direct {t16, t17}, Ljava/lang/Integer;.<init>:(I)V
 move-object v2, t16
-const-string t18"Nobody"move-object v3, t18
+const-string t18, "Nobody"
+move-object v3, t18
 const t20, #int 1000
 new-instance t19, Ljava/lang/Integer;
 invoke-direct {t19, t20}, Ljava/lang/Integer;.<init>:(I)V
@@ -46,7 +47,8 @@ move-object t4, t21
 const t24, #int 0
 new-instance t23, Ljava/lang/Integer;
 invoke-direct {t23, t24}, Ljava/lang/Integer;.<init>:(I)V
-const-string t25"Somebody"check-cast t23, L/java/lang/Integer;
+const-string t25, "Somebody"
+check-cast t23, L/java/lang/Integer;
 invoke-virtual {t23}, Ljava/lang/Integer;.intValue:()I
 move-result t22
 aput-object t25, t4, t22

@@ -5,7 +5,8 @@ const t7, #int 0
 new-instance t6, Ljava/lang/Integer;
 invoke-direct {t6, t7}, Ljava/lang/Integer;.<init>:(I)V
 move-object t4, t6
-const-string t8" "move-object t5, t8
+const-string t8, " "
+move-object t5, t8
 const t10, #int 0
 new-instance t9, Ljava/lang/Integer;
 invoke-direct {t9, t10}, Ljava/lang/Integer;.<init>:(I)V

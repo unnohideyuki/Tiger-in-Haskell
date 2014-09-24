@@ -35,8 +35,10 @@ check-cast t15, L/java/lang/Integer;
 invoke-virtual {t15}, Ljava/lang/Integer;.intValue:()I
 move-result t18
 aput-object t1, t3, t18
-const-string t19"ab"move-object v2, t19
-const-string t20"cd"move-object v3, t20
+const-string t19, "ab"
+move-object v2, t19
+const-string t20, "cd"
+move-object v3, t20
 invoke-static {v0, v1, v2, v3}, _strcmp
 move-result-object t21
 move-object t5, t21

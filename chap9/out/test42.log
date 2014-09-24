@@ -76,8 +76,10 @@ const t40, #int 4
 new-instance t39, Ljava/lang/Integer;
 invoke-direct {t39, t40}, Ljava/lang/Integer;.<init>:(I)V
 move-object v2, t39
-const-string t41"aname"move-object v3, t41
-const-string t42"somewhere"move-object v4, t42
+const-string t41, "aname"
+move-object v3, t41
+const-string t42, "somewhere"
+move-object v4, t42
 const t44, #int 0
 new-instance t43, Ljava/lang/Integer;
 invoke-direct {t43, t44}, Ljava/lang/Integer;.<init>:(I)V
@@ -191,7 +193,8 @@ const t86, #int 100
 new-instance t85, Ljava/lang/Integer;
 invoke-direct {t85, t86}, Ljava/lang/Integer;.<init>:(I)V
 move-object v2, t85
-const-string t87""move-object v3, t87
+const-string t87, ""
+move-object v3, t87
 invoke-static {v0, v1, v2, v3}, _initArray
 move-result-object t88
 move-object t6, t88
@@ -229,8 +232,10 @@ const t101, #int 4
 new-instance t100, Ljava/lang/Integer;
 invoke-direct {t100, t101}, Ljava/lang/Integer;.<init>:(I)V
 move-object v2, t100
-const-string t102"Kapoios"move-object v3, t102
-const-string t103"Kapou"move-object v4, t103
+const-string t102, "Kapoios"
+move-object v3, t102
+const-string t103, "Kapou"
+move-object v4, t103
 const t105, #int 2432
 new-instance t104, Ljava/lang/Integer;
 invoke-direct {t104, t105}, Ljava/lang/Integer;.<init>:(I)V
@@ -272,7 +277,8 @@ aput-object t112, t3, t119
 invoke-static {v0, v1, v2, v3, v4}, _initRecord
 move-result-object t120
 move-object t7, t120
-const-string t121"Allos"move-object t11, t121
+const-string t121, "Allos"
+move-object t11, t121
 const t123, #int 5
 new-instance t122, Ljava/lang/Integer;
 invoke-direct {t122, t123}, Ljava/lang/Integer;.<init>:(I)V
@@ -384,7 +390,8 @@ aget-object t164, t5, t165
 const t168, #int 0
 new-instance t167, Ljava/lang/Integer;
 invoke-direct {t167, t168}, Ljava/lang/Integer;.<init>:(I)V
-const-string t169"kati"check-cast t167, L/java/lang/Integer;
+const-string t169, "kati"
+check-cast t167, L/java/lang/Integer;
 invoke-virtual {t167}, Ljava/lang/Integer;.intValue:()I
 move-result t166
 aput-object t169, t164, t166
@@ -409,14 +416,16 @@ aput-object t177, t172, t174
 const t181, #int 34
 new-instance t180, Ljava/lang/Integer;
 invoke-direct {t180, t181}, Ljava/lang/Integer;.<init>:(I)V
-const-string t182"sfd"check-cast t180, L/java/lang/Integer;
+const-string t182, "sfd"
+check-cast t180, L/java/lang/Integer;
 invoke-virtual {t180}, Ljava/lang/Integer;.intValue:()I
 move-result t179
 aput-object t182, t6, t179
 const t185, #int 0
 new-instance t184, Ljava/lang/Integer;
 invoke-direct {t184, t185}, Ljava/lang/Integer;.<init>:(I)V
-const-string t186"sdf"check-cast t184, L/java/lang/Integer;
+const-string t186, "sdf"
+check-cast t184, L/java/lang/Integer;
 invoke-virtual {t184}, Ljava/lang/Integer;.intValue:()I
 move-result t183
 aput-object t186, t7, t183
