@@ -43,9 +43,10 @@ munchExp :: T.Exp -> State CgenState Int
 
 munchExp (T.CONST n) = 
   do
-    t <- newTemp
-    emit $ A.constInstr n [t]
-    return t
+    t0 <- newTemp
+    t1 <- newTemp
+    emit $ A.constInstr n [t0, t1]
+    return t0
    
 munchExp (T.STR s) =
   do

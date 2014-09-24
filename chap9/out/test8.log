@@ -1,0 +1,50 @@
+
+---- prog ----
+:L6
+const t7, #int 1
+new-instance t6, Ljava/lang/Integer;
+invoke-direct {t6, t7}, Ljava/lang/Integer;.<init>:(I)V
+move-object t4, t6
+const t9, #int 10
+new-instance t8, Ljava/lang/Integer;
+invoke-direct {t8, t9}, Ljava/lang/Integer;.<init>:(I)V
+const t11, #int 20
+new-instance t10, Ljava/lang/Integer;
+invoke-direct {t10, t11}, Ljava/lang/Integer;.<init>:(I)V
+check-cast t8, L/java/lang/Integer;
+invoke-virtual {t8}, Ljava/lang/Integer;.intValue:()I
+move-result t12
+check-cast t10, L/java/lang/Integer;
+invoke-virtual {t10}, Ljava/lang/Integer;.intValue:()I
+move-result t13
+if-gt t12, t13, :L0
+const t15, #int 0
+new-instance t14, Ljava/lang/Integer;
+invoke-direct {t14, t15}, Ljava/lang/Integer;.<init>:(I)V
+move-object t4, t14
+:L0
+const t17, #int 0
+new-instance t16, Ljava/lang/Integer;
+invoke-direct {t16, t17}, Ljava/lang/Integer;.<init>:(I)V
+check-cast t4, L/java/lang/Integer;
+invoke-virtual {t4}, Ljava/lang/Integer;.intValue:()I
+move-result t18
+check-cast t16, L/java/lang/Integer;
+invoke-virtual {t16}, Ljava/lang/Integer;.intValue:()I
+move-result t19
+if-ne t18, t19, :L2
+const t21, #int 40
+new-instance t20, Ljava/lang/Integer;
+invoke-direct {t20, t21}, Ljava/lang/Integer;.<init>:(I)V
+move-object t5, t20
+:L4
+return-object t5
+goto :L5
+:L2
+const t23, #int 30
+new-instance t22, Ljava/lang/Integer;
+invoke-direct {t22, t23}, Ljava/lang/Integer;.<init>:(I)V
+move-object t5, t22
+goto :L4
+:L5
+

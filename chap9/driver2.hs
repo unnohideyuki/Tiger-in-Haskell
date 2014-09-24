@@ -16,6 +16,7 @@ main = do
   -- TODO: not only stm but (stm:stms) should be linearized.
   let (stms1, t1) = C.linearize stm t
   let (stms2, t2, lab) = C.basicBlocks stms1 t1
-  print $ C.traceSchedule stms2 lab t2
+  let (stms3, _) = C.traceSchedule stms2 lab t2
+  print stms3
 
   

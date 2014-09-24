@@ -1,0 +1,22 @@
+
+---- prog ----
+:L3
+const t13, #int 0
+new-instance t12, Ljava/lang/Integer;
+invoke-direct {t12, t13}, Ljava/lang/Integer;.<init>:(I)V
+return-object t12
+goto :L2
+:L2
+
+---- L1_g ----
+:L5
+return-object t8
+goto :L4
+:L4
+
+---- L0_g ----
+:L7
+return-object t4
+goto :L6
+:L6
+

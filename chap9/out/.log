@@ -54,7 +54,8 @@
 ../additonalcases/test17b.tig : driver2.exe: 4:12: type not defined (field): treelist
 ../additonalcases/test19b.tig : driver2.exe: 8:29: undefined variable: a
 ../additonalcases/test32b.tig : driver2.exe: 6:18: type mismatch: expected INT, actual STRING
-../additonalcases/test33b.tig : ../additonalcases/test37b.tig : [LABEL "L1",MOVE (TEMP 4) (CONST 0),MOVE (TEMP 5) (STR " "),MOVE (TEMP 0) (TEMP 5),JUMP (NAME "L0") ["L0"],LABEL "L0"]
+../additonalcases/test33b.tig : driver2.exe: 3:17: record type not found: rectype
+../additonalcases/test37b.tig : [LABEL "L1",MOVE (TEMP 4) (CONST 0),MOVE (TEMP 5) (STR " "),MOVE (TEMP 0) (TEMP 5),JUMP (NAME "L0") ["L0"],LABEL "L0"]
 ../additonalcases/test38b.tig : driver2.exe: 5:9: duplicated defintion: a
 ../additonalcases/test39b.tig : driver2.exe: 5:18: duplicated defintion: g
 ../additonalcases/test41b.tig : [LABEL "L1",MOVE (TEMP 4) (CONST 0),MOVE (TEMP 5) (STR "str"),MOVE (TEMP 0) (TEMP 5),JUMP (NAME "L0") ["L0"],LABEL "L0"]

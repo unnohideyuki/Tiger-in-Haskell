@@ -1,0 +1,1 @@
+tandorc.exe: 12:16: type mismatch: expected RECORD [("name",STRING),("id",INT)] 60024, actual ARRAY INT 50024

@@ -13,7 +13,9 @@ newTemp :: Temp -> (Int, Temp)
 newTemp t@Temp{temps=n}  = (n, t{temps = n + 1})
 
 makeString :: Int -> String
-makeString n = "t" ++ show n
+makeString n | n >= 0 = "t" ++ show n
+             | n >= -5 = "v" ++ show (-n-1)
+             | otherwise = "p" ++ show (-n-6)
 
 newLabel :: Temp -> (Label, Temp)
 newLabel t@Temp{labs=n} = 

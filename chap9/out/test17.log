@@ -1,0 +1,11 @@
+
+---- prog ----
+:L1
+const t6, #int 0
+new-instance t5, Ljava/lang/Integer;
+invoke-direct {t5, t6}, Ljava/lang/Integer;.<init>:(I)V
+move-object t4, t5
+return-object t4
+goto :L0
+:L0
+

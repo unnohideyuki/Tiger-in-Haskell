@@ -77,7 +77,7 @@ integer2int s d =
 int2integer :: String -> String -> String
 int2integer s d =  
   "new-instance " ++ d ++ ", Ljava/lang/Integer;\n"
-  ++ "invoke-direct {" ++ d ++ ", " ++ s ++ ", Ljava/lang/Integer;.<init>:(I)V"
+  ++ "invoke-direct {" ++ d ++ ", " ++ s ++ ", Ljava/lang/Integer;.<init>:(I)V\n"
 
 binOper :: String -> [Int] -> [Int] -> Instr
 binOper binop dst src =
@@ -121,7 +121,7 @@ constInstr c dst =
         i3 = "invoke-direct {" ++ (ds!!0) ++ ", " ++ (ds!!1) 
              ++ "}, Ljava/lang/Integer;.<init>:(I)V"
       in
-       concat [i1, "\n", i2, "\n", i3]
+       concat [i1, "\n", i2, "\n", i3, "\n"]
   in
    OPER { oper_assem = assem
         , oper_dst = dst

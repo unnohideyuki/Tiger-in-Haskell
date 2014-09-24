@@ -1,0 +1,712 @@
+
+---- prog ----
+:L11
+const t24, #int 0
+new-instance t23, Ljava/lang/Integer;
+invoke-direct {t23, t24}, Ljava/lang/Integer;.<init>:(I)V
+return-object t23
+goto :L10
+:L10
+
+---- L0_prettyprint ----
+:L13
+const t27, #int 1
+new-instance t26, Ljava/lang/Integer;
+invoke-direct {t26, t27}, Ljava/lang/Integer;.<init>:(I)V
+check-cast t26, Ljava/lang/Integer;
+check-cast t5, Ljava/lang/Integer;
+invoke-virtual {t26}, Ljava/lang/Integer;.intValue:()I
+move-result t29
+invoke-virtual {t5}, Ljava/lang/Integer;.intValue:()I
+move-result t30
+add-int t29, t29, t30
+new-instance t28, Ljava/lang/Integer;
+invoke-direct {t28, t29, Ljava/lang/Integer;.<init>:(I)V
+const-string t31""check-cast t28, L/java/lang/Integer;
+invoke-virtual {t28}, Ljava/lang/Integer;.intValue:()I
+move-result t25
+aput-object t31, t7, t25
+const t33, #int 5
+new-instance t32, Ljava/lang/Integer;
+invoke-direct {t32, t33}, Ljava/lang/Integer;.<init>:(I)V
+check-cast t6, Ljava/lang/Integer;
+check-cast t32, Ljava/lang/Integer;
+invoke-virtual {t6}, Ljava/lang/Integer;.intValue:()I
+move-result t35
+invoke-virtual {t32}, Ljava/lang/Integer;.intValue:()I
+move-result t36
+add-int t35, t35, t36
+new-instance t34, Ljava/lang/Integer;
+invoke-direct {t34, t35, Ljava/lang/Integer;.<init>:(I)V
+move-object v0, t7
+move-object v1, t5
+const t38, #int 2
+new-instance t37, Ljava/lang/Integer;
+invoke-direct {t37, t38}, Ljava/lang/Integer;.<init>:(I)V
+check-cast t34, Ljava/lang/Integer;
+check-cast t37, Ljava/lang/Integer;
+invoke-virtual {t34}, Ljava/lang/Integer;.intValue:()I
+move-result t40
+invoke-virtual {t37}, Ljava/lang/Integer;.intValue:()I
+move-result t41
+sub-int t40, t40, t41
+new-instance t39, Ljava/lang/Integer;
+invoke-direct {t39, t40, Ljava/lang/Integer;.<init>:(I)V
+check-cast t39, L/java/lang/Integer;
+invoke-virtual {t39}, Ljava/lang/Integer;.intValue:()I
+move-result t42
+aput-object t5, t7, t42
+const t44, #int 0
+new-instance t43, Ljava/lang/Integer;
+invoke-direct {t43, t44}, Ljava/lang/Integer;.<init>:(I)V
+move-object v2, t43
+move-object v3, t4
+invoke-static {v0, v1, v2, v3}, L2_show
+move-result-object t45
+const t47, #int 1
+new-instance t46, Ljava/lang/Integer;
+invoke-direct {t46, t47}, Ljava/lang/Integer;.<init>:(I)V
+check-cast t46, Ljava/lang/Integer;
+check-cast t5, Ljava/lang/Integer;
+invoke-virtual {t46}, Ljava/lang/Integer;.intValue:()I
+move-result t49
+invoke-virtual {t5}, Ljava/lang/Integer;.intValue:()I
+move-result t50
+add-int t49, t49, t50
+new-instance t48, Ljava/lang/Integer;
+invoke-direct {t48, t49, Ljava/lang/Integer;.<init>:(I)V
+check-cast t48, Ljava/lang/Integer;
+invoke-virtual {t48}, Ljava/lang/Integer;.intValue:()I
+move-result t52
+check-cast t7, [Ljava/lang/Object;
+aget-object t51, t7, t52
+return-object t51
+goto :L12
+:L12
+
+---- L2_show ----
+:L15
+const t54, #int 0
+new-instance t53, Ljava/lang/Integer;
+invoke-direct {t53, t54}, Ljava/lang/Integer;.<init>:(I)V
+check-cast t12, L/java/lang/Integer;
+invoke-virtual {t12}, Ljava/lang/Integer;.intValue:()I
+move-result t55
+check-cast t53, L/java/lang/Integer;
+invoke-virtual {t53}, Ljava/lang/Integer;.intValue:()I
+move-result t56
+if-eq t55, t56, :L7
+const t58, #int 4
+new-instance t57, Ljava/lang/Integer;
+invoke-direct {t57, t58}, Ljava/lang/Integer;.<init>:(I)V
+check-cast t14, Ljava/lang/Integer;
+check-cast t57, Ljava/lang/Integer;
+invoke-virtual {t14}, Ljava/lang/Integer;.intValue:()I
+move-result t60
+invoke-virtual {t57}, Ljava/lang/Integer;.intValue:()I
+move-result t61
+add-int t60, t60, t61
+new-instance t59, Ljava/lang/Integer;
+invoke-direct {t59, t60, Ljava/lang/Integer;.<init>:(I)V
+move-object v0, t15
+move-object v1, t13
+const t63, #int 2
+new-instance t62, Ljava/lang/Integer;
+invoke-direct {t62, t63}, Ljava/lang/Integer;.<init>:(I)V
+check-cast t59, Ljava/lang/Integer;
+check-cast t62, Ljava/lang/Integer;
+invoke-virtual {t59}, Ljava/lang/Integer;.intValue:()I
+move-result t65
+invoke-virtual {t62}, Ljava/lang/Integer;.intValue:()I
+move-result t66
+sub-int t65, t65, t66
+new-instance t64, Ljava/lang/Integer;
+invoke-direct {t64, t65, Ljava/lang/Integer;.<init>:(I)V
+check-cast t64, L/java/lang/Integer;
+invoke-virtual {t64}, Ljava/lang/Integer;.intValue:()I
+move-result t67
+aput-object t13, t15, t67
+const t69, #int 0
+new-instance t68, Ljava/lang/Integer;
+invoke-direct {t68, t69}, Ljava/lang/Integer;.<init>:(I)V
+check-cast t68, Ljava/lang/Integer;
+invoke-virtual {t68}, Ljava/lang/Integer;.intValue:()I
+move-result t71
+check-cast t12, [Ljava/lang/Object;
+aget-object t70, t12, t71
+move-object v2, t70
+invoke-static {v0, v1, v2}, L3_indent
+move-result-object t72
+const t74, #int 5
+new-instance t73, Ljava/lang/Integer;
+invoke-direct {t73, t74}, Ljava/lang/Integer;.<init>:(I)V
+check-cast t14, Ljava/lang/Integer;
+check-cast t73, Ljava/lang/Integer;
+invoke-virtual {t14}, Ljava/lang/Integer;.intValue:()I
+move-result t76
+invoke-virtual {t73}, Ljava/lang/Integer;.intValue:()I
+move-result t77
+add-int t76, t76, t77
+new-instance t75, Ljava/lang/Integer;
+invoke-direct {t75, t76, Ljava/lang/Integer;.<init>:(I)V
+move-object v0, t15
+move-object v1, t13
+const t79, #int 2
+new-instance t78, Ljava/lang/Integer;
+invoke-direct {t78, t79}, Ljava/lang/Integer;.<init>:(I)V
+check-cast t75, Ljava/lang/Integer;
+check-cast t78, Ljava/lang/Integer;
+invoke-virtual {t75}, Ljava/lang/Integer;.intValue:()I
+move-result t81
+invoke-virtual {t78}, Ljava/lang/Integer;.intValue:()I
+move-result t82
+sub-int t81, t81, t82
+new-instance t80, Ljava/lang/Integer;
+invoke-direct {t80, t81, Ljava/lang/Integer;.<init>:(I)V
+check-cast t80, L/java/lang/Integer;
+invoke-virtual {t80}, Ljava/lang/Integer;.intValue:()I
+move-result t83
+aput-object t13, t15, t83
+const t85, #int -3
+new-instance t84, Ljava/lang/Integer;
+invoke-direct {t84, t85}, Ljava/lang/Integer;.<init>:(I)V
+check-cast t84, Ljava/lang/Integer;
+check-cast t13, Ljava/lang/Integer;
+invoke-virtual {t84}, Ljava/lang/Integer;.intValue:()I
+move-result t87
+invoke-virtual {t13}, Ljava/lang/Integer;.intValue:()I
+move-result t88
+add-int t87, t87, t88
+new-instance t86, Ljava/lang/Integer;
+invoke-direct {t86, t87, Ljava/lang/Integer;.<init>:(I)V
+check-cast t86, Ljava/lang/Integer;
+invoke-virtual {t86}, Ljava/lang/Integer;.intValue:()I
+move-result t90
+check-cast t15, [Ljava/lang/Object;
+aget-object t89, t15, t90
+const t92, #int 1
+new-instance t91, Ljava/lang/Integer;
+invoke-direct {t91, t92}, Ljava/lang/Integer;.<init>:(I)V
+check-cast t89, Ljava/lang/Integer;
+check-cast t91, Ljava/lang/Integer;
+invoke-virtual {t89}, Ljava/lang/Integer;.intValue:()I
+move-result t94
+invoke-virtual {t91}, Ljava/lang/Integer;.intValue:()I
+move-result t95
+add-int t94, t94, t95
+new-instance t93, Ljava/lang/Integer;
+invoke-direct {t93, t94, Ljava/lang/Integer;.<init>:(I)V
+move-object v2, t93
+const t97, #int 1
+new-instance t96, Ljava/lang/Integer;
+invoke-direct {t96, t97}, Ljava/lang/Integer;.<init>:(I)V
+check-cast t96, Ljava/lang/Integer;
+invoke-virtual {t96}, Ljava/lang/Integer;.intValue:()I
+move-result t99
+check-cast t12, [Ljava/lang/Object;
+aget-object t98, t12, t99
+move-object v3, t98
+invoke-static {v0, v1, v2, v3}, L2_show
+move-result-object t100
+const t102, #int 5
+new-instance t101, Ljava/lang/Integer;
+invoke-direct {t101, t102}, Ljava/lang/Integer;.<init>:(I)V
+check-cast t14, Ljava/lang/Integer;
+check-cast t101, Ljava/lang/Integer;
+invoke-virtual {t14}, Ljava/lang/Integer;.intValue:()I
+move-result t104
+invoke-virtual {t101}, Ljava/lang/Integer;.intValue:()I
+move-result t105
+add-int t104, t104, t105
+new-instance t103, Ljava/lang/Integer;
+invoke-direct {t103, t104, Ljava/lang/Integer;.<init>:(I)V
+move-object v0, t15
+move-object v1, t13
+const t107, #int 2
+new-instance t106, Ljava/lang/Integer;
+invoke-direct {t106, t107}, Ljava/lang/Integer;.<init>:(I)V
+check-cast t103, Ljava/lang/Integer;
+check-cast t106, Ljava/lang/Integer;
+invoke-virtual {t103}, Ljava/lang/Integer;.intValue:()I
+move-result t109
+invoke-virtual {t106}, Ljava/lang/Integer;.intValue:()I
+move-result t110
+sub-int t109, t109, t110
+new-instance t108, Ljava/lang/Integer;
+invoke-direct {t108, t109, Ljava/lang/Integer;.<init>:(I)V
+check-cast t108, L/java/lang/Integer;
+invoke-virtual {t108}, Ljava/lang/Integer;.intValue:()I
+move-result t111
+aput-object t13, t15, t111
+const t113, #int -3
+new-instance t112, Ljava/lang/Integer;
+invoke-direct {t112, t113}, Ljava/lang/Integer;.<init>:(I)V
+check-cast t112, Ljava/lang/Integer;
+check-cast t13, Ljava/lang/Integer;
+invoke-virtual {t112}, Ljava/lang/Integer;.intValue:()I
+move-result t115
+invoke-virtual {t13}, Ljava/lang/Integer;.intValue:()I
+move-result t116
+add-int t115, t115, t116
+new-instance t114, Ljava/lang/Integer;
+invoke-direct {t114, t115, Ljava/lang/Integer;.<init>:(I)V
+check-cast t114, Ljava/lang/Integer;
+invoke-virtual {t114}, Ljava/lang/Integer;.intValue:()I
+move-result t118
+check-cast t15, [Ljava/lang/Object;
+aget-object t117, t15, t118
+const t120, #int 1
+new-instance t119, Ljava/lang/Integer;
+invoke-direct {t119, t120}, Ljava/lang/Integer;.<init>:(I)V
+check-cast t117, Ljava/lang/Integer;
+check-cast t119, Ljava/lang/Integer;
+invoke-virtual {t117}, Ljava/lang/Integer;.intValue:()I
+move-result t122
+invoke-virtual {t119}, Ljava/lang/Integer;.intValue:()I
+move-result t123
+add-int t122, t122, t123
+new-instance t121, Ljava/lang/Integer;
+invoke-direct {t121, t122, Ljava/lang/Integer;.<init>:(I)V
+move-object v2, t121
+const t125, #int 2
+new-instance t124, Ljava/lang/Integer;
+invoke-direct {t124, t125}, Ljava/lang/Integer;.<init>:(I)V
+check-cast t124, Ljava/lang/Integer;
+invoke-virtual {t124}, Ljava/lang/Integer;.intValue:()I
+move-result t127
+check-cast t12, [Ljava/lang/Object;
+aget-object t126, t12, t127
+move-object v3, t126
+invoke-static {v0, v1, v2, v3}, L2_show
+move-result-object t128
+move-object t22, t128
+:L9
+const t130, #int 0
+new-instance t129, Ljava/lang/Integer;
+invoke-direct {t129, t130}, Ljava/lang/Integer;.<init>:(I)V
+return-object t129
+goto :L14
+:L7
+const t132, #int 4
+new-instance t131, Ljava/lang/Integer;
+invoke-direct {t131, t132}, Ljava/lang/Integer;.<init>:(I)V
+check-cast t14, Ljava/lang/Integer;
+check-cast t131, Ljava/lang/Integer;
+invoke-virtual {t14}, Ljava/lang/Integer;.intValue:()I
+move-result t134
+invoke-virtual {t131}, Ljava/lang/Integer;.intValue:()I
+move-result t135
+add-int t134, t134, t135
+new-instance t133, Ljava/lang/Integer;
+invoke-direct {t133, t134, Ljava/lang/Integer;.<init>:(I)V
+move-object v0, t15
+move-object v1, t13
+const t137, #int 2
+new-instance t136, Ljava/lang/Integer;
+invoke-direct {t136, t137}, Ljava/lang/Integer;.<init>:(I)V
+check-cast t133, Ljava/lang/Integer;
+check-cast t136, Ljava/lang/Integer;
+invoke-virtual {t133}, Ljava/lang/Integer;.intValue:()I
+move-result t139
+invoke-virtual {t136}, Ljava/lang/Integer;.intValue:()I
+move-result t140
+sub-int t139, t139, t140
+new-instance t138, Ljava/lang/Integer;
+invoke-direct {t138, t139, Ljava/lang/Integer;.<init>:(I)V
+check-cast t138, L/java/lang/Integer;
+invoke-virtual {t138}, Ljava/lang/Integer;.intValue:()I
+move-result t141
+aput-object t13, t15, t141
+const-string t142"."move-object v2, t142
+invoke-static {v0, v1, v2}, L3_indent
+move-result-object t143
+move-object t22, t143
+goto :L9
+:L14
+
+---- L3_indent ----
+:L17
+const t147, #int 1
+new-instance t146, Ljava/lang/Integer;
+invoke-direct {t146, t147}, Ljava/lang/Integer;.<init>:(I)V
+move-object t20, t146
+const t149, #int -3
+new-instance t148, Ljava/lang/Integer;
+invoke-direct {t148, t149}, Ljava/lang/Integer;.<init>:(I)V
+const t151, #int -2
+new-instance t150, Ljava/lang/Integer;
+invoke-direct {t150, t151}, Ljava/lang/Integer;.<init>:(I)V
+check-cast t150, Ljava/lang/Integer;
+check-cast t17, Ljava/lang/Integer;
+invoke-virtual {t150}, Ljava/lang/Integer;.intValue:()I
+move-result t153
+invoke-virtual {t17}, Ljava/lang/Integer;.intValue:()I
+move-result t154
+add-int t153, t153, t154
+new-instance t152, Ljava/lang/Integer;
+invoke-direct {t152, t153, Ljava/lang/Integer;.<init>:(I)V
+check-cast t152, Ljava/lang/Integer;
+invoke-virtual {t152}, Ljava/lang/Integer;.intValue:()I
+move-result t156
+check-cast t19, [Ljava/lang/Object;
+aget-object t155, t19, t156
+check-cast t148, Ljava/lang/Integer;
+check-cast t155, Ljava/lang/Integer;
+invoke-virtual {t148}, Ljava/lang/Integer;.intValue:()I
+move-result t158
+invoke-virtual {t155}, Ljava/lang/Integer;.intValue:()I
+move-result t159
+add-int t158, t158, t159
+new-instance t157, Ljava/lang/Integer;
+invoke-direct {t157, t158, Ljava/lang/Integer;.<init>:(I)V
+check-cast t157, Ljava/lang/Integer;
+invoke-virtual {t157}, Ljava/lang/Integer;.intValue:()I
+move-result t161
+check-cast t19, [Ljava/lang/Object;
+aget-object t160, t19, t161
+move-object t21, t160
+:L5
+check-cast t20, L/java/lang/Integer;
+invoke-virtual {t20}, Ljava/lang/Integer;.intValue:()I
+move-result t162
+check-cast t21, L/java/lang/Integer;
+invoke-virtual {t21}, Ljava/lang/Integer;.intValue:()I
+move-result t163
+if-le t162, t163, :L6
+const t165, #int 1
+new-instance t164, Ljava/lang/Integer;
+invoke-direct {t164, t165}, Ljava/lang/Integer;.<init>:(I)V
+const t167, #int -2
+new-instance t166, Ljava/lang/Integer;
+invoke-direct {t166, t167}, Ljava/lang/Integer;.<init>:(I)V
+const t169, #int -2
+new-instance t168, Ljava/lang/Integer;
+invoke-direct {t168, t169}, Ljava/lang/Integer;.<init>:(I)V
+check-cast t168, Ljava/lang/Integer;
+check-cast t17, Ljava/lang/Integer;
+invoke-virtual {t168}, Ljava/lang/Integer;.intValue:()I
+move-result t171
+invoke-virtual {t17}, Ljava/lang/Integer;.intValue:()I
+move-result t172
+add-int t171, t171, t172
+new-instance t170, Ljava/lang/Integer;
+invoke-direct {t170, t171, Ljava/lang/Integer;.<init>:(I)V
+check-cast t170, Ljava/lang/Integer;
+invoke-virtual {t170}, Ljava/lang/Integer;.intValue:()I
+move-result t174
+check-cast t19, [Ljava/lang/Object;
+aget-object t173, t19, t174
+check-cast t166, Ljava/lang/Integer;
+check-cast t173, Ljava/lang/Integer;
+invoke-virtual {t166}, Ljava/lang/Integer;.intValue:()I
+move-result t176
+invoke-virtual {t173}, Ljava/lang/Integer;.intValue:()I
+move-result t177
+add-int t176, t176, t177
+new-instance t175, Ljava/lang/Integer;
+invoke-direct {t175, t176, Ljava/lang/Integer;.<init>:(I)V
+check-cast t175, Ljava/lang/Integer;
+invoke-virtual {t175}, Ljava/lang/Integer;.intValue:()I
+move-result t179
+check-cast t19, [Ljava/lang/Object;
+aget-object t178, t19, t179
+check-cast t164, Ljava/lang/Integer;
+check-cast t178, Ljava/lang/Integer;
+invoke-virtual {t164}, Ljava/lang/Integer;.intValue:()I
+move-result t181
+invoke-virtual {t178}, Ljava/lang/Integer;.intValue:()I
+move-result t182
+add-int t181, t181, t182
+new-instance t180, Ljava/lang/Integer;
+invoke-direct {t180, t181, Ljava/lang/Integer;.<init>:(I)V
+move-object t145, t180
+const t184, #int 5
+new-instance t183, Ljava/lang/Integer;
+invoke-direct {t183, t184}, Ljava/lang/Integer;.<init>:(I)V
+check-cast t18, Ljava/lang/Integer;
+check-cast t183, Ljava/lang/Integer;
+invoke-virtual {t18}, Ljava/lang/Integer;.intValue:()I
+move-result t186
+invoke-virtual {t183}, Ljava/lang/Integer;.intValue:()I
+move-result t187
+add-int t186, t186, t187
+new-instance t185, Ljava/lang/Integer;
+invoke-direct {t185, t186, Ljava/lang/Integer;.<init>:(I)V
+move-object v0, t19
+move-object v1, t17
+const t189, #int 2
+new-instance t188, Ljava/lang/Integer;
+invoke-direct {t188, t189}, Ljava/lang/Integer;.<init>:(I)V
+check-cast t185, Ljava/lang/Integer;
+check-cast t188, Ljava/lang/Integer;
+invoke-virtual {t185}, Ljava/lang/Integer;.intValue:()I
+move-result t191
+invoke-virtual {t188}, Ljava/lang/Integer;.intValue:()I
+move-result t192
+sub-int t191, t191, t192
+new-instance t190, Ljava/lang/Integer;
+invoke-direct {t190, t191, Ljava/lang/Integer;.<init>:(I)V
+check-cast t190, L/java/lang/Integer;
+invoke-virtual {t190}, Ljava/lang/Integer;.intValue:()I
+move-result t193
+aput-object t17, t19, t193
+const t195, #int 1
+new-instance t194, Ljava/lang/Integer;
+invoke-direct {t194, t195}, Ljava/lang/Integer;.<init>:(I)V
+const t197, #int -2
+new-instance t196, Ljava/lang/Integer;
+invoke-direct {t196, t197}, Ljava/lang/Integer;.<init>:(I)V
+const t199, #int -2
+new-instance t198, Ljava/lang/Integer;
+invoke-direct {t198, t199}, Ljava/lang/Integer;.<init>:(I)V
+check-cast t198, Ljava/lang/Integer;
+check-cast t17, Ljava/lang/Integer;
+invoke-virtual {t198}, Ljava/lang/Integer;.intValue:()I
+move-result t201
+invoke-virtual {t17}, Ljava/lang/Integer;.intValue:()I
+move-result t202
+add-int t201, t201, t202
+new-instance t200, Ljava/lang/Integer;
+invoke-direct {t200, t201, Ljava/lang/Integer;.<init>:(I)V
+check-cast t200, Ljava/lang/Integer;
+invoke-virtual {t200}, Ljava/lang/Integer;.intValue:()I
+move-result t204
+check-cast t19, [Ljava/lang/Object;
+aget-object t203, t19, t204
+check-cast t196, Ljava/lang/Integer;
+check-cast t203, Ljava/lang/Integer;
+invoke-virtual {t196}, Ljava/lang/Integer;.intValue:()I
+move-result t206
+invoke-virtual {t203}, Ljava/lang/Integer;.intValue:()I
+move-result t207
+add-int t206, t206, t207
+new-instance t205, Ljava/lang/Integer;
+invoke-direct {t205, t206, Ljava/lang/Integer;.<init>:(I)V
+check-cast t205, Ljava/lang/Integer;
+invoke-virtual {t205}, Ljava/lang/Integer;.intValue:()I
+move-result t209
+check-cast t19, [Ljava/lang/Object;
+aget-object t208, t19, t209
+check-cast t194, Ljava/lang/Integer;
+check-cast t208, Ljava/lang/Integer;
+invoke-virtual {t194}, Ljava/lang/Integer;.intValue:()I
+move-result t211
+invoke-virtual {t208}, Ljava/lang/Integer;.intValue:()I
+move-result t212
+add-int t211, t211, t212
+new-instance t210, Ljava/lang/Integer;
+invoke-direct {t210, t211, Ljava/lang/Integer;.<init>:(I)V
+check-cast t210, Ljava/lang/Integer;
+invoke-virtual {t210}, Ljava/lang/Integer;.intValue:()I
+move-result t214
+check-cast t19, [Ljava/lang/Object;
+aget-object t213, t19, t214
+move-object v2, t213
+move-object v3, t16
+invoke-static {v0, v1, v2, v3}, concat
+move-result-object t215
+move-object t144, t215
+check-cast t145, L/java/lang/Integer;
+invoke-virtual {t145}, Ljava/lang/Integer;.intValue:()I
+move-result t216
+aput-object t144, t19, t216
+const t218, #int 4
+new-instance t217, Ljava/lang/Integer;
+invoke-direct {t217, t218}, Ljava/lang/Integer;.<init>:(I)V
+check-cast t18, Ljava/lang/Integer;
+check-cast t217, Ljava/lang/Integer;
+invoke-virtual {t18}, Ljava/lang/Integer;.intValue:()I
+move-result t220
+invoke-virtual {t217}, Ljava/lang/Integer;.intValue:()I
+move-result t221
+add-int t220, t220, t221
+new-instance t219, Ljava/lang/Integer;
+invoke-direct {t219, t220, Ljava/lang/Integer;.<init>:(I)V
+move-object v0, t19
+move-object v1, t17
+const t223, #int 2
+new-instance t222, Ljava/lang/Integer;
+invoke-direct {t222, t223}, Ljava/lang/Integer;.<init>:(I)V
+check-cast t219, Ljava/lang/Integer;
+check-cast t222, Ljava/lang/Integer;
+invoke-virtual {t219}, Ljava/lang/Integer;.intValue:()I
+move-result t225
+invoke-virtual {t222}, Ljava/lang/Integer;.intValue:()I
+move-result t226
+sub-int t225, t225, t226
+new-instance t224, Ljava/lang/Integer;
+invoke-direct {t224, t225, Ljava/lang/Integer;.<init>:(I)V
+check-cast t224, L/java/lang/Integer;
+invoke-virtual {t224}, Ljava/lang/Integer;.intValue:()I
+move-result t227
+aput-object t17, t19, t227
+const-string t228"\\n"move-object v2, t228
+invoke-static {v0, v1, v2}, L1_write
+move-result-object t229
+const t231, #int 0
+new-instance t230, Ljava/lang/Integer;
+invoke-direct {t230, t231}, Ljava/lang/Integer;.<init>:(I)V
+return-object t230
+goto :L16
+:L6
+const t233, #int 4
+new-instance t232, Ljava/lang/Integer;
+invoke-direct {t232, t233}, Ljava/lang/Integer;.<init>:(I)V
+check-cast t18, Ljava/lang/Integer;
+check-cast t232, Ljava/lang/Integer;
+invoke-virtual {t18}, Ljava/lang/Integer;.intValue:()I
+move-result t235
+invoke-virtual {t232}, Ljava/lang/Integer;.intValue:()I
+move-result t236
+add-int t235, t235, t236
+new-instance t234, Ljava/lang/Integer;
+invoke-direct {t234, t235, Ljava/lang/Integer;.<init>:(I)V
+move-object v0, t19
+move-object v1, t17
+const t238, #int 2
+new-instance t237, Ljava/lang/Integer;
+invoke-direct {t237, t238}, Ljava/lang/Integer;.<init>:(I)V
+check-cast t234, Ljava/lang/Integer;
+check-cast t237, Ljava/lang/Integer;
+invoke-virtual {t234}, Ljava/lang/Integer;.intValue:()I
+move-result t240
+invoke-virtual {t237}, Ljava/lang/Integer;.intValue:()I
+move-result t241
+sub-int t240, t240, t241
+new-instance t239, Ljava/lang/Integer;
+invoke-direct {t239, t240, Ljava/lang/Integer;.<init>:(I)V
+check-cast t239, L/java/lang/Integer;
+invoke-virtual {t239}, Ljava/lang/Integer;.intValue:()I
+move-result t242
+aput-object t17, t19, t242
+const-string t243" "move-object v2, t243
+invoke-static {v0, v1, v2}, L1_write
+move-result-object t244
+const t246, #int 1
+new-instance t245, Ljava/lang/Integer;
+invoke-direct {t245, t246}, Ljava/lang/Integer;.<init>:(I)V
+check-cast t20, Ljava/lang/Integer;
+check-cast t245, Ljava/lang/Integer;
+invoke-virtual {t20}, Ljava/lang/Integer;.intValue:()I
+move-result t248
+invoke-virtual {t245}, Ljava/lang/Integer;.intValue:()I
+move-result t249
+add-int t248, t248, t249
+new-instance t247, Ljava/lang/Integer;
+invoke-direct {t247, t248, Ljava/lang/Integer;.<init>:(I)V
+move-object t20, t247
+goto :L5
+:L16
+
+---- L1_write ----
+:L19
+const t253, #int 1
+new-instance t252, Ljava/lang/Integer;
+invoke-direct {t252, t253}, Ljava/lang/Integer;.<init>:(I)V
+const t255, #int -2
+new-instance t254, Ljava/lang/Integer;
+invoke-direct {t254, t255}, Ljava/lang/Integer;.<init>:(I)V
+check-cast t254, Ljava/lang/Integer;
+check-cast t9, Ljava/lang/Integer;
+invoke-virtual {t254}, Ljava/lang/Integer;.intValue:()I
+move-result t257
+invoke-virtual {t9}, Ljava/lang/Integer;.intValue:()I
+move-result t258
+add-int t257, t257, t258
+new-instance t256, Ljava/lang/Integer;
+invoke-direct {t256, t257, Ljava/lang/Integer;.<init>:(I)V
+check-cast t256, Ljava/lang/Integer;
+invoke-virtual {t256}, Ljava/lang/Integer;.intValue:()I
+move-result t260
+check-cast t11, [Ljava/lang/Object;
+aget-object t259, t11, t260
+check-cast t252, Ljava/lang/Integer;
+check-cast t259, Ljava/lang/Integer;
+invoke-virtual {t252}, Ljava/lang/Integer;.intValue:()I
+move-result t262
+invoke-virtual {t259}, Ljava/lang/Integer;.intValue:()I
+move-result t263
+add-int t262, t262, t263
+new-instance t261, Ljava/lang/Integer;
+invoke-direct {t261, t262, Ljava/lang/Integer;.<init>:(I)V
+move-object t251, t261
+const t265, #int 5
+new-instance t264, Ljava/lang/Integer;
+invoke-direct {t264, t265}, Ljava/lang/Integer;.<init>:(I)V
+check-cast t10, Ljava/lang/Integer;
+check-cast t264, Ljava/lang/Integer;
+invoke-virtual {t10}, Ljava/lang/Integer;.intValue:()I
+move-result t267
+invoke-virtual {t264}, Ljava/lang/Integer;.intValue:()I
+move-result t268
+add-int t267, t267, t268
+new-instance t266, Ljava/lang/Integer;
+invoke-direct {t266, t267, Ljava/lang/Integer;.<init>:(I)V
+move-object v0, t11
+move-object v1, t9
+const t270, #int 2
+new-instance t269, Ljava/lang/Integer;
+invoke-direct {t269, t270}, Ljava/lang/Integer;.<init>:(I)V
+check-cast t266, Ljava/lang/Integer;
+check-cast t269, Ljava/lang/Integer;
+invoke-virtual {t266}, Ljava/lang/Integer;.intValue:()I
+move-result t272
+invoke-virtual {t269}, Ljava/lang/Integer;.intValue:()I
+move-result t273
+sub-int t272, t272, t273
+new-instance t271, Ljava/lang/Integer;
+invoke-direct {t271, t272, Ljava/lang/Integer;.<init>:(I)V
+check-cast t271, L/java/lang/Integer;
+invoke-virtual {t271}, Ljava/lang/Integer;.intValue:()I
+move-result t274
+aput-object t9, t11, t274
+const t276, #int 1
+new-instance t275, Ljava/lang/Integer;
+invoke-direct {t275, t276}, Ljava/lang/Integer;.<init>:(I)V
+const t278, #int -2
+new-instance t277, Ljava/lang/Integer;
+invoke-direct {t277, t278}, Ljava/lang/Integer;.<init>:(I)V
+check-cast t277, Ljava/lang/Integer;
+check-cast t9, Ljava/lang/Integer;
+invoke-virtual {t277}, Ljava/lang/Integer;.intValue:()I
+move-result t280
+invoke-virtual {t9}, Ljava/lang/Integer;.intValue:()I
+move-result t281
+add-int t280, t280, t281
+new-instance t279, Ljava/lang/Integer;
+invoke-direct {t279, t280, Ljava/lang/Integer;.<init>:(I)V
+check-cast t279, Ljava/lang/Integer;
+invoke-virtual {t279}, Ljava/lang/Integer;.intValue:()I
+move-result t283
+check-cast t11, [Ljava/lang/Object;
+aget-object t282, t11, t283
+check-cast t275, Ljava/lang/Integer;
+check-cast t282, Ljava/lang/Integer;
+invoke-virtual {t275}, Ljava/lang/Integer;.intValue:()I
+move-result t285
+invoke-virtual {t282}, Ljava/lang/Integer;.intValue:()I
+move-result t286
+add-int t285, t285, t286
+new-instance t284, Ljava/lang/Integer;
+invoke-direct {t284, t285, Ljava/lang/Integer;.<init>:(I)V
+check-cast t284, Ljava/lang/Integer;
+invoke-virtual {t284}, Ljava/lang/Integer;.intValue:()I
+move-result t288
+check-cast t11, [Ljava/lang/Object;
+aget-object t287, t11, t288
+move-object v2, t287
+move-object v3, t8
+invoke-static {v0, v1, v2, v3}, concat
+move-result-object t289
+move-object t250, t289
+check-cast t251, L/java/lang/Integer;
+invoke-virtual {t251}, Ljava/lang/Integer;.intValue:()I
+move-result t290
+aput-object t250, t11, t290
+const t292, #int 0
+new-instance t291, Ljava/lang/Integer;
+invoke-direct {t291, t292}, Ljava/lang/Integer;.<init>:(I)V
+return-object t291
+goto :L18
+:L18
+

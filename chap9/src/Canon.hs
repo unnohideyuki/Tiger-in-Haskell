@@ -194,9 +194,9 @@ getnext table (b@(T.LABEL lab:_):rest) temp =
 getnext _ [] temp = ([], temp)
 getnext _ _ _ = error "fatal: illegal pattern for getnext"
 
-traceSchedule :: [Block] -> Temp.Label -> Temp.Temp -> [T.Stm]
+traceSchedule :: [Block] -> Temp.Label -> Temp.Temp -> ([T.Stm], Temp.Temp)
 traceSchedule blocks done temp =
   let 
-    (blk, _) = getnext (foldr enterblock Symbol.empty blocks) blocks temp 
+    (blk, t') = getnext (foldr enterblock Symbol.empty blocks) blocks temp 
   in
-   blk ++ [T.LABEL done]
+   (blk ++ [T.LABEL done], t')
