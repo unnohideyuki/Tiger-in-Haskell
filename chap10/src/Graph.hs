@@ -4,7 +4,7 @@ import qualified Data.Map as Map
 import Data.List
 
 newtype Node = Node Int
-             deriving (Eq, Show)
+             deriving (Eq, Ord, Show)
 
 data Graph = Graph { get_nnodes :: Int
                    , get_adjacency :: Map.Map (Int, Int) Bool
