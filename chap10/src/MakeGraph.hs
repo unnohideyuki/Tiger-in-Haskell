@@ -32,37 +32,38 @@ newState = I2gState { labs = Map.empty
                     , nodes = []
                     }
            
-newNode' :: State I2gState G.Node
-newNode' = state $ \st ->
-  let
-    fg = flowg st
-    g = get_control fg
-    (node, g') = G.newNode g
-    fg' = fg{get_control=g'}
-    ns = nodes st
-  in
-   (node, st{flowg=fg', nodes=ns ++ [node]})
-           
-checkNextEdge :: G.Node -> State I2gState ()   
-checkNextEdge node = state $ \st ->
-  let
-    fg = flowg st
-    g = get_control fg
-  in
-   case pends st of
-     ((Known nf, NextInstr):ps) -> 
-       let
-         g' = G.mk_edge g nf node
-         fg' = fg{get_control=g'}
-       in
-        ((), st{flowg=fg'})
-     _ -> ((), st)
    
 newNode :: State I2gState G.Node
 newNode = do
   node <- newNode'
   checkNextEdge node
   return node
+  where
+    newNode' :: State I2gState G.Node
+    newNode' = state $ \st ->
+      let
+        fg = flowg st
+        g = get_control fg
+        (node, g') = G.newNode g
+        fg' = fg{get_control=g'}
+        ns = nodes st
+      in
+       (node, st{flowg=fg', nodes=ns ++ [node]})
+           
+    checkNextEdge :: G.Node -> State I2gState ()   
+    checkNextEdge node = state $ \st ->
+      let
+        fg = flowg st
+        g = get_control fg
+      in
+       case pends st of
+         ((Known nf, NextInstr):ps) -> 
+           let
+             g' = G.mk_edge g nf node
+             fg' = fg{get_control=g'}
+           in
+            ((), st{flowg=fg', pends=ps})
+         _ -> ((), st)
 
 insertLabel :: Temp.Label -> G.Node -> State I2gState ()
 insertLabel lab node = state $ \st ->
