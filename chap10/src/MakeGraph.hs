@@ -73,7 +73,7 @@ insertLabel lab node = state $ \st ->
   in
    ((), st{labs=m'})
 
-set_def :: G.Node -> [Temp.Temp] -> State I2gState ()
+set_def :: G.Node -> [Int] -> State I2gState ()
 set_def node ts = state $ \st ->
   let 
     fg = flowg st
@@ -83,7 +83,7 @@ set_def node ts = state $ \st ->
   in
    ((), st{flowg=fg'})
     
-set_use :: G.Node -> [Temp.Temp] -> State I2gState ()
+set_use :: G.Node -> [Int] -> State I2gState ()
 set_use node ts = state $ \st ->
   let 
     fg = flowg st
@@ -102,14 +102,91 @@ set_ismove node b = state $ \st ->
     fg' = fg{get_ismove=ismove'}
   in
    ((), st{flowg=fg'})
-    
+
+insert_edge :: I2gState -> G.Node -> G.Node -> I2gState
+insert_edge st n0 n1 =
+  let
+    fg = flowg st
+    g = get_control fg
+    g' = G.mk_edge g n0 n1
+    fg' = fg{get_control=g'}
+  in
+   st{flowg=fg'}
+
+pend_edge :: I2gState -> (NodeRef, NodeRef) -> I2gState
+pend_edge st x =
+  let
+    ps = pends st
+  in
+   st{pends=(x:ps)}
+
+solve_labeled_edges :: Temp.Label -> G.Node -> State I2gState ()
+solve_labeled_edges lab node = state $ \st ->
+  let
+    ps = pends st
+    st' = st{pends=[]}
+
+    loop_pends s [] = s
+    loop_pends s (x:xs) =
+      case x of
+        (Known node0, Labeled n) ->
+          if n == lab
+          then loop_pends (insert_edge s  node0 node) xs
+          else loop_pends (pend_edge s x) xs
+        _ -> loop_pends (pend_edge s x) xs
+  in
+   ((), loop_pends st' ps)
+
+add_edge :: NodeRef -> NodeRef -> State I2gState()
+add_edge node0@(Known n0) node1 = state $ \st ->
+  let
+    ps = pends st
+    m = labs st
+  in
+   case node1 of
+     NextInstr -> ((), st{pends=(node0, node1):ps})
+     Labeled lab ->
+       case Map.lookup lab m of
+         Just n -> ((), insert_edge st n0 n)
+         Nothing -> ((), st{pends=(node0, node1):ps})
+     _ -> error "must not occure."
+
+add_edge _ _ = error "edge to add must start from a known node."
+   
 trInsts :: [A.Instr] -> State I2gState ()
+
+trInsts [] = return ()
 
 trInsts (A.LABEL{A.lab_lab=lab}:insts) =
   do
     node <- newNode
+    add_edge (Known node) NextInstr
     insertLabel lab node
+    solve_labeled_edges lab node
     set_def node []
     set_use node []
     set_ismove node False
-    -- TODO: solve labeled edge
+    trInsts insts
+
+trInsts(A.OPER{A.oper_dst=dst, A.oper_src=src, A.oper_jump=js}:insts) =
+  do
+    node <- newNode
+    set_def node dst
+    set_use node src
+    set_ismove node False
+    case js of
+      Just (lab:_:[]) ->
+        do add_edge (Known node) (Labeled lab)
+           add_edge (Known node) NextInstr
+      Just (lab:[]) -> add_edge (Known node) (Labeled lab)
+      _ -> add_edge (Known node) NextInstr
+    trInsts insts
+
+trInsts(A.MOVE{A.move_dst=d, A.move_src=s}:insts) =
+  do
+    node <- newNode
+    add_edge (Known node) NextInstr
+    set_def node [d]
+    set_use node [s]
+    set_ismove node True
+    trInsts insts

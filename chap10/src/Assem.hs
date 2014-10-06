@@ -203,7 +203,7 @@ cjumpInstr cond dst src label =
    OPER { oper_assem = assem
         , oper_dst = dst
         , oper_src = src
-        , oper_jump = Just [label]
+        , oper_jump = Just [label, ""] -- "" means next instruction
         }
 
 jumpInstr :: Label -> Instr
