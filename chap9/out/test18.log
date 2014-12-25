@@ -1,1 +1,1 @@
-tandorc.exe: 5:18: function not defined: do_nothing2
+tandorc: 5:18: function not defined: do_nothing2

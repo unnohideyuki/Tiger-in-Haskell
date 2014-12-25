@@ -1,1 +1,1 @@
-tandorc.exe: 3:18: type mismatch: expected UNIT, actual INT
+tandorc: 3:18: type mismatch: expected UNIT, actual INT

@@ -1,1 +1,1 @@
-tandorc.exe: 4:1: cyclic dependency: a
+tandorc: 4:1: cyclic dependency: a

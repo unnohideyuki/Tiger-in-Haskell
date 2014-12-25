@@ -1,1 +1,1 @@
-tandorc.exe: 7:13: type mismatch: expected RECORD [("name",STRING),("id",INT)] 40025, actual RECORD [("name",STRING),("id",INT)] 50025
+tandorc: 7:13: type mismatch: expected RECORD [("name",STRING),("id",INT)] 40025, actual RECORD [("name",STRING),("id",INT)] 50025

@@ -1,1 +1,1 @@
-tandorc.exe: 3:18: undefined variable: i
+tandorc: 3:18: undefined variable: i

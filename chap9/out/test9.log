@@ -1,1 +1,1 @@
-tandorc.exe: 3:1: type mismatch: expected INT, actual STRING
+tandorc: 3:1: type mismatch: expected INT, actual STRING
