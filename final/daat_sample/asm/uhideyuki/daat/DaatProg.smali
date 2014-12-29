@@ -14,15 +14,23 @@
     return-void
 .end method
 
-.method public static main()V
-    .registers 1
+.method public static main([Ljava/lang/Object;Ljava/lang/Integer;)Ljava/lang/Integer;
+    .registers 4
+    .param p0, "arcd"    # [Ljava/lang/Object;
+    .param p1, "fp"    # Ljava/lang/Integer;
 
     .prologue
     .line 9
-    const-string v0, "Hello, world!\n"
+    const-string v0, "Hello, Android World!\n"
 
     invoke-static {v0}, Luhideyuki/daat/DaatRuntime;->print(Ljava/lang/String;)V
 
     .line 10
-    return-void
+    new-instance v0, Ljava/lang/Integer;
+
+    const/4 v1, 0x0
+
+    invoke-direct {v0, v1}, Ljava/lang/Integer;-><init>(I)V
+
+    return-object v0
 .end method
