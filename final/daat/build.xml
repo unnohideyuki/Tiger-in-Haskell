@@ -1,0 +1,24 @@
+<project name="apkbuild">
+
+<path id="android.antlibs">
+    <pathelement path="/home/unno/android-sdk-linux/tools/lib/ant-tasks.jar" />
+</path>
+
+<!-- Custom tasks -->
+<taskdef resource="anttasks.properties" classpathref="android.antlibs" />
+
+<apkbuilder
+        outfolder="bin"
+        resourcefile="Daat.ap_"
+        apkfilepath="bin/Daat-debug-unaligned.apk"
+        debugpackaging="true"
+        debugsigning="true"
+        verbose="true"
+        hascode="true"
+        previousBuildType="true/true"
+        buildType="true/true">
+    <dex path="bin/classes.dex"/>
+    <sourcefolder path="src"/>
+</apkbuilder>
+
+</project>
