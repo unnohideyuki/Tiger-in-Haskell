@@ -1,6 +1,7 @@
 module Assem where
 
 import qualified Temp
+import qualified Symbol
 
 type Label = Temp.Label
 
@@ -71,13 +72,13 @@ check_cast r s =
 
 integer2int :: String -> String -> String
 integer2int s d =
-  "invoke-virtual {" ++ s ++ "}, Ljava/lang/Integer;.intValue:()I\n"
+  "invoke-virtual {" ++ s ++ "}, Ljava/lang/Integer;->intValue()I\n"
   ++ "move-result " ++ d ++ "\n"
   
 int2integer :: String -> String -> String
 int2integer s d =  
   "new-instance " ++ d ++ ", Ljava/lang/Integer;\n"
-  ++ "invoke-direct {" ++ d ++ ", " ++ s ++ ", Ljava/lang/Integer;.<init>:(I)V\n"
+  ++ "invoke-direct {" ++ d ++ ", " ++ s ++ ", Ljava/lang/Integer;-><init>(I)V\n"
 
 binOper :: String -> [Int] -> [Int] -> Instr
 binOper binop dst src =
@@ -116,10 +117,10 @@ constInstr c dst =
   let
     assem ds _ _ =
       let
-        i1 = "const " ++ (ds!!1) ++ ", #int " ++ (show c)
+        i1 = "const " ++ (ds!!1) ++ ", " ++ (show c)
         i2 = "new-instance " ++ (ds!!0) ++ ", Ljava/lang/Integer;"
         i3 = "invoke-direct {" ++ (ds!!0) ++ ", " ++ (ds!!1) 
-             ++ "}, Ljava/lang/Integer;.<init>:(I)V"
+             ++ "}, Ljava/lang/Integer;-><init>(I)V"
       in
        concat [i1, "\n", i2, "\n", i3, "\n"]
   in
@@ -164,7 +165,7 @@ moveInstr dst src =
   let
     assem ds ss _ =
       let
-        s1 = check_cast (ss!!0) "L/java/lang/Integer;"
+        s1 = check_cast (ss!!0) "Ljava/lang/Integer;"
         s2 = integer2int (ss!!0) (ds!!1)
         s3 = "aput-object " ++ (ss!!1) ++ ", " ++ (ds!!0) ++ ", " ++ (ds!!1) ++ "\n"
       in
@@ -247,6 +248,34 @@ callInstr f d nargs =
         , oper_jump = Nothing
         }
    
+extCallInstr f d nargs =
+  let
+    vx = case nargs of 
+      0 -> "{}"
+      1 -> "{v0}"
+      2 -> "{v0, v1}"
+      _ -> "{v0, v1, v2}"
+
+    f' = extName f
+      
+    c = "invoke-static " ++ vx ++ ", " ++ f' ++ "\n"
+
+    assem ds _ _ = c ++ "move-result-object " ++ (ds!!0) ++ "\n"
+  in
+   OPER { oper_assem = assem
+        , oper_dst = [d]
+        , oper_src = []
+        , oper_jump = Nothing
+        }
+
+extName :: Symbol.Symbol -> Symbol.Symbol
+extName "print" = "Luhideyuki/daat/DaatRuntime;->print(Ljava/lang/String;)Ljava/lang/Integer;"
+extName f = error $ "unknown external name: " ++ f
+
+isExternal :: Symbol.Symbol -> Bool
+isExternal "print" = True
+isExternal _ = False
+
 labelDef :: String -> Instr
 labelDef l =
   let

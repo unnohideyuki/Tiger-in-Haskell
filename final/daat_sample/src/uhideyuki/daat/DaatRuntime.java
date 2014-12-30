@@ -10,6 +10,7 @@ import uhideyuki.daat.DaatProg;
 public class DaatRuntime extends Activity
 {
     static TextView tv;
+    static final Integer z = new Integer(0);
 
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -24,8 +25,14 @@ public class DaatRuntime extends Activity
         DaatProg.main(arcd, fp);
     }
 
-    public static void print(String s)
+    public static Integer print(String s)
     {
         tv.append(s);
+        return z;
+    }
+
+    public static String tostring(Integer i)
+    {
+        return i.toString();
     }
 }

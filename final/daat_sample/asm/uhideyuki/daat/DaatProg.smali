@@ -26,6 +26,13 @@
     invoke-static {v0}, Luhideyuki/daat/DaatRuntime;->print(Ljava/lang/String;)V
 
     .line 10
+    invoke-static {p1}, Luhideyuki/daat/DaatRuntime;->tostring(Ljava/lang/Integer;)Ljava/lang/String;
+
+    move-result-object v0
+
+    invoke-static {v0}, Luhideyuki/daat/DaatRuntime;->print(Ljava/lang/String;)V
+
+    .line 11
     new-instance v0, Ljava/lang/Integer;
 
     const/4 v1, 0x0

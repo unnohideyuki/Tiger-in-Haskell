@@ -6,8 +6,26 @@
 # static fields
 .field static tv:Landroid/widget/TextView;
 
+.field static final z:Ljava/lang/Integer;
+
 
 # direct methods
+.method static constructor <clinit>()V
+    .registers 2
+
+    .prologue
+    .line 13
+    new-instance v0, Ljava/lang/Integer;
+
+    const/4 v1, 0x0
+
+    invoke-direct {v0, v1}, Ljava/lang/Integer;-><init>(I)V
+
+    sput-object v0, Luhideyuki/daat/DaatRuntime;->z:Ljava/lang/Integer;
+
+    return-void
+.end method
+
 .method public constructor <init>()V
     .registers 1
 
@@ -18,18 +36,33 @@
     return-void
 .end method
 
-.method public static print(Ljava/lang/String;)V
+.method public static print(Ljava/lang/String;)Ljava/lang/Integer;
     .registers 2
     .param p0, "s"    # Ljava/lang/String;
 
     .prologue
-    .line 29
+    .line 30
     sget-object v0, Luhideyuki/daat/DaatRuntime;->tv:Landroid/widget/TextView;
 
     invoke-virtual {v0, p0}, Landroid/widget/TextView;->append(Ljava/lang/CharSequence;)V
 
-    .line 30
-    return-void
+    .line 31
+    sget-object v0, Luhideyuki/daat/DaatRuntime;->z:Ljava/lang/Integer;
+
+    return-object v0
+.end method
+
+.method public static tostring(Ljava/lang/Integer;)Ljava/lang/String;
+    .registers 2
+    .param p0, "i"    # Ljava/lang/Integer;
+
+    .prologue
+    .line 36
+    invoke-virtual {p0}, Ljava/lang/Integer;->toString()Ljava/lang/String;
+
+    move-result-object v0
+
+    return-object v0
 .end method
 
 
@@ -39,15 +72,15 @@
     .param p1, "savedInstanceState"    # Landroid/os/Bundle;
 
     .prologue
-    .line 17
+    .line 18
     invoke-super {p0, p1}, Landroid/app/Activity;->onCreate(Landroid/os/Bundle;)V
 
-    .line 18
+    .line 19
     const/high16 v2, 0x7f030000
 
     invoke-virtual {p0, v2}, Luhideyuki/daat/DaatRuntime;->setContentView(I)V
 
-    .line 19
+    .line 20
     const/high16 v2, 0x7f050000
 
     invoke-virtual {p0, v2}, Luhideyuki/daat/DaatRuntime;->findViewById(I)Landroid/view/View;
@@ -58,12 +91,12 @@
 
     sput-object v2, Luhideyuki/daat/DaatRuntime;->tv:Landroid/widget/TextView;
 
-    .line 21
+    .line 22
     const/16 v2, 0x400
 
     new-array v0, v2, [Ljava/lang/Object;
 
-    .line 22
+    .line 23
     .local v0, "arcd":[Ljava/lang/Object;
     new-instance v1, Ljava/lang/Integer;
 
@@ -71,10 +104,10 @@
 
     invoke-direct {v1, v2}, Ljava/lang/Integer;-><init>(I)V
 
-    .line 24
+    .line 25
     .local v1, "fp":Ljava/lang/Integer;
     invoke-static {v0, v1}, Luhideyuki/daat/DaatProg;->main([Ljava/lang/Object;Ljava/lang/Integer;)Ljava/lang/Integer;
 
-    .line 25
+    .line 26
     return-void
 .end method

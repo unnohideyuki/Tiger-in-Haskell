@@ -6,6 +6,7 @@ import qualified Assem as A
 import qualified Tree as T
 import qualified DalvikFrame as F
 import qualified Temp
+import qualified Symbol
 
 data CgenState = CgenState { get_insts :: [A.Instr]
                            , get_temp :: Temp.Temp 
@@ -90,7 +91,17 @@ munchExp (T.ARR e1 e2) =
   
 munchExp (T.RCD e i) = munchExp (T.ARR e (T.CONST i))
 
-munchExp (T.CALL (T.NAME f) es) =
+munchExp c@(T.CALL (T.NAME n) _) =
+  if A.isExternal n then
+    munchExtCall c
+  else
+    munchCall c
+
+munchExp (T.CALL f _) = fail $ "not a function name" ++ show f
+munchExp (T.NAME _) = fail "NAME alone is not expected to be munchExped."
+munchExp (T.ESEQ _ _) = fail "ESEQ must not appear in this phase."
+
+munchCall (T.CALL (T.NAME f) es) =
   let
     nargs = length es
     
@@ -116,7 +127,7 @@ munchExp (T.CALL (T.NAME f) es) =
      sp <- get_sp
      nsp <- munchExp $ T.BINOP T.PLUS (T.TEMP sp) (T.CONST $ nargs+3)
      emit $ A.regMoveInstr v0 arcd
-     emit $ A.regMoveInstr v1 fp
+     emit $ A.regMoveInstr v1 nsp
      i <- munchExp $ T.BINOP T.MINUS (T.TEMP nsp) (T.CONST 2)
      munchStm [T.MOVE (T.MEM $ T.TEMP i) (T.TEMP fp)]
      setargs es 0 nsp
@@ -124,9 +135,21 @@ munchExp (T.CALL (T.NAME f) es) =
      emit $ A.callInstr f t nargs
      return t
 
-munchExp (T.CALL f _) = fail $ "not a function name" ++ show f
-munchExp (T.NAME _) = fail "NAME alone is not expected to be munchExped."
-munchExp (T.ESEQ _ _) = fail "ESEQ must not appear in this phase."                       
+munchExtCall (T.CALL (T.NAME f) es) =
+  let
+    nargs = length es
+
+    setargs [] _ = return ()
+    setargs (e:es') n = do
+      t <- munchExp e
+      emit $ A.regMoveInstr (-1-n) t
+      setargs es' (n+1)
+  in
+   do
+     setargs es 0
+     t <- newTemp
+     emit $ A.extCallInstr f t nargs
+     return t
 
 munchStm :: [T.Stm] -> State CgenState ()
 
