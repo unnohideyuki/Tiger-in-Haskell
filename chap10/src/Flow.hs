@@ -10,4 +10,6 @@ data Flowgraph = FGRAPH { get_control :: G.Graph
                         , get_use :: Map.Map G.Node [Int]
                         , get_ismove :: Map.Map G.Node Bool
                         }
+                 deriving Show
+
 

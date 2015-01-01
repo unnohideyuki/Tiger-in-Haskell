@@ -13,7 +13,11 @@ data NodeRef = NextInstr
              | Known G.Node
 
 instrs2graph :: [A.Instr] -> (Flowgraph, [G.Node])
-instrs2graph = undefined
+instrs2graph insts =
+  let
+    (_, s) = runState (trInsts insts) newState
+  in
+   (flowg s, nodes s)
 
 data I2gState = I2gState { labs :: Map.Map Temp.Label G.Node
                          , pends :: [(NodeRef, NodeRef)]
