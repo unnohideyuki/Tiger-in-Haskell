@@ -51,22 +51,24 @@ succ_nodes g (Node x') =
   let
     adj = get_adjacency g
     n = get_nnodes g
-    cand = [(x', y) | y <- [0..(n-1)]]
+    isSucc y =
+      case Map.lookup (x', y) adj of
+        Just True -> True
+        _ -> False
   in
-   cand >>= (\(x, y) -> case Map.lookup (x, y) adj of
-                Just True -> [Node y]
-                _ -> [])
+   fmap Node $ filter isSucc [0..(n-1)]
 
 pred_nodes :: Graph -> Node -> [Node]
 pred_nodes g (Node y') =
   let
     adj = get_adjacency g
     n = get_nnodes g
-    cand = [(x, y') | x <- [0..(n-1)]]
+    isPred x =
+      case Map.lookup (x, y') adj of
+        Just True -> True
+        _ -> False
   in
-   cand >>= (\(x, y) -> case Map.lookup (x, y) adj of
-                Just True -> [Node x]
-                _ -> [])
+   fmap Node $ filter isPred [0..(n-1)]
 
 adj_nodes :: Graph -> Node -> [Node]
 adj_nodes g node = nub $ succ_nodes g node ++ pred_nodes g node
