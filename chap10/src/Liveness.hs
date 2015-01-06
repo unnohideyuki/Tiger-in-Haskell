@@ -139,7 +139,7 @@ nodes = state $ \st ->
   let
     g = get_graph st
     n = G.get_nnodes g
-    xs = reverse [0..n]
+    xs = reverse [0..(n-1)]
   in
    (fmap G.Node xs, st)
 
