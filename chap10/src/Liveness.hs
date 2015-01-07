@@ -185,6 +185,8 @@ calcLiveness' = do
     True -> returnOuts
     False -> calcLiveness'
 
+calcLiveness :: Map.Map G.Node [Int] -> Map.Map G.Node [Int] -> G.Graph
+                -> Map.Map G.Node [Int]
 calcLiveness ds us g =
   let
     st = newLiveState ds us g
