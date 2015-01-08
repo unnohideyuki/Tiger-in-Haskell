@@ -9,21 +9,31 @@ import qualified Graph as G
 
 type Interference = Map.Map Int [Int]
 type AdjSet = Map.Map (Int, Int) Bool
+type GMap = Map.Map G.Node [Int]
 
 data BuildState = BuildState { adjSet :: AdjSet
                              , adjList :: Interference
                              }
 
-wrapmap :: Map.Map G.Node [Int] -> G.Node -> [Int]
-wrapmap m node =
-  case Map.lookup node m of
-    Just xs -> xs
-    _ -> []
 
-build :: [G.Node] -> (G.Node -> [Int]) -> (G.Node -> [Int]) -> (G.Node -> Bool) -> (G.Node -> [Int]) -> Interference
-          
-build nodes ds us isMove liveOut = fst $ runState (build' nodes) newBuildState
+build :: [G.Node] -> GMap -> GMap -> Map.Map G.Node Bool -> GMap -> Interference
+build nodes defMap useMap isMoveMap liveOutMap = fst $ runState (build' nodes) newBuildState
   where
+    wrapmap :: GMap -> G.Node -> [Int]
+    wrapmap m node =
+      case Map.lookup node m of
+        Just xs -> xs
+        _ -> []
+
+    ds = wrapmap defMap
+    us = wrapmap useMap
+    liveOut = wrapmap liveOutMap
+
+    isMove node =
+      case Map.lookup node isMoveMap of
+        Just True -> True
+        _ -> False
+
     newBuildState = BuildState Map.empty Map.empty
 
     retResult = state $ \st -> (adjList st, st)
