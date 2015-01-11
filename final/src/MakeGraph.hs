@@ -82,7 +82,7 @@ set_def node ts = state $ \st ->
   let 
     fg = flowg st
     def = get_def fg
-    def' = Map.insert node ts def
+    def' = Map.insert node (filter (0 <) ts) def
     fg' = fg{get_def=def'}
   in
    ((), st{flowg=fg'})
@@ -92,7 +92,7 @@ set_use node ts = state $ \st ->
   let 
     fg = flowg st
     use = get_use fg
-    use' = Map.insert node ts use
+    use' = Map.insert node (filter (0 <) ts) use
     fg' = fg{get_use=use'}
   in
    ((), st{flowg=fg'})

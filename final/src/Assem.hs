@@ -78,7 +78,7 @@ integer2int s d =
 int2integer :: String -> String -> String
 int2integer s d =  
   "new-instance " ++ d ++ ", Ljava/lang/Integer;\n"
-  ++ "invoke-direct {" ++ d ++ ", " ++ s ++ ", Ljava/lang/Integer;-><init>(I)V\n"
+  ++ "invoke-direct {" ++ d ++ ", " ++ s ++ "}, Ljava/lang/Integer;-><init>(I)V\n"
 
 binOper :: String -> [Int] -> [Int] -> Instr
 binOper binop dst src =
@@ -152,7 +152,7 @@ strInstr :: String -> [Int] -> Instr
 strInstr s dst =
   let
     assem ds _ _ =
-      "const-string " ++ (ds!!0) ++ ", " ++ (show s) ++ "\n"
+      "const-string " ++ (ds!!0) ++ ", \"" ++ s ++ "\"\n"
   in
    OPER { oper_assem = assem
         , oper_dst = dst
@@ -193,9 +193,9 @@ cjumpInstr cond dst src label =
   let
     assem ds ss _ =
       let
-        s1 = check_cast (ss!!0) "L/java/lang/Integer;"
+        s1 = check_cast (ss!!0) "Ljava/lang/Integer;"
         s2 = integer2int (ss!!0) (ds!!0)
-        s3 = check_cast (ss!!1) "L/java/lang/Integer;"
+        s3 = check_cast (ss!!1) "Ljava/lang/Integer;"
         s4 = integer2int (ss!!1) (ds!!1)
         s5 = "if-" ++ cond ++ " " ++ (ds!!0) ++ ", " ++ (ds!!1) ++ ", :" ++ label ++ "\n"
       in

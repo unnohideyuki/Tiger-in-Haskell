@@ -1,1 +1,1 @@
-DaatProg.s.sample2
+../helo5.s
