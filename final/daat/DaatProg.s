@@ -1,1 +1,1 @@
-../helo5.s
+../fizzbuzz_a.s

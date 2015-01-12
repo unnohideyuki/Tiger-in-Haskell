@@ -29,6 +29,7 @@ base_venv = fromList xs
       (name, FunEntry { level = TL.outermost, label = Temp.namedLabel name
                       , formals = fmls, result = res})
     xs = [ global_fun "print" [T.STRING] T.UNIT
+         , global_fun "toString" [T.INT] T.STRING
          , global_fun "flush" [] T.UNIT
          , global_fun "getchar" [] T.STRING
          , global_fun "ord" [T.STRING] T.INT

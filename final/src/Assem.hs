@@ -270,10 +270,12 @@ extCallInstr f d nargs =
 
 extName :: Symbol.Symbol -> Symbol.Symbol
 extName "print" = "Luhideyuki/daat/DaatRuntime;->print(Ljava/lang/String;)Ljava/lang/Integer;"
+extName "toString" = "Luhideyuki/daat/DaatRuntime;->tostring(Ljava/lang/Integer;)Ljava/lang/String;"
 extName f = error $ "unknown external name: " ++ f
 
 isExternal :: Symbol.Symbol -> Bool
 isExternal "print" = True
+isExternal "toString" = True
 isExternal _ = False
 
 labelDef :: String -> Instr
