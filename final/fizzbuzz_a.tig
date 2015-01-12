@@ -1,0 +1,21 @@
+let
+  var mod5 := 0
+  var mod3 := 0
+in
+  for i := 1 to 30 do (
+    mod5 := i - i / 5 * 5;
+    mod3 := i - i / 3 * 3;
+
+    if (mod5 + mod3) = 0 then
+      print("FizzBuzz, ")
+    else if mod3 = 0 then
+      print("Fizz, ")
+    else if mod5 = 0 then
+      print("Buzz, ")
+    else
+      (print(toString(i)); print(", "))
+   );
+   print("...\n")
+end
+
+

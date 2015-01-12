@@ -1,0 +1,4 @@
+for i := 1 to 10 do (print(toString(i*i)); print("\n"))
+
+
+
