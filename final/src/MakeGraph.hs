@@ -164,9 +164,9 @@ trInsts [] = return ()
 trInsts (A.LABEL{A.lab_lab=lab}:insts) =
   do
     node <- newNode
-    add_edge (Known node) NextInstr
     insertLabel lab node
     solve_labeled_edges lab node
+    add_edge (Known node) NextInstr
     set_def node []
     set_use node []
     set_ismove node False

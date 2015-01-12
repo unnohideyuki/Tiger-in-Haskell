@@ -95,7 +95,7 @@ binOper binop dst src =
        concat [s1, s2, s3, s4, s5, s6]
   in
    OPER { oper_assem = assem
-        , oper_dst = dst
+        , oper_dst = dst ++ src -- src should be protected
         , oper_src = src
         , oper_jump = Nothing
         }

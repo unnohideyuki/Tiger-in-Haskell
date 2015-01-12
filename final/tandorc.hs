@@ -58,8 +58,8 @@ compile_frags (frg:frgs) t s =
                    Just c -> "v" ++ show (c + 2)
                    _ -> error $ "mkString error: " ++ (show n) ++ "\n"
 
-    -- str = concat $ fmap (A.format mkString) insts
-    str = concat $ fmap (A.format Temp.makeString) insts
+    str = concat $ fmap (A.format mkString) insts
+    -- str = concat $ fmap (A.format Temp.makeString) insts
 
     hdr =
       ".method public static "
@@ -71,7 +71,7 @@ compile_frags (frg:frgs) t s =
 
     ftr = "nop\n.end method\n"
   in
-   compile_frags frgs t' (s ++ hdr ++ str ++ ftr ++ show colmap ++ show adjListMap ++ show outs ++ show (zip [0..] insts) ++ show g)
+   compile_frags frgs t' (s ++ hdr ++ str ++ ftr)
 
 printPreamble :: IO ()
 printPreamble = do
